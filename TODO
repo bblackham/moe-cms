@@ -3,6 +3,7 @@ Evaluator
 mo-install: don't copy private test data to public
 generator vysledkovych listin
 lepsi time limity
+zkopirovat *.ok i kdyz program spadne na run-time error
 
 Environment
 ~~~~~~~~~~~
