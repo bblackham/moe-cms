@@ -5,9 +5,6 @@ score: better formatting of the score table
 interactive tasks: solve deadlocks?
 interactive tasks: logging of messages
 
-guide: compile <file>, not only <task>
-guide: status
-
 Environment
 ~~~~~~~~~~~
 fpc: add switch -gl (runtime errors write line#)
