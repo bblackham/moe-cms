@@ -11,6 +11,7 @@ fi
 . config
 
 # Set up environment:
+#   HDIR	home dir of the evaluator
 #   PDIR	problem specific data
 #   SDIR	contestant's solution
 #   TDIR	test results

@@ -1,17 +1,17 @@
 Evaluator
 ~~~~~~~~~
-mo-install: don't copy private test data to public
 lepsi time limity
 zkopirovat *.ok i kdyz program spadne na run-time error
-submit: do real test?
-
-giant: sample input?
+konfigurovatelne vstupni a vystupni soubory
+konfigurovatelny pristup k timerum a /proc/self/stat (pripadne /proc/self/fd)
+better formatting of the score table
+online ukazovani runtime a memory
+score: alignment of table cells
 
 Environment
 ~~~~~~~~~~~
 per-user tmp ?
 spousteni rhide z mc
-shift+sipky v rhide
 rhide: debugging Pascal programs: variable names must be upper-cased
 
 Contest
@@ -21,3 +21,9 @@ Prepare /home/mo/public/<problem>/* for all problems
 <contest runs>
 # ./comp-kickout
 # ./comp-cleanup
+
+before competition
+~~~~~~~~~~~~~~~~~~
+uninstall telnetd
+clean /tmp + /var/tmp and check permissions
+reset owners of com-day* and com-all to avoid quota problems

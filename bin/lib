@@ -70,6 +70,7 @@ function box-clean
 function dir-init
 {
 	pstart "Initializing... "
+	HDIR=.
 	PDIR=problems/$PROBLEM
 	SDIR=solutions/$CONTESTANT/$PROBLEM
 	TDIR=testing/$CONTESTANT/$PROBLEM
@@ -122,10 +123,11 @@ function compile
 	SRC=$SRCN
 	EXE=$PROBLEM
 	CCMD=COMP_$SRCEXT
-	CCMD="`eval echo ${!CCMD}`"
-	COMP_SANDBOX_OPTS="`eval echo $COMP_SANDBOX_OPTS`"
+	CCMD=`eval echo ${!CCMD}`
+	COMP_SANDBOX_OPTS=`eval echo $COMP_SANDBOX_OPTS`
 	echo "Compiler command: $CCMD"
 	echo "Compiler sandbox options: $COMP_SANDBOX_OPTS"
+	eval $COMP_SANDBOX_INIT
 
 	echo "Compiler input files:"
 	ls -Al $BOXDIR
@@ -169,18 +171,20 @@ function test-run-file
 	echo "Input: $TDIR/$PROBLEM"
 	ln $PDIR/$TEST.in $TDIR/$TEST.in
 	cp $PDIR/$TEST.in $BOXDIR/$PROBLEM.in
+	eval $SANDBOX_INIT
 	echo "Input files:"
 	ls -Al $BOXDIR
 
 	pcont "<run> "
 	echo "Timeout: $TIME_LIMIT s"
 	echo "Memory: $MEM_LIMIT KB"
-	BOXOPTS="`eval echo $TEST_SANDBOX_OPTS`"
+	BOXOPTS=`eval echo $TEST_SANDBOX_OPTS`
 	echo "Sandbox options: $BOXOPTS"
 	if ! $BOXCMD $BOXOPTS -- ./$PROBLEM 2>$TDIR/exec.out ; then
-		TEST_MSG="`cat $TDIR/exec.out`"
+		TEST_MSG="`head -1 $TDIR/exec.out`"
 		pend "$TEST_MSG"
-		echo "$TEST_MSG"
+		cat $TDIR/exec.out
+		rm $TDIR/exec.out
 		echo >>$PTSFILE "0 $TEST_MSG"
 		return 1
 	fi
@@ -208,19 +212,22 @@ function test-run-interactive
 	echo "Input: $TDIR/$PROBLEM"
 	ln $PDIR/$TEST.in $TDIR/$TEST.in
 	cp $PDIR/$TEST.in $BOXDIR/$PROBLEM.in
+	eval $SANDBOX_INIT
 	echo "Input files:"
 	ls -Al $BOXDIR
 
 	pcont "<run> "
 	echo "Timeout: $TIME_LIMIT s"
 	echo "Memory: $MEM_LIMIT KB"
-	BOXOPTS="`eval echo $TEST_SANDBOX_OPTS`"
+	BOXOPTS=`eval echo $TEST_SANDBOX_OPTS`
 	echo "Sandbox options: $BOXOPTS"
-	ICCMD="`eval echo $IA_CHECK`"
+	ICCMD=`eval echo $IA_CHECK`
 	echo "Interactive checker: $ICCMD"
-	if ! bin/iwrapper $BOXCMD $BOXOPTS -- ./$PROBLEM @@ $ICCMD 2>$TDIR/exec.out ; then
-		TEST_MSG="`cat $TDIR/exec.out`"
+	if ! $HDIR/bin/iwrapper $BOXCMD $BOXOPTS -- ./$PROBLEM @@ $ICCMD 2>$TDIR/exec.out ; then
+		TEST_MSG="`head -1 $TDIR/exec.out`"
 		pend "$TEST_MSG"
+		cat $TDIR/exec.out
+		rm $TDIR/exec.out
 		echo "$TEST_MSG"
 		echo >>$PTSFILE "0 $TEST_MSG"
 		return 1
@@ -235,9 +242,9 @@ function syntax-check
 {
 	[ -n "$SYNTAX_CHECK" ] || return 0
 	pcont "<syntax> "
-	SCHECK="`eval echo $SYNTAX_CHECK`"
+	SCHECK=`eval echo $SYNTAX_CHECK`
 	echo "Syntax check command: $SCHECK"
-	$SCHECK && return 0
+	eval $SCHECK && return 0
 	pend "Wrong syntax."
 	echo "Wrong syntax."
 	echo >>$PTSFILE "0 Wrong syntax."
@@ -250,10 +257,10 @@ function output-check
 {
 	[ -n "$OUTPUT_CHECK" ] || return 0
 	pcont "<check> "
-	ln $PDIR/$TEST.out $TDIR/$TEST.ok
-	OCHECK="`eval echo $OUTPUT_CHECK`"
+	[ -f $PDIR/$TEST.out ] && ln $PDIR/$TEST.out $TDIR/$TEST.ok
+	OCHECK=`eval echo $OUTPUT_CHECK`
 	echo "Output check command: $OCHECK"
-	$OCHECK && return 0
+	eval $OCHECK && return 0
 	pend "Wrong answer."
 	echo "Wrong answer."
 	echo >>$PTSFILE "0 Wrong answer."
@@ -264,6 +271,7 @@ function output-check
 
 function public-setup
 {
+	HDIR=$MO_PUBLIC
 	PDIR=$MO_PUBLIC/problems/$PROBLEM
 	SDIR=.
 	TDIR=~/.test
@@ -278,4 +286,13 @@ function public-setup
 	BOXCMD="$MO_PUBLIC/bin/box -c$BOXDIR"
 	exec >log
 	pend "OK  (see 'log' for details)"
+}
+
+# Locate output of open data problem, test case TEST
+
+function open-locate
+{
+	[ -f $PDIR/$TEST.in ] || die "Unknown test $TEST"
+	SRCN=$SDIR/$PROBLEM$TEST.out
+	[ -f $SRCN ] || die "Output file $SRCN not found"
 }
