@@ -1,32 +1,40 @@
 # The Evaluator -- Public Checking Script
-# (c) 2001 Martin Mares <mj@ucw.cz>
+# (c) 2001--2004 Martin Mares <mj@ucw.cz>
 
 set -e
 [ -n "$MO_PUBLIC" -a -d "$MO_PUBLIC" ] || { echo >&2 "MO_PUBLIC not set, giving up." ; exit 1 ; }
 . $MO_PUBLIC/bin/lib
 . $MO_PUBLIC/config
 
-[ -n "$1" ] || die "Usage: check <problem> [<file>]"
+[ -n "$1" ] || die "Usage: check <problem> [<test-number>]"
 PROBLEM=$1
 public-setup
 . $PDIR/config
-PTSFILE=$TDIR/points
-if [ -n "$OPEN_DATA_PROBLEM" ] ; then
+
+function test-verdict
+{
+	pend "$2"
+	exit 0
+}
+
+if [ $TASK_TYPE == open-data ] ; then
 	[ -n "$2" ] || die "You need to specify test number for open data problems."
 	TEST=$2
-	open-locate
 	pstart "Checking $TEST: "
+	open-locate
+	ln $SRCN $TDIR/$TEST.out
 	syntax-check
-	pend "OK"
+	test-result 1 OK
 else
-	[ -z "$2" ] || die "No test number should be specified for normal problems."
+	[ -z "$2" ] || die "Test number should be given only for open data problems."
 	locate-source
 	compile
 	for TEST in $SAMPLE_TESTS ; do
+		(
 		pstart "Checking on sample input $TEST: "
 		test-run
 		syntax-check
 		output-check
-		pend "OK"
+		)
 	done
 fi

@@ -1,6 +1,6 @@
 #!/bin/bash
 # The Evaluator for Open Data Problems
-# (c) 2001 Martin Mares <mj@ucw.cz>
+# (c) 2001--2004 Martin Mares <mj@ucw.cz>
 
 set -e
 if [ ! -f config -o ! -f bin/lib ] ; then
@@ -10,14 +10,6 @@ fi
 . bin/lib
 . config
 
-# Set up environment:
-#   HDIR	home dir of the evaluator
-#   PDIR	problem specific data
-#   SDIR	contestant's solution
-#   TDIR	test results
-#   BOXDIR	sandbox
-#   PROBLEM	problem we're evaluating
-
 [ -n "$2" ] || die "Usage: ev-open <contestant> <problem>"
 CONTESTANT=$1
 PROBLEM=$2
@@ -25,23 +17,33 @@ dir-init
 log-init
 . $PDIR/config
 
+# Initialize the points file
+PTSFILE=$TDIR/points
+>$PTSFILE
+
+function test-verdict
+{
+	if [ $1 == 0 ] ; then
+		pend "$2"
+	else
+		pend "$2 ($1 points)"
+	fi
+	echo >>$PTSFILE "$TEST $1 $2"
+	exit 0
+}
+
 # Perform the tests
 PTSFILE=$TDIR/points
 for TEST in $TESTS ; do
 	(
 	[ -f $PDIR/$TEST.config ] && . $PDIR/$TEST.config
 	exec >$TDIR/$TEST.log
-	pstart "Test $TEST ($POINTS_PER_TEST points)... "
+	pstart "Test $TEST... "
 	echo "Test $TEST ($POINTS_PER_TEST points)"
-	echo >>$PTSFILE -n "$TEST "
-	if [ ! -f $SDIR/$TEST.out ] ; then
-		echo >>$PTSFILE "0 No solution."
-		die "No solution."
-	fi
-	syntax-check || exit 0
-	output-check || exit 0
-	echo "Test completed OK ($POINTS_PER_TEST points)"
-	echo >>$PTSFILE "$POINTS_PER_TEST OK"
-	pend "OK"
+	[ -f $SDIR/$TEST.out ] || test-result 0 "No solution."
+	ln $SDIR/$TEST.out $TDIR/$TEST.out
+	syntax-check
+	output-check
+	die "You must never see this message."
 	)
 done

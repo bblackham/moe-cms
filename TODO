@@ -1,21 +1,17 @@
 Evaluator
 ~~~~~~~~~
-!!! timed-out interactive tasks !!!
-lepsi time limity
-zkopirovat *.ok i kdyz program spadne na run-time error
-konfigurovatelne vstupni a vystupni soubory
-konfigurovatelny pristup k timerum a /proc/self/stat (pripadne /proc/self/fd)
-better formatting of the score table
-online ukazovani runtime a memory
+box: konfigurovatelny pristup k timerum a /proc/self/stat (pripadne /proc/self/fd)
+score: better formatting of the score table
 score: alignment of table cells
-input files shouldn't be mandatory (esp. for interactive tasks)
 stdio tasks: don't allow them to read the files
-interactive tasks: allow logging to the main log?
 interactive tasks: solve deadlocks?
-weird characters in checker command descriptions: use automatic escaping?
-moving handling of points file to bin/ev
+interactive tasks: logging of messages
+a tool for creating accounts with passwords (according to userlist?) ; replace UID ranges completely?
+fix mo-* to use mo-get-users
+post-sandbox hook
 
-better messages on failed submit
+guide: compile <file>, not only <task>
+guide: status
 
 Environment
 ~~~~~~~~~~~

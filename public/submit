@@ -1,5 +1,5 @@
 # The Evaluator -- Public Submit Script
-# (c) 2001 Martin Mares <mj@ucw.cz>
+# (c) 2001--2004 Martin Mares <mj@ucw.cz>
 
 set -e
 [ -n "$MO_PUBLIC" -a -d "$MO_PUBLIC" ] || { echo >&2 "MO_PUBLIC not set, giving up." ; exit 1 ; }
@@ -11,41 +11,61 @@ if [ "$1" = --force ] ; then
 	FORCE=1
 	shift
 fi
-[ -n "$1" -o "$1" = "--help" ] || die "Usage: submit [--force] <problem> [<test>]"
+[ -n "$1" -o "$1" = "--help" ] || die "Usage: submit [--force] <problem> [<test-number>]"
 PROBLEM=$1
 public-setup
 . $PDIR/config
-PTSFILE=$TDIR/points
+
+function test-verdict
+{
+	pend "$2"
+	[ $1 == 0 ] && exit 1 || exit 0
+}
+
 FAILED=0
-if [ -n "$OPEN_DATA_PROBLEM" ] ; then
+if [ $TASK_TYPE == open-data ] ; then
 	[ -n "$2" ] || die "You need to specify test number for open data problems."
 	TEST=$2
+	pstart "Test case $TEST: "
 	open-locate
-	syntax-check || FAILED=1
+	(
+		ln $SRCN $TDIR/$TEST.out
+		syntax-check
+		test-result 1 OK
+	) || FAILED=1
 else
-	[ -z "$2" ] || die "No test number should be specified for normal problems."
+	[ -z "$2" ] || die "Test number should be given only for open data problems."
 	locate-source
 	compile
 	for TEST in $SAMPLE_TESTS ; do
+		(
 		pstart "Checking on sample input $TEST: "
-		if test-run && syntax-check && output-check ; then
-			pend "OK"
-		else
-			FAILED=$(($FAILED+1))
-		fi
+		test-run
+		syntax-check
+		output-check
+		die "How could I get there? It's a buuuuug!"
+		) || FAILED=$(($FAILED+1))
 	done
 fi
-pstart "Submitting... "
+
 if [ $FAILED != 0 ] ; then
 	if [ $FORCE != 0 ] ; then
-		pcont "(tests failed, but --force given) "
+		pend "TESTS FAILED, but --force given, so submitting anyway."
 	else
-		pend "TESTS FAILED  Use submit --force if you really want to submit a wrong solution."
+		pend "TESTS FAILED. Nothing has been submitted!"
+		pend "Use submit --force if you really want to submit a WRONG solution."
 		exit 1
 	fi
 fi
+
+pstart "Submitting... "
 mkdir -p ~/.submit
-[ -z "$OPEN_DATA_PROBLEM" ] && rm -rf ~/.submit/$PROBLEM
-mkdir -p ~/.submit/$PROBLEM
-cp $SRCN ~/.submit/$PROBLEM/
+if [ $TASK_TYPE == open-data ] ; then
+	mkdir -p ~/.submit/$PROBLEM
+	cp $SRCN ~/.submit/$PROBLEM/$TEST.out
+else
+	rm -rf ~/.submit/$PROBLEM
+	mkdir -p ~/.submit/$PROBLEM
+	cp $SRCN ~/.submit/$PROBLEM/
+fi
 pend "OK"

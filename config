@@ -1,27 +1,31 @@
-# Configuration file for MO Evaluator
-# (c) 2001 Martin Mares <mj@ucw.cz>
+# Configuration file for the MO Evaluator
+# (c) 2001--2004 Martin Mares <mj@ucw.cz>
 
-# Directories and users
+# The root of the whole directory hierarchy
 MO_ROOT=/aux/mo
+
+# User and group used by the evaluator itself
 EVAL_USER=mo-eval
 EVAL_GROUP=mo-eval
+
+# Test user for the sandbox. You can let mo-setup create more test users
+# and then run several evaluators in parallel, each in its own sandbox.
+# For testing, you can also leave TEST_USER undefined and run the sandbox
+# with EVAL_USER privileges, but beware, this is INSECURE.
+#TEST_USER=${TEST_USER:-mo-test1}
 TEST_USERS="mo-test1 mo-test2"
 
-# UID range assigned to contestants
-CT_UID_MIN=65100
-CT_UID_MAX=65199
+# Sometimes we need to get a list of all contestants (not in the evaluator
+# itself, but in various auxiliary scripts). In such cases we call mo-get-users,
+# which either scans /etc/passwd for users with UID in the following range,
+# or uses an explicit list of contestants CT_USER_LIST (username<tab>fullname).
+#CT_UID_MIN=65100
+#CT_UID_MAX=65199
+CT_USER_LIST=userlist
 
-# If the contestants are not present in /etc/passwd on the evaluating machine,
-# we need a list of them (username<tab>fullname).
-#CT_USER_LIST=userlist
+### Per-task configuration variables (default values, override in per-task config)
 
-# Test user for sandboxing
-TEST_USER=${TEST_USER:mo-test1}
-
-### all of the following variables can be overriden in per-task config file
-
-# Default task type (file or interactive)
-TASK_TYPE=file
+## Compiler settings:
 
 # Known source file extensions
 EXTENSIONS="c C cpp p pas"
@@ -45,8 +49,73 @@ COMP_SANDBOX_OPTS='-m65536 -t60 -w -e'
 # Sandbox initializaton commands for compilation
 COMP_SANDBOX_INIT=
 
+# List of extra files needed for compilation. They are copied to the compiler
+# sandbox from the problem's directory.
+#COMP_EXTRAS="extras.h"
+
+## Tester settings (most can be overriden in per-test config):
+
+# The following variables are automatically set by the evaluator:
+# PROBLEM	name of the problem
+# HDIR		home directory of the evaluator (i.e., this file is $HDIR/config)
+# PDIR		directory containing problem data
+# SDIR		directory containing contestant's solution
+# TDIR		directory containing testing results
+# TMPDIR	directory containing temporary files
+# TEST		name of the current test
+
+# Task type:
+# offline	off-line task
+# interactive	interactive task communicating via stdio with a testing program
+# open-data	open-data task (i.e., we don't submit program, but output files)
+TASK_TYPE=file
+
+# I/O type (IO_TYPE sets defaults for IN_TYPE and OUT_TYPE)
+# file		input from $PROBLEM.in, output to $PROBLEM.out (possible even for interactive tasks)
+# stdio		input from stdin, output to stdout
+# none		no input/output
+IO_TYPE=stdio
+#IN_TYPE=stdio
+#OUT_TYPE=stdio
+
+# A list of all tests
+TESTS="1 2 3 4 5 6 7 8 9 10"
+
+# A list of public tests (executed by submit and check scripts)
+SAMPLE_TESTS="0"
+
+# Number of points per test
+POINTS_PER_TEST=1
+
+# Time limit in seconds
+TIME_LIMIT=10
+
+# Memory limit in kilobytes
+MEM_LIMIT=16384
+
+# Command used to check output syntax (optional)
+# Returns exit code 1 if syntax is wrong, 0 if correct
+# fd1 is connect to evaluator log, feel free to log anything
+# fd2 is an optional one-line verdict
+#SYNTAX_CHECK='grep -v -- - $TDIR/$TEST.out'
+
+# Command used to check output correctness
+# Returns exit code 1 if output is incorrect, 0 if correct
+# fd1 is connect to evaluator log, feel free to log anything
+# fd2 is an optional one-line verdict
+# The checker can generate $TDIR/$TEST.pts to assign points irregularly
+OUTPUT_CHECK='diff -bBu $TDIR/$TEST.ok $TDIR/$TEST.out'
+
+# Checker for interactive tasks
+# Returns exit code 1 if test failed, 0 if passed
+# fd1 is connect to evaluator log, feel free to log anything
+# fd2 is an optional one-line verdict
+# The checker can generate $TDIR/$TEST.pts to assign points irregularly
+#IC_CHECK='$PDIR/checker $PDIR/$TEST.in $PDIR/$TEST.chk'
+
 # Sandbox options used when testing
 TEST_SANDBOX_OPTS='-a2 -f -m$MEM_LIMIT -t$TIME_LIMIT'
 # -w for wall clock measuring
-# For stdio tasks append '-i$PROBLEM.in -o$PROBLEM.out'
+
+# Sandbox initialization commands
 SANDBOX_INIT=

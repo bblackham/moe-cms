@@ -1,5 +1,5 @@
 # The Evaluator -- Shell Function Library
-# (c) 2001 Martin Mares <mj@ucw.cz>
+# (c) 2001--2004 Martin Mares <mj@ucw.cz>
 
 # General settings
 shopt -s dotglob
@@ -30,6 +30,15 @@ function pend
 
 function die
 {
+	# Report an internal error
+	echo >&2 "$@"
+	[ -n "$HAVE_LOG" ] && echo "Fatal error: $@"
+	exit 2
+}
+
+function fatal
+{
+	# Report a fatal error in the program being tested
 	echo >&2 "$@"
 	[ -n "$HAVE_LOG" ] && echo "Fatal error: $@"
 	exit 1
@@ -40,9 +49,9 @@ function die
 function box-init
 {
 	pstart "Preparing sandbox... "
-	[ -n "$TEST_USER" ] || die "TEST_USER not set. Please fix."
-	if [ $TEST_USER == $EVAL_USER ] ; then
+	if [ -z "$TEST_USER" -o "$TEST_USER" == $EVAL_USER ] ; then
 		pcont "running locally (INSECURE), "
+		TEST_USER=$EVAL_USER
 		BOXDIR=box
 		BOXCMD=bin/box
 		mkdir -p box
@@ -74,11 +83,12 @@ function dir-init
 	PDIR=problems/$PROBLEM
 	SDIR=solutions/$CONTESTANT/$PROBLEM
 	TDIR=testing/$CONTESTANT/$PROBLEM
+	TMPDIR=tmp
 	[ -d $PDIR ] || die "Problem $PROBLEM not known"
-	[ -d $SDIR ] || die "Solution of $PROBLEM not found"
-	mkdir -p $TDIR
-	rm -rf $TDIR
-	cp -a $SDIR $TDIR
+	[ -d $SDIR ] || fatal "Solution of $PROBLEM not found"
+	mkdir -p $TDIR $TMPDIR
+	rm -rf $TDIR $TMPDIR
+	mkdir -p $TDIR $TMPDIR
 	cat >$TDIR/log <<EOF
 Testing solution of $PROBLEM by $CONTESTANT
 Test started at `date`
@@ -86,7 +96,6 @@ Contestant's solution directory: $SDIR
 Problem directory: $PDIR
 Testing directory: $TDIR
 EOF
-	>$TDIR/points
 	pend "OK"
 }
 
@@ -103,23 +112,23 @@ function locate-source
 			SRCEXT=$a
 		fi
 	done
-	[ -n "$SRCN" ] || die "NOT FOUND"
+	[ -n "$SRCN" ] || fatal "NOT FOUND"
 	pend $SRCN
 	echo "Found source file: $SDIR/$SRCN"
 }
 
-# Compilation (compile SDIR/SRCN with PDIR/EXTRAS to EXE=TDIR/PROBLEM)
+# Compilation (compile SDIR/SRCN with PDIR/COMP_EXTRAS to EXE=TDIR/PROBLEM)
 
 function compile
 {
 	pstart "Compiling... "
 	cp -a $SDIR/$SRCN $TDIR/$SRCN
-	if [ -n "$EXTRAS" ] ; then
-		echo "Extras: $EXTRAS"
-		for a in $EXTRAS ; do cp $PDIR/$a $TDIR/ ; done
+	if [ -n "$COMP_EXTRAS" ] ; then
+		echo "Extras: $COMP_EXTRAS"
+		for a in $COMP_EXTRAS ; do cp $PDIR/$a $TDIR/ ; done
 	fi
 	box-clean
-	for a in $SRCN $EXTRAS ; do cp $TDIR/$a $BOXDIR/ ; done
+	for a in $SRCN $COMP_EXTRAS ; do cp $TDIR/$a $BOXDIR/ ; done
 	SRC=$SRCN
 	EXE=$PROBLEM
 	CCMD=COMP_$SRCEXT
@@ -153,93 +162,119 @@ function compile
 	pend "OK"
 }
 
-# Running of test program according to current task type
+# Running of test program according to current task type (returns exit code and TEST_MSG)
 
 function test-run
 {
 	test-run-$TASK_TYPE
 }
 
-# Running of test program with file input/output
+function test-result
+{
+	P=$1
+	M=$2
+	if [ -s $TDIR/$TEST.pts ] ; then
+		P=`cat $TDIR/$TEST.pts`
+		rm $TDIR/$TEST.pts
+	fi
+	echo "Verdict: $M"
+	echo "Points: $P"
+	test-verdict $P "$M"
+}
 
-function test-run-file
+function test-prolog
 {
 	pcont "<init> "
 	box-clean
 	echo "Executable file: $TDIR/$PROBLEM"
+	if [ ! -x $TDIR/$PROBLEM ] ; then
+		test-result 0 "Compile error."
+	fi
 	cp $TDIR/$PROBLEM $BOXDIR/
-	echo "Input: $TDIR/$PROBLEM"
-	ln $PDIR/$TEST.in $TDIR/$TEST.in
-	cp $PDIR/$TEST.in $BOXDIR/$PROBLEM.in
-	eval $SANDBOX_INIT
-	echo "Input files:"
-	ls -Al $BOXDIR
-
-	pcont "<run> "
+	BOX_EXTRAS=
+	IN_TYPE=${IN_TYPE:-$IO_TYPE}
+	OUT_TYPE=${OUT_TYPE:-$IO_TYPE}
+	case $IN_TYPE in
+		file)	echo "Input file: $PROBLEM.in (from $PDIR/$TEST.in)"
+			ln $PDIR/$TEST.in $TDIR/$TEST.in
+			cp $PDIR/$TEST.in $BOXDIR/$PROBLEM.in
+			BOX_EXTRAS="$BOX_EXTRAS -i/dev/null"
+			;;
+		stdio)	echo "Input file: <stdin> (from $PDIR/$TEST.in)"
+			ln $PDIR/$TEST.in $TDIR/$TEST.in
+			cp $PDIR/$TEST.in $BOXDIR/$PROBLEM.in
+			BOX_EXTRAS="$BOX_EXTRAS -i$PROBLEM.in"
+			;;
+		none)	echo "Input file: <none>"
+			;;
+		*)	die "Unknown IN_TYPE $IN_TYPE"
+			;;
+	esac
+	case $OUT_TYPE in
+		file)	echo "Output file: $PROBLEM.out"
+			BOX_EXTRAS="$BOX_EXTRAS -o/dev/null"
+			;;
+		stdio)	echo "Output file: <stdout>"
+			BOX_EXTRAS="$BOX_EXTRAS -o$PROBLEM.out"
+			;;
+		none)	echo "Output file: <none>"
+			;;
+		*)	die "Unknown OUT_TYPE $OUT_TYPE"
+			;;
+	esac
 	echo "Timeout: $TIME_LIMIT s"
 	echo "Memory: $MEM_LIMIT KB"
-	BOXOPTS=`eval echo $TEST_SANDBOX_OPTS`
-	echo "Sandbox options: $BOXOPTS"
-	if ! $BOXCMD $BOXOPTS -- ./$PROBLEM 2>$TDIR/exec.out ; then
-		TEST_MSG="`head -1 $TDIR/exec.out`"
-		pend "$TEST_MSG"
-		cat $TDIR/exec.out
-		rm $TDIR/exec.out
-		echo >>$PTSFILE "0 $TEST_MSG"
-		return 1
-	fi
-	cat $TDIR/exec.out
-	rm $TDIR/exec.out
-	test-fetch-output || return 1
+	eval $SANDBOX_INIT
+	echo "Sandbox contents before start:"
+	ls -Al $BOXDIR
 }
 
-function test-fetch-output
+function test-epilog
 {
-	echo "Output files:"
+	echo "Sandbox contents after exit:"
 	ls -Al $BOXDIR
-	if [ ! -f $BOXDIR/$PROBLEM.out ] ; then
-		pend "No output file."
-		echo "No output file."
-		echo >>$PTSFILE "0 No output."
-		return 1
+	case ${OUT_TYPE:-$IO_TYPE} in
+		file)	[ -f $BOXDIR/$PROBLEM.out ] || test-result 0 "No output file."
+			cp $BOXDIR/$PROBLEM.out $TDIR/$TEST.out
+			;;
+		stdio)	[ -f $BOXDIR/$PROBLEM.out ] || test-result 0 "No output file."
+			cp $BOXDIR/$PROBLEM.out $TDIR/$TEST.out
+			;;
+	esac
+}
+
+# Running of test program with file input/output
+
+function test-run-file
+{
+	test-prolog
+	pcont "<run> "
+	BOXOPTS="`eval echo $TEST_SANDBOX_OPTS`$BOX_EXTRAS"
+	echo "Sandbox options: $BOXOPTS"
+	if ! $BOXCMD $BOXOPTS -- ./$PROBLEM 2>$TMPDIR/exec.out ; then
+		MSG=`head -1 $TMPDIR/exec.out`
+		test-result 0 "$MSG"
 	fi
-	cp $BOXDIR/$PROBLEM.out $TDIR/$TEST.out
+	cat $TMPDIR/exec.out
+	test-epilog
 }
 
 # Running of interactive test programs
 
 function test-run-interactive
 {
-	pcont "<init> "
-	box-clean
-	echo "Executable file: $TDIR/$PROBLEM"
-	cp $TDIR/$PROBLEM $BOXDIR/
-	echo "Input: $TDIR/$PROBLEM"
-	ln $PDIR/$TEST.in $TDIR/$TEST.in
-	cp $PDIR/$TEST.in $BOXDIR/$PROBLEM.in
-	eval $SANDBOX_INIT
-	echo "Input files:"
-	ls -Al $BOXDIR
-
+	test-prolog
 	pcont "<run> "
-	echo "Timeout: $TIME_LIMIT s"
-	echo "Memory: $MEM_LIMIT KB"
-	BOXOPTS=`eval echo $TEST_SANDBOX_OPTS`
+	BOXOPTS="`eval echo $TEST_SANDBOX_OPTS`$BOX_EXTRAS"
 	echo "Sandbox options: $BOXOPTS"
 	ICCMD=`eval echo $IA_CHECK`
 	echo "Interactive checker: $ICCMD"
-	if ! $HDIR/bin/iwrapper $BOXCMD $BOXOPTS -- ./$PROBLEM @@ $ICCMD 2>$TDIR/exec.out ; then
-		TEST_MSG="`head -1 $TDIR/exec.out`"
-		pend "$TEST_MSG"
-		cat $TDIR/exec.out
-		rm $TDIR/exec.out
-		echo "$TEST_MSG"
-		echo >>$PTSFILE "0 $TEST_MSG"
-		return 1
+	if ! $HDIR/bin/iwrapper $BOXCMD $BOXOPTS -- ./$PROBLEM @@ $ICCMD 2>$TMPDIR/exec.out ; then
+		MSG="`head -1 $TMPDIR/exec.out`"
+		test-result 0 "$MSG"
 	fi
-	cat $TDIR/exec.out
-	rm $TDIR/exec.out
-	[ -z "$OUTPUT_CHECK" ] || test-fetch-output || return 1
+	cat $TMPDIR/exec.out
+	test-epilog
 }
 
 # Syntax checks
@@ -250,11 +285,12 @@ function syntax-check
 	pcont "<syntax> "
 	SCHECK=`eval echo $SYNTAX_CHECK`
 	echo "Syntax check command: $SCHECK"
-	eval $SCHECK && return 0
-	pend "Wrong syntax."
-	echo "Wrong syntax."
-	echo >>$PTSFILE "0 Wrong syntax."
-	return 1
+	if ! eval $SCHECK 2>$TMPDIR/exec.out ; then
+		MSG=`head -1 $TMPDIR/exec.out`
+		if [ -z "$MSG" ] ; then MSG="Wrong syntax." ; fi
+		test-result 0 "$MSG"
+	fi
+	cat $TMPDIR/exec.out
 }
 
 # Output checks
@@ -266,11 +302,14 @@ function output-check
 	[ -f $PDIR/$TEST.out ] && ln $PDIR/$TEST.out $TDIR/$TEST.ok
 	OCHECK=`eval echo $OUTPUT_CHECK`
 	echo "Output check command: $OCHECK"
-	eval $OCHECK && return 0
-	pend "Wrong answer."
-	echo "Wrong answer."
-	echo >>$PTSFILE "0 Wrong answer."
-	return 1
+	if ! eval $OCHECK 2>$TMPDIR/exec.out ; then
+		MSG=`head -1 $TMPDIR/exec.out`
+		if [ -z "$MSG" ] ; then MSG="Wrong answer." ; fi
+		test-result 0 "$MSG"
+	fi
+	MSG=`head -1 $TMPDIR/exec.out`
+	if [ -z "$MSG" ] ; then MSG="OK" ; fi
+	test-result $POINTS_PER_TEST "$MSG"
 }
 
 # Setup of public commands
@@ -281,6 +320,7 @@ function public-setup
 	PDIR=$MO_PUBLIC/problems/$PROBLEM
 	SDIR=.
 	TDIR=~/.test
+	TMPDIR=~/.test
 	[ -d $PDIR ] || die "Unknown problem $PROBLEM"
 
 	pstart "Initializing... "
@@ -300,5 +340,5 @@ function open-locate
 {
 	[ -f $PDIR/$TEST.in ] || die "Unknown test $TEST"
 	SRCN=$SDIR/$PROBLEM$TEST.out
-	[ -f $SRCN ] || die "Output file $SRCN not found"
+	[ -f $SRCN ] || fatal "Output file $SRCN not found"
 }
