@@ -10,7 +10,6 @@ TEST_USERS="mo-test1 mo-test2"
 # UID range assigned to contestants
 CT_UID_MIN=21000
 CT_UID_MAX=29999
-CT_UID_MIN=1000
 
 # Test user for sandboxing
 TEST_USER=${TEST_USER:mo-test1}
