@@ -1,0 +1,5 @@
+#!/bin/sh
+set -e
+[ -n "$1" ]
+sed <$1 's/^/   /' | a2ps -Ma4 -r --columns=1 --rows=1 --font-size=10 --borders=no -B -o /tmp/score.ps
+print /tmp/score.ps
