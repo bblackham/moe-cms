@@ -37,7 +37,8 @@ echo "Creating public"
 rm -rf public
 mkdir public
 cd public
-cp -a $H/bin $H/config $H/problems .
+cp -a $H/bin $H/config .
+mkdir problems
 cp -a $H/public/* bin/
 chmod +x bin/*
 cd ..
