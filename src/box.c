@@ -35,6 +35,7 @@ static int use_wall_clock;
 static int file_access;
 static int verbose;
 static int memory_limit;
+static int allow_times;
 static char *redir_stdin, *redir_stdout;
 
 static pid_t box_pid;
@@ -207,6 +208,7 @@ valid_syscall(struct user *u)
     case SYS_munmap:
     case SYS_ioctl:
     case SYS_uname:
+    case 252:
       return 1;
     case SYS_time:
     case SYS_alarm:
@@ -246,6 +248,8 @@ valid_syscall(struct user *u)
     case SYS_mmap2:
     case SYS__sysctl:
       return (filter_syscalls == 1);
+    case SYS_times:
+      return allow_times;
     default:
       return 0;
     }
@@ -472,6 +476,7 @@ Options:\n\
 -m <size>\tLimit address space to <size> KB\n\
 -o <file>\tRedirect stdout to <file>\n\
 -t <time>\tStop after <time> seconds\n\
+-T\t\tAllow syscalls for measuring run time\n\
 -v\t\tBe verbose\n\
 -w\t\tMeasure wall clock time instead of run time\n\
 ");
@@ -485,7 +490,7 @@ main(int argc, char **argv)
   uid_t uid;
   char *cwd = NULL;
 
-  while ((c = getopt(argc, argv, "a:c:efi:m:o:t:vw")) >= 0)
+  while ((c = getopt(argc, argv, "a:c:efi:m:o:t:Tvw")) >= 0)
     switch (c)
       {
       case 'a':
@@ -511,6 +516,9 @@ main(int argc, char **argv)
 	break;
       case 't':
 	timeout = atol(optarg);
+	break;
+      case 'T':
+	allow_times++;
 	break;
       case 'v':
 	verbose++;
