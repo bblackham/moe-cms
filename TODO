@@ -1,3 +1,12 @@
 -static ?
-multiple check inputs?
 mo-install: don't copy private test data to public
+disable `write' command
+/tmp
+generator vysledkovych listin
+spousteni rhide z mc
+limit na # procesu per user
+NR_TASKS ?
+shift+sipky v rhide
+Delete key
+rhide: debugging Pascal programs: variable names must be upper-cased
+script na vyhazovani uzivatelu na konci souteze
