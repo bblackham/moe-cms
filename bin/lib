@@ -48,7 +48,7 @@ function box-init
 		mkdir -p box
 	else
 		pcont "used account $TEST_USER, "
-		BOXDIR=$MO_ROOT/$TEST_USER
+		BOXDIR=$MO_ROOT/eval/$TEST_USER
 		BOXCMD=bin/box-$TEST_USER
 	fi
 	[ -d $BOXDIR -a -f $BOXCMD ] || die "Sandbox set up incorrectly"
