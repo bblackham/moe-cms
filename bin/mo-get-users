@@ -8,8 +8,8 @@ set -e
 . config
 
 if [ "$1" = --full ] ; then
-	FORM='$1,"\t",$5'
+	FORM='$1,$5'
 else
 	FORM='$1'
 fi
-awk -F: </etc/passwd "{ gsub(\",.*\",\"\",\$5); if (\$3 >= $CT_UID_MIN && \$3 <= $CT_UID_MAX) print $FORM; }"
+awk -F: </etc/passwd "{ gsub(\",.*\",\"\",\$5); OFS=\"\t\"; if (\$3 >= $CT_UID_MIN && \$3 <= $CT_UID_MAX) print $FORM; }"
