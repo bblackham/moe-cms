@@ -16,7 +16,7 @@ esac
 
 case $mode in
   eval)
-    echo -n Zadejte heslo pro mo-eval:
+    echo -n Enter password for mo-eval:
     read passwd
     passwd=`echo $passwd | bin/md5crypt`
     echo $EVAL_USER:x:$uid:$uid:MO Evaluator:$MO_ROOT/eval/$EVAL_USER:/bin/bash >> etcpasswd
