@@ -11,6 +11,10 @@ TEST_USERS="mo-test1 mo-test2"
 CT_UID_MIN=65100
 CT_UID_MAX=65199
 
+# If the contestants are not present in /etc/passwd on the evaluating machine,
+# we need a list of them (username<tab>fullname).
+#CT_USER_LIST=userlist
+
 # Test user for sandboxing
 TEST_USER=${TEST_USER:mo-test1}
 
