@@ -1,4 +1,3 @@
--static ?
 mo-install: don't copy private test data to public
 disable `write' command
 /tmp
@@ -10,5 +9,4 @@ shift+sipky v rhide
 Delete key
 rhide: debugging Pascal programs: variable names must be upper-cased
 script na vyhazovani uzivatelu na konci souteze
-submitovani uloh, ktere nefunguji pro sample input?
 lepsi time limity

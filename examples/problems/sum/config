@@ -5,7 +5,7 @@
 TESTS="1 2"
 
 # Test with example input
-SAMPLE_TEST=1
+SAMPLE_TESTS=1
 
 # Number of points per test
 POINTS_PER_TEST=1

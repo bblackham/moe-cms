@@ -6,21 +6,38 @@ set -e
 . $MO_PUBLIC/bin/lib
 . $MO_PUBLIC/config
 
-[ -n "$1" ] || die "Usage: submit <problem>"
+FORCE=0
+if [ "$1" = --force ] ; then
+	FORCE=1
+	shift
+fi
+[ -n "$1" -o "$1" = "--help" ] || die "Usage: submit [--force] <problem>"
 PROBLEM=$1
 public-setup
 . $PDIR/config
 locate-source
 compile
 PTSFILE=$TDIR/points
+FAILED=0
 for TEST in $SAMPLE_TESTS ; do
 	pstart "Checking on sample input $TEST: "
-	test-run
-	syntax-check
-	pend "OK"
+	if test-run && syntax-check ; then
+		pend "OK"
+	else
+		FAILED=$(($FAILED+1))
+	fi
 done
-pstart "Submiting: "
-mkdir -p ~/.submit/$PROBLEM
-rm -rf ~/.submit/$PROBLEM/*
+pstart "Submiting... "
+if [ $FAILED != 0 ] ; then
+	if [ $FORCE != 0 ] ; then
+		pcont "(tests failed, but --force given) "
+	else
+		pend "TESTS FAILED  Use submit --force if you really want to submit a wrong solution."
+		exit 1
+	fi
+fi
+mkdir -p ~/.submit
+rm -rf ~/.submit/$PROBLEM
+mkdir ~/.submit/$PROBLEM
 cp $SRCN ~/.submit/$PROBLEM/
 pend "OK"
