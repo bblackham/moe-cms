@@ -197,7 +197,7 @@ function test-fetch-output
 {
 	echo "Output files:"
 	ls -Al $BOXDIR
-	if [ ! -s $BOXDIR/$PROBLEM.out ] ; then
+	if [ ! -f $BOXDIR/$PROBLEM.out ] ; then
 		pend "No output file."
 		echo "No output file."
 		echo >>$PTSFILE "0 No output."
