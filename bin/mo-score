@@ -60,6 +60,7 @@ foreach $u (keys %users) {
 			$ttest = $1;
 			$tpts = $2;
 			$trem = $3;
+			$ttest =~ s/[^0-9]//g;
 			$known_tests{$t}{$ttest} = 1;
 			$results{$u}{$t}{$ttest} = $tpts;
 			$remarks{$u}{$t}{$ttest} = $trem;
@@ -192,9 +193,11 @@ if ($debug) {
 		$hdr = 0;
 	}
 	print "</TABLE>\n";
-	print "<H2>Error codes</H2><UL>\n";
-	foreach $r (sort keys %error_codes) { print "<LI>$r: $error_codes{$r}\n"; }
-	print "</UL>\n";
+	if ($detail) {
+		print "<H2>Error codes</H2><UL>\n";
+		foreach $r (sort keys %error_codes) { print "<LI>$r: $error_codes{$r}\n"; }
+		print "</UL>\n";
+	}
 	print "</BODY></HTML>\n";
 } elsif ($tex) {
 	print "\\error{TeX output not supported yet!}\n";
