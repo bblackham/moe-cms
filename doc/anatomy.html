@@ -1,0 +1,44 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html40/strict.dtd">
+
+<html><head>
+<title>MO Eval - Anatomy</title>
+<link rev=made href="mailto:mj@ucw.cz">
+<link rel=stylesheet title=Default href="mo-eval.css" type="text/css" media=all>
+</head><body>
+
+<h1>The Anatomy of MO-Eval</h1>
+
+<p>MO-Eval lives in the following directory structure:
+
+<ul>
+<li><code>bin/</code> &ndash; all programs (usually shell scripts)
+<li><code>box/</code> &ndash; temporary files used by the sandbox module
+<li><code>doc</code> &ndash; this documentation
+<li><code>examples</code> &ndash; example problems
+<li><code>misc</code> &ndash; various currently undocumented stuff
+<li><code>problems/</code> &ndash; definitions of problems (tasks)
+<li><code>public</code> &ndash; data available publicly to the contestants
+<li><code>solutions</code> &ndash; solutions of problems (both by contestants and authors)
+<li><code>src</code> &ndash; source of parts of the evaluator written in C
+<li><code>template</code> &ndash; templates of contestants' home directories
+<li><code>testing</code> &ndash; results of testing of solutions
+<li><code>tmp</code> &ndash; various temporary files
+<li><code>Makefile</code> &ndash; as usually
+<li><code>config</code> &ndash; the main configuration file
+</ul>
+
+<p>When installed, it will create the following hierarchy:
+
+<ul>
+<li><code>eval</code> &ndash; all data belonging to the evaluator, inaccessible to contestants
+<li><code>public</code> &ndash; public data made available to the contestants
+<li><code>users</code> &ndash; home directories of the contestants
+</ul>
+
+<p>We have tried to make the whole system as flexible as possible, which has lead to writing
+almost everything as simple shell scripts, building on  a library of shell functions contained
+in <code>bin/lib</code>. The config files are also shell scripts, making it possible to do lots
+of fancy (and also confusing, to be honest :) ) things there, the most useful being variable
+substitutions.
+
+</body></html>

@@ -1,0 +1,58 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html40/strict.dtd">
+
+<html><head>
+<title>The MO Contest Environment</title>
+<link rev=made href="mailto:mj@ucw.cz">
+<link rel=stylesheet title=Default href="mo-eval.css" type="text/css" media=all>
+</head><body>
+
+<h1>The MO Contest Environment</h1>
+
+<p>The MO Contest Environment a.k.a. MO-Eval is a simple system for conducting programming competitions similar to the
+<a href="http://olympiads.win.tue.nl/ioi/">International Olympiad in Informatics</a> &ndash; a contest
+where the participants solve programming tasks, which are then evaluated off-line after the end of the
+competition. It's built in a modular way, so extending to other types of programming contests
+(e.g., to on-line contests like the <a href="http://icpc.baylor.edu/icpc/">ACM ICPC</a>) should be
+pretty easy, but it hasn't been done yet.
+
+<p>We use this environment at the <a href="http://mo.mff.cuni.cz/p/index.html.en">Czech Olympiad in programming</a>
+(officially a part of the Mathematical Olympiad) since 2002 and also at the <a href="http://mo.mff.cuni.cz/cpspc/">CPSPC</a>
+(Czech-Polish-Slovak Preparation Camp) when it's held in the Czech Republic.
+
+<h2>Download</h2>
+
+<p>You can download the current release <a href="http://atrey.karlin.mff.cuni.cz/~mj/download/eval/eval-1.0.tar.gz">eval-1.0</a>
+or browse <a href="http://atrey.karlin.mff.cuni.cz/~mj/download/eval/">the archive of past releases</a>.
+
+<h2>Documentation</h2>
+
+<ul>
+<li><a href="anatomy.html">Anatomy of MO-Eval</a>
+<li><a href="install.html">Installation</a>
+<li><a href="tasks.html">Tasks and their types</a>
+<li><a href="eval.html">Evaluating solutions</a>
+<li><a href="public.html">Utilities for contestants</a>
+</ul>
+
+<h2>Portability</h2>
+
+<p>The environment runs under Linux. We currently use a slightly modified installation of <a href="http://www.debian.org/">Debian
+GNU/Linux</a>, but it will happily work with any other Linux distribution with a 2.4 or newer kernel. Everything except the sandbox
+module (which heavily depends on the Linux kernel) should be easily portable to other UNIX systems, although you will probably
+need to install some of the GNU utilities (especially bash) and Perl. Porting to Windows is out of question.
+
+<h2>Author</h2>
+
+<p>MO-Eval has been written by <a href="http://atrey.karlin.mff.cuni.cz/~mj/">Martin Mares</a>.
+Great thanks go to Jan Kara and Milan Straka for their help and for many fine ideas.
+
+<h2>License</h2>
+
+<p>The MO-Eval package can be used and distributed under the terms of the <a href="http://www.gnu.org/copyleft/gpl.html">GNU General
+Public License version 2.</a>
+
+<h2>Feedback</h2>
+
+<p>All bug reports, suggestions and patches are welcome. Please mail them to <a href="mailto:mj@ucw.cz">mj@ucw.cz</a>.
+
+</body></html>
