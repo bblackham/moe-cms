@@ -1,0 +1,20 @@
+#!/bin/bash
+# Create a floppy with solutions, testing logs and example solution
+# expects that mo-create-packages has been run before
+# and adds stuff in $MO_ROOT/floppy
+
+[ -n "$1" ] || { echo "Usage: mo-create-floppy <user>" ; exit 1 ; }
+USER=$1
+[ -f config ] || { echo "Missing config file, check cwd." ; exit 1 ; }
+set -e
+. config
+
+mkdosfs /dev/fd0
+mount -tvfat /dev/fd0 /mnt
+D=/mnt
+U=$MO_ROOT/users/$USER/$USER
+if [ -d $U/testing ] ; then ( cd $U ; zip -r $D/testing.zip testing ) fi
+if [ -d $U/solutions ] ; then cp -dR $U/solutions/* $D/ ; fi
+cp -dR $MO_ROOT/floppy/* $D/
+umount /mnt
+echo "Done."
