@@ -1,0 +1,11 @@
+#!/bin/sh
+D=back/`date '+%H%M'`
+mkdir -p $D
+for m in hi1{01,02,03,04,05,06,07,08,09,10,11,12} hi2{01,02,03,04,05,06,07,08,09,10,11} hi4{01,02,03,04,05,06,07,08,09,10,11,12,13,14,15,16,18,19,20} ; do
+	echo -n "$m: "
+	mkdir $p $D/$m
+	pushd $D/$m >/dev/null
+	ssh $m 'cd /aux/mo/users ; tar czf - .' | tar xzf -
+	popd >/dev/null
+	du -s $D/$m | cut -f 1
+done
