@@ -1,0 +1,24 @@
+#!/bin/sh
+
+[ -n "$1" ] || { echo "Usage: mo-grab <tasks>" ; exit 1 ; }
+[ -f config ] || { echo "Missing config file, check cwd." ; exit 1 ; }
+set -e
+. config
+
+for user in `awk -F: </etc/passwd '{ if ($3 >= 21000 && $3 < 30000) print $1; }'` ; do
+	echo -n "$user:"
+	H=`eval echo ~$user`/.submit
+	if [ -d $H ] ; then
+		[ -d solutions/$user ] || mkdir -p solutions/$user
+		for t in $@ ; do
+			rm -rf solutions/$user/$t
+			if [ -d $H/$t ] ; then
+				echo -n " $t"
+				cp -dr $H/$t solutions/$user/$t
+			fi
+		done
+		echo
+	else
+		echo " No .submit directory"
+	fi
+done
