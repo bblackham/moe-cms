@@ -159,6 +159,7 @@ function test-run
 	echo "Executable file: $TDIR/$PROBLEM"
 	cp $TDIR/$PROBLEM $BOXDIR/
 	echo "Input: $TDIR/$PROBLEM"
+	ln $PDIR/$TEST.in $TDIR/$TEST.in
 	cp $PDIR/$TEST.in $BOXDIR/$PROBLEM.in
 	echo "Input files:"
 	ls -Al $BOXDIR
