@@ -15,12 +15,15 @@ EVAL_GROUP=mo-eval
 #TEST_USER=${TEST_USER:-mo-test1}
 TEST_USERS="mo-test1 mo-test2"
 
+# These values are used when creating logins for eval and contestanst.
+EVAL_UID_MIN=65000
+CT_UID_MIN=65100
+CT_UID_MAX=65199
+
 # Sometimes we need to get a list of all contestants (not in the evaluator
 # itself, but in various auxiliary scripts). In such cases we call mo-get-users,
-# which either scans /etc/passwd for users with UID in the following range,
-# or uses an explicit list of contestants CT_USER_LIST (username<tab>fullname).
-#CT_UID_MIN=65100
-#CT_UID_MAX=65199
+# which either uses an explicit list of contestants CT_USER_LIST (username<tab>fullname),
+# or (if undefined) scans /etc/passwd for users with UID between CT_UID_MIN and CT_UID_MAX.
 CT_USER_LIST=userlist
 
 ### Per-task configuration variables (default values, override in per-task config)
