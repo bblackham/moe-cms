@@ -7,24 +7,28 @@ EVAL_USER=mo-eval
 EVAL_GROUP=mo-eval
 TEST_USERS="mo-test1 mo-test2"
 
-# Currently used test user
-TEST_USER=mo-test1
+# Test user for sandboxing
+TEST_USER=${TEST_USER:mo-test1}
 
 ### all of the following variables can be overriden in per-task config file
 
 # Known source file extensions
 EXTENSIONS="c C cpp p pas"
 
+# Extra compiler flags (null, but can be overriden)
+EXTRA_CFLAGS=
+
 # For each source extension, we must give compiler command
-COMP_c='/usr/bin/gcc -O2 -g -o $EXE $SRC'
-COMP_C='/usr/bin/g++ -O2 -g -o $EXE $SRC'
+COMP_c='/usr/bin/gcc -O2 -g -o $EXE $EXTRA_CFLAGS $SRC'
+COMP_C='/usr/bin/g++ -O2 -g -o $EXE $EXTRA_CFLAGS $SRC'
 COMP_cpp="$COMP_C"
-COMP_p='/usr/bin/fpc -Ci -Cr -g -O2 -So -Sg -o$EXE $SRC'
+COMP_p='/usr/bin/fpc -Ci -Cr -g -O2 -So -Sg -o$EXE $EXTRA_CFLAGS $SRC'
 COMP_pas="$COMP_p"
 
 # Sandbox options used when compiling
 COMP_SANDBOX_OPTS='-m65536 -t60 -w -e'
 
 # Sandbox options used when testing
-TEST_SANDBOX_OPTS='-a2 -f -m$MEM_LIMIT -t$TIME_LIMIT -w'
+TEST_SANDBOX_OPTS='-a2 -f -m$MEM_LIMIT -t$TIME_LIMIT'
+# -w for wall clock measuring
 # For stdio tasks append '-i$PROBLEM.in -o$PROBLEM.out'
