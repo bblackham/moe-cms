@@ -1,0 +1,26 @@
+#!/usr/bin/perl
+# A simple script for making releases of mo-eval
+# (c) 2005 Martin Mares <mj@ucw.cz>
+
+use strict;
+use warnings;
+require "maint/release.pm";
+
+my $r = new UCW::Release("mo-eval");
+my $ver = $r->GetVersionFromFile("Makefile", "VERSION=(.*)");
+#$r->GetVersionsFromChangelog("ChangeLog", "Released as (.*)\.");
+unshift @{$r->{"rules"}}, '^(problems|testing|solutions|maint)/.*' => '-';
+push @{$r->{"directories"}}, "problems", "testing", "solutions";
+push @{$r->{"uploads"}}, {
+	"url" => "scp://atrey.karlin.mff.cuni.cz/~ftp/pub/local/mj/eval/"
+	};
+$r->ParseOptions;
+$r->InitDist("maint/dist");
+$r->GenPackage;
+$r->GenFile("README");
+$r->Dispatch;
+
+if ($r->{"do_upload"}) {
+	print "Updating checked-out documentation at Atrey\n";
+	`ssh atrey cd src/eval && Cu`; die if $?;
+}
