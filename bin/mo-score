@@ -15,6 +15,8 @@ while (($arg = $ARGV[0]) =~ /^--([a-z]+)$/) {
 }
 @ARGV || die $usage;
 
+@tasks = @ARGV;
+
 print STDERR "Scanning contestants... ";
 open (CT, "bin/mo-get-users --full |") || die "Cannot get list of contestants";
 while (<CT>) {
@@ -183,15 +185,18 @@ if ($debug) {
 	print '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html40/strict.dtd">', "\n";
 	print "<HTML><HEAD><TITLE>Rank list</TITLE></HEAD><BODY>\n";
 	print "<H1>Rank list</H1>\n";
-	print "<TABLE>\n";
-	$hdr = 1;
-	foreach $r (@table) {
-		print "<TR>", join('',map {
-			if ($hdr) { $_ = "<TH>$_"; }
-			else { $_ = "<TD align=" . (/^[0-9A-Z-]+$/ ? "right" : "left") . (length($_) > 14 ? " width=150" : "") . ">$_"; }
-		} @$r), "\n";
-		$hdr = 0;
+
+	my @perm;
+ 	&printHtmlHeader(\@perm);
+	print "<tbody>";
+	
+	foreach $r (@table[1..($#table - 1)]) {
+		&printHtmlRow(@{$r}[@perm]);
 	}
+
+	print "<tbody>";
+	&printHtmlRow(@{$table[$#table]}[@perm]);
+
 	print "</TABLE>\n";
 	if ($detail) {
 		print "<H2>Error codes</H2><UL>\n";
@@ -205,4 +210,64 @@ if ($debug) {
 	foreach $r (@table) { print join("\t",@$r), "\n"; }
 	print "\n";
 	foreach $r (sort keys %error_codes) { print "$r: $error_codes{$r}\n"; }
+}
+
+
+sub printHtmlRow {
+	print "<TR>", join('',map {
+		if ($hdr) { $_ = "<TH>$_"; }
+		else { $_ = "<TD align=" . (/^[0-9A-Z-]+$/ ? "right" : "left") . (length($_) > 14 ? " width=150" : "") . ">$_"; }
+	} @_), "\n";
+}
+
+
+sub printHtmlHeader {
+
+  my ($perm) = @_;
+
+   my $colspec = "<colgroup span=3>";
+   my $hdr1;
+   my $hdr2;
+
+   @$perm = (0, 1, 2);
+   my $p = 3;
+
+   if ($detail) {
+     $hdr1 = "<th rowspan=2>Rank<th rowspan=2>User<th rowspan=2>Name";
+     for my $task (@tasks) {
+
+	my $nSub = scalar(keys %{$known_tests{$task}});
+
+	$p++;
+	map { push @$perm, $p++ } (1..$nSub);
+	push @$perm, $p - $nSub - 1;
+	
+	$colspec .= "<colgroup span='" . $nSub . "'>\n";
+	$colspec .= "<colgroup span='1'>\n";
+	$hdr1 .= "<th colspan='" . ($nSub + 1) . "' style='border-bottom:1px solid black;'>$task";
+	$hdr2 .= join("", map { "<th>$_" } sort {$a <=> $b} keys %{$known_tests{$task}});
+	$hdr2 .= "<th>Total";
+     }
+   
+     $hdr1 .= "<th rowspan='2'>Total";
+     
+   } else {  ## no detail
+   
+     $hdr1 = "<th>Rank<th>User<th>Name";
+
+     for my $task (@tasks) {
+        push @$perm, $p++;
+	$hdr1 .= "<th>$task";
+     }
+     $hdr1 .= "<th>Total";
+     $colspec .= "<colgroup span='" . scalar (@tasks) . "'>";
+   }
+
+   push @$perm, $p++;
+   
+   print "<TABLE rules=groups frame=all border='1' cellpadding='2'>\n";
+   print "$colspec<colgroup span='1'>\n";
+   print "<tr>$hdr1</tr>\n";
+   print "<tr>$hdr2</tr>\n" if $detail;
+  
 }
