@@ -6,10 +6,8 @@ zkopirovat *.ok i kdyz program spadne na run-time error
 
 Environment
 ~~~~~~~~~~~
-nezapomenout vzit s sebou poznamky k povidani o prostredi
 per-user tmp ?
 spousteni rhide z mc
-limit na # procesu per user
 shift+sipky v rhide
 rhide: debugging Pascal programs: variable names must be upper-cased
 
