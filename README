@@ -45,3 +45,9 @@ Don't use limits.conf for that since with sshd the limits would affect _root_
 		ulimit -SHn 256		# max open files
 		ulimit -SHv 262144	# max virtual memory
 	fi
+
+
+Various notes:
+~~~~~~~~~~~~~~
+- if you want to assign partial score to testcases, just make the OUTPUT_CHECK
+  program generate a file $TDIR/$TEST.pts containing the score.

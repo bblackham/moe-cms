@@ -1,6 +1,6 @@
 #!/bin/bash
 # The Evaluator -- Master Control Script
-# (c) 2001 Martin Mares <mj@ucw.cz>
+# (c) 2001--2003 Martin Mares <mj@ucw.cz>
 
 set -e
 if [ ! -f config -o ! -f bin/lib ] ; then
@@ -28,7 +28,7 @@ box-init
 
 # Compile the program
 locate-source $3
-compile
+compile || true
 
 # Perform the tests
 PTSFILE=$TDIR/points
@@ -36,18 +36,23 @@ for TEST in $TESTS ; do
 	(
 	[ -f $PDIR/$TEST.config ] && . $PDIR/$TEST.config
 	exec >$TDIR/$TEST.log
-	pstart "Test $TEST ($POINTS_PER_TEST points)... "
-	echo "Test $TEST ($POINTS_PER_TEST points)"
+	pstart "Test $TEST... "
+	echo "Test $TEST"
 	echo >>$PTSFILE -n "$TEST "
 	if [ ! -f $TDIR/$PROBLEM ] ; then
-		echo >$PTSFILE "0 Compile error."
+		echo >>$PTSFILE "0 Compile error."
 		die "No executable file"
 	fi
 	test-run || exit 0
 	syntax-check || exit 0
 	output-check || exit 0
-	echo "Test completed OK ($POINTS_PER_TEST points)"
-	echo >>$PTSFILE "$POINTS_PER_TEST OK"
-	pend "OK"
+	if [ -f $TDIR/$TEST.pts ] ; then
+		PTS=`cat $TDIR/$TEST.pts`
+	else
+		PTS=$POINTS_PER_TEST
+	fi
+	echo "Test completed OK ($PTS points)"
+	echo >>$PTSFILE "$PTS OK"
+	pend "OK, $PTS points"
 	)
 done
