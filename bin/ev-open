@@ -1,0 +1,47 @@
+#!/bin/bash
+# The Evaluator for Open Data Problems
+# (c) 2001 Martin Mares <mj@ucw.cz>
+
+set -e
+if [ ! -f config -o ! -f bin/lib ] ; then
+	echo "Unable to find evaluator files!"
+	exit 1
+fi
+. bin/lib
+. config
+
+# Set up environment:
+#   HDIR	home dir of the evaluator
+#   PDIR	problem specific data
+#   SDIR	contestant's solution
+#   TDIR	test results
+#   BOXDIR	sandbox
+#   PROBLEM	problem we're evaluating
+
+[ -n "$2" ] || die "Usage: ev-open <contestant> <problem>"
+CONTESTANT=$1
+PROBLEM=$2
+dir-init
+log-init
+. $PDIR/config
+
+# Perform the tests
+PTSFILE=$TDIR/points
+for TEST in $TESTS ; do
+	(
+	[ -f $PDIR/$TEST.config ] && . $PDIR/$TEST.config
+	exec >$TDIR/$TEST.log
+	pstart "Test $TEST ($POINTS_PER_TEST points)... "
+	echo "Test $TEST ($POINTS_PER_TEST points)"
+	echo >>$PTSFILE -n "$TEST "
+	if [ ! -f $SDIR/$TEST.out ] ; then
+		echo >>$PTSFILE "0 No solution."
+		die "No solution."
+	fi
+	syntax-check || exit 0
+	output-check || exit 0
+	echo "Test completed OK ($POINTS_PER_TEST points)"
+	echo >>$PTSFILE "$POINTS_PER_TEST OK"
+	pend "OK"
+	)
+done
