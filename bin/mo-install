@@ -1,6 +1,6 @@
 #!/bin/sh
 
-[ -f config ] || ( echo "Missing config file, check cwd." ; exit 1 )
+[ -f config ] || { echo "Missing config file, check cwd." ; exit 1 ; }
 set -e
 . config
 
@@ -32,13 +32,16 @@ for u in $TEST_USERS ; do
 	done
 
 # common
-echo "Creating common"
-rm -rf common
-mkdir common
-cd common
+echo "Creating public"
+rm -rf public
+mkdir public
+cd public
+cp -a $H/bin $H/config $H/problems .
+cp -a $H/public/* bin/
+chmod +x bin/*
 cd ..
-chown -R $EVAL_USER.$EVAL_GROUP common
-chmod 750 $EVAL_USER
+chown -R $EVAL_USER.$EVAL_GROUP public
+chmod 755 public
 
 # SSH keys (FIXME)
 echo "Copying SSH keys"
