@@ -8,7 +8,7 @@ EVAL_GROUP=mo-eval
 TEST_USERS="mo-test1 mo-test2"
 
 # Currently used test user
-TEST_USER=mo-eval
+TEST_USER=mo-test1
 
 ### all of the following variables can be overriden in per-task config file
 

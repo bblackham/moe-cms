@@ -22,3 +22,5 @@ for user in `awk -F: </etc/passwd '{ if ($3 >= 21000 && $3 < 30000) print $1; }'
 		echo " No .submit directory"
 	fi
 done
+chown -R $EVAL_USER solutions
+chmod -R a+r solutions
