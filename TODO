@@ -10,7 +10,13 @@ nezapomenout vzit s sebou poznamky k povidani o prostredi
 per-user tmp ?
 spousteni rhide z mc
 limit na # procesu per user
-NR_TASKS ?
 shift+sipky v rhide
 rhide: debugging Pascal programs: variable names must be upper-cased
-deleting of user data after competition
+
+Contest
+~~~~~~~
+Prepare /home/mo/public/<problem>/* for all problems
+# ./comp-prepare
+<contest runs>
+# ./comp-kickout
+# ./comp-cleanup
