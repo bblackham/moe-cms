@@ -9,6 +9,11 @@ for m in `cd $1 ; echo *` ; do
 		u=`basename $d`
 		if [ $u != mo00 -a `ls $d | wc -l` -gt 0 ] ; then
 			echo -n " $u"
+			if [ -d $d/.submit ] ; then
+				echo -n '('
+				( cd $d/.submit ; echo -n * )
+				echo -n ')'
+			fi
 		fi
 	done
 	echo
