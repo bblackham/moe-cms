@@ -1,0 +1,21 @@
+#!/bin/bash
+
+[ -f config ] || { echo "Missing config file, check cwd." ; exit 1 ; }
+set -e
+. config
+make
+
+H=`pwd`
+cd $MO_ROOT
+
+# mo-test home
+for u in $TEST_USERS ; do
+	echo "Creating $u"
+	rm -rf ./$u
+	mkdir $u
+	chown $u.$EVAL_GROUP $u
+	chmod 770 $u
+	cp $EVAL_USER/bin/box $EVAL_USER/bin/box-$u
+	chown $u.$EVAL_GROUP $EVAL_USER/bin/box-$u
+	chmod 4550 $EVAL_USER/bin/box-$u
+	done

@@ -20,17 +20,7 @@ cd ..
 chown -R $EVAL_USER.$EVAL_GROUP $EVAL_USER
 chmod 700 $EVAL_USER
 
-# mo-test home
-for u in $TEST_USERS ; do
-	echo "Creating $u"
-	rm -rf ./$u
-	mkdir $u
-	chown $u.$EVAL_GROUP $u
-	chmod 770 $u
-	cp $EVAL_USER/bin/box $EVAL_USER/bin/box-$u
-	chown $u.$EVAL_GROUP $EVAL_USER/bin/box-$u
-	chmod 4550 $EVAL_USER/bin/box-$u
-	done
+( cd $EVAL_USER ; bin/mo-create-testusers )
 
 # common
 echo "Creating public"
@@ -46,7 +36,7 @@ chown -R $EVAL_USER.$EVAL_GROUP public
 chmod 755 public
 
 # SSH keys (FIXME)
-echo "Copying SSH keys"
-mkdir $EVAL_USER/.ssh
-cp ~mj/.ssh/authorized_keys $EVAL_USER/.ssh/
-chown -R $EVAL_USER $EVAL_USER/.ssh
+#echo "Copying SSH keys"
+#mkdir $EVAL_USER/.ssh
+#cp ~mj/.ssh/authorized_keys $EVAL_USER/.ssh/
+#chown -R $EVAL_USER $EVAL_USER/.ssh
