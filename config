@@ -2,14 +2,14 @@
 # (c) 2001 Martin Mares <mj@ucw.cz>
 
 # Directories and users
-MO_ROOT=/home/mo
+MO_ROOT=/aux/mo
 EVAL_USER=mo-eval
 EVAL_GROUP=mo-eval
 TEST_USERS="mo-test1 mo-test2"
 
 # UID range assigned to contestants
-CT_UID_MIN=21000
-CT_UID_MAX=29999
+CT_UID_MIN=65100
+CT_UID_MAX=65199
 
 # Test user for sandboxing
 TEST_USER=${TEST_USER:mo-test1}
