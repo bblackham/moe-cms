@@ -250,7 +250,8 @@ function test-run-file
 	BOXOPTS="`eval echo $TEST_SANDBOX_OPTS`$BOX_EXTRAS"
 	echo "Sandbox options: $BOXOPTS"
 	if ! $BOXCMD $BOXOPTS -- ./$PROBLEM 2>$TMPDIR/exec.out ; then
-		MSG=`head -1 $TMPDIR/exec.out`
+		cat $TMPDIR/exec.out
+		MSG=`tail -1 $TMPDIR/exec.out`
 		test-result 0 "$MSG"
 	fi
 	cat $TMPDIR/exec.out
@@ -268,7 +269,8 @@ function test-run-interactive
 	ICCMD=`eval echo $IA_CHECK`
 	echo "Interactive checker: $ICCMD"
 	if ! $HDIR/bin/iwrapper $BOXCMD $BOXOPTS -- ./$PROBLEM @@ $ICCMD 2>$TMPDIR/exec.out ; then
-		MSG="`head -1 $TMPDIR/exec.out`"
+		cat $TMPDIR/exec.out
+		MSG="`tail -1 $TMPDIR/exec.out`"
 		test-result 0 "$MSG"
 	fi
 	cat $TMPDIR/exec.out
@@ -284,7 +286,8 @@ function syntax-check
 	SCHECK=`eval echo $SYNTAX_CHECK`
 	echo "Syntax check command: $SCHECK"
 	if ! eval $SCHECK 2>$TMPDIR/exec.out ; then
-		MSG=`head -1 $TMPDIR/exec.out`
+		cat $TMPDIR/exec.out
+		MSG=`tail -1 $TMPDIR/exec.out`
 		if [ -z "$MSG" ] ; then MSG="Wrong syntax." ; fi
 		test-result 0 "$MSG"
 	fi
@@ -301,11 +304,13 @@ function output-check
 	OCHECK=`eval echo $OUTPUT_CHECK`
 	echo "Output check command: $OCHECK"
 	if ! eval $OCHECK 2>$TMPDIR/exec.out ; then
-		MSG=`head -1 $TMPDIR/exec.out`
+		cat $TMPDIR/exec.out
+		MSG=`tail -1 $TMPDIR/exec.out`
 		if [ -z "$MSG" ] ; then MSG="Wrong answer." ; fi
 		test-result 0 "$MSG"
 	fi
-	MSG=`head -1 $TMPDIR/exec.out`
+	cat $TMPDIR/exec.out
+	MSG=`tail -1 $TMPDIR/exec.out`
 	if [ -z "$MSG" ] ; then MSG="OK" ; fi
 	test-result $POINTS_PER_TEST "$MSG"
 }
