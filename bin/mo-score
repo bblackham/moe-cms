@@ -42,6 +42,8 @@ if ($extras && open (EX, "exceptions")) {
 
 print STDERR "Scanning task results... ";
 $need_tasks = join("|", @ARGV);
+%messages = ();
+%error_codes = ();
 foreach $u (keys %users) {
 	opendir (D, "testing/$u") or next;
 	foreach $t (readdir(D)) {
@@ -71,6 +73,14 @@ foreach $u (keys %users) {
 					($cmt = "$1$2") =~ tr/a-z/A-Z/;
 				}
 				elsif ($trem =~ /^Wrong answer/) { $cmt = "WA"; }
+				if (!defined $messages{$trem}) {
+					$messages{$trem} = $cmt;
+					if (!defined $error_codes{$cmt}) {
+						$error_codes{$cmt} = $trem;
+					} else {
+						$error_codes{$cmt} .= ", $trem";
+					}
+				}
 			}
 			$comment{$u}{$t}{$ttest} = $cmt;
 			$total{$u}{$t} += $tpts;
@@ -182,9 +192,14 @@ if ($debug) {
 		$hdr = 0;
 	}
 	print "</TABLE>\n";
+	print "<H2>Error codes</H2><UL>\n";
+	foreach $r (sort keys %error_codes) { print "<LI>$r: $error_codes{$r}\n"; }
+	print "</UL>\n";
 	print "</BODY></HTML>\n";
 } elsif ($tex) {
 	print "\\error{TeX output not supported yet!}\n";
 } else {
 	foreach $r (@table) { print join("\t",@$r), "\n"; }
+	print "\n";
+	foreach $r (sort keys %error_codes) { print "$r: $error_codes{$r}\n"; }
 }
