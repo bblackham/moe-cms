@@ -150,18 +150,21 @@ main(int argc, char **argv)
 
   if (!WIFEXITED(sbox))
     die("Sandbox fault, status=%x", sbox);
-  if (!WIFEXITED(schk))
+  if (!WIFEXITED(schk) || WEXITSTATUS(schk) >= 100)
     die("Checker fault, status=%x", schk);
   if (WEXITSTATUS(sbox))
     {
       copy(boxepipe[0]);
+      copy(chkepipe[0]);
       return 1;
     }
   else if (WEXITSTATUS(schk))
     {
       copy(chkepipe[0]);
+      copy(boxepipe[0]);
       return 1;
     }
   copy(boxepipe[0]);
+  copy(chkepipe[0]);
   return 0;
 }
