@@ -53,7 +53,7 @@ if [ $FAILED != 0 ] ; then
 		pend "TESTS FAILED, but --force given, so submitting anyway."
 	else
 		pend "TESTS FAILED. Nothing has been submitted!"
-		pend "Use submit --force if you really want to submit a WRONG solution."
+		pend "Use submit --force if you really want to submit an obviously WRONG solution."
 		exit 1
 	fi
 fi
