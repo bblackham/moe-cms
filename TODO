@@ -2,34 +2,16 @@ Evaluator
 ~~~~~~~~~
 box: konfigurovatelny pristup k timerum a /proc/self/stat (pripadne /proc/self/fd)
 score: better formatting of the score table
-score: alignment of table cells
-stdio tasks: don't allow them to read the files
 interactive tasks: solve deadlocks?
 interactive tasks: logging of messages
-a tool for creating accounts with passwords (according to userlist?) ; replace UID ranges completely?
+creating user accounts: start with userlist, create passwd items and passwords; replace CT_UID_xxx completely?
 fix mo-* to use mo-get-users
 post-sandbox hook
 
 guide: compile <file>, not only <task>
 guide: status
+guide for CPSPC: stdio, not files, should be used for I/O
 
 Environment
 ~~~~~~~~~~~
-per-user tmp ?
-rhide: debugging Pascal programs: variable names must be upper-cased
 fpc: add switch -gl (runtime errors write line#)
-
-
-Contest
-~~~~~~~
-Prepare /home/mo/public/<problem>/* for all problems
-# ./comp-prepare
-<contest runs>
-# ./comp-kickout
-# ./comp-cleanup
-
-before competition
-~~~~~~~~~~~~~~~~~~
-uninstall telnetd
-clean /tmp + /var/tmp and check permissions
-reset owners of com-day* and com-all to avoid quota problems

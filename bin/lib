@@ -202,8 +202,7 @@ function test-prolog
 			;;
 		stdio)	echo "Input file: <stdin> (from $PDIR/$TEST.in)"
 			ln $PDIR/$TEST.in $TDIR/$TEST.in
-			cp $PDIR/$TEST.in $BOXDIR/$PROBLEM.in
-			BOX_EXTRAS="$BOX_EXTRAS -i$PROBLEM.in"
+			BOX_EXTRAS="$BOX_EXTRAS -i$TDIR/$TEST.in"
 			;;
 		none)	echo "Input file: <none>"
 			;;
@@ -215,7 +214,7 @@ function test-prolog
 			BOX_EXTRAS="$BOX_EXTRAS -o/dev/null"
 			;;
 		stdio)	echo "Output file: <stdout>"
-			BOX_EXTRAS="$BOX_EXTRAS -o$PROBLEM.out"
+			BOX_EXTRAS="$BOX_EXTRAS -o$TDIR/$TEST.out"
 			;;
 		none)	echo "Output file: <none>"
 			;;
@@ -237,8 +236,7 @@ function test-epilog
 		file)	[ -f $BOXDIR/$PROBLEM.out ] || test-result 0 "No output file."
 			cp $BOXDIR/$PROBLEM.out $TDIR/$TEST.out
 			;;
-		stdio)	[ -f $BOXDIR/$PROBLEM.out ] || test-result 0 "No output file."
-			cp $BOXDIR/$PROBLEM.out $TDIR/$TEST.out
+		stdio)	[ -f $TDIR/$TEST.out ] || test-result 0 "No output file."
 			;;
 	esac
 }
