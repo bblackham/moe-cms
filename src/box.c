@@ -15,6 +15,7 @@
 #include <stdarg.h>
 #include <unistd.h>
 #include <getopt.h>
+#include <time.h>
 #include <sys/wait.h>
 #include <sys/user.h>
 #include <sys/time.h>
@@ -444,6 +445,7 @@ Usage: box [<options>] -- <command> <arguments>\n\
 \n\
 Options:\n\
 -a <level>\tSet file access level (0=none, 1=cwd, 2=/etc,/lib,..., 3=whole fs, 9=no checks; needs -f)\n\
+-c <dir>\tChange directory to <dir> first\n\
 -e\t\tPass full environment of parent process\n\
 -f\t\tFilter system calls (-ff=very restricted)\n\
 -m <size>\tLimit address space to <size> KB\n\
@@ -459,12 +461,16 @@ main(int argc, char **argv)
 {
   int c;
   uid_t uid;
+  char *cwd = NULL;
 
-  while ((c = getopt(argc, argv, "a:efm:t:vw")) >= 0)
+  while ((c = getopt(argc, argv, "a:c:efm:t:vw")) >= 0)
     switch (c)
       {
       case 'a':
 	file_access = atol(optarg);
+	break;
+      case 'c':
+	cwd = optarg;
 	break;
       case 'e':
 	pass_environ = 1;
@@ -493,6 +499,8 @@ main(int argc, char **argv)
   uid = geteuid();
   if (setreuid(uid, uid) < 0)
     die("setreuid: %m");
+  if (cwd && chdir(cwd))
+    die("chdir: %m");
   box_pid = fork();
   if (box_pid < 0)
     die("fork: %m");

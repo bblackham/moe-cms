@@ -1,0 +1,65 @@
+# The Evaluator -- Master Control Script
+# (c) 2001 Martin Mares <mj@ucw.cz>
+
+set -e
+cd
+. bin/lib
+. config
+[ -n "$TEST_USER" ] || die "TEST_USER not set. Please fix."
+[ -d $MO_ROOT/$TEST_USER ] || die "TEST_USER set incorrectly. Please fix."
+[ -n "$2" ] || die "Usage: ev <contestant> <problem>"
+CT=$1
+PROBLEM=$2
+. bin/lib
+
+# Initialize the testing directory
+echo >&2 "Testing contestant $CT, problem $PROBLEM"
+echo >&2
+PDIR=problems/$PROBLEM
+SDIR=solutions/$CT/$PROBLEM
+TDIR=testing/$CT/$PROBLEM
+. bin/task-init
+. $PDIR/config
+
+# Set up logging
+exec >>$TDIR/log
+HAVE_LOG=1
+
+# Compile the solution
+( . bin/task-compile )
+
+# Perform the tests
+for TEST in $TESTS ; do
+	(
+	pstart "Test $TEST: "
+	[ -f $PDIR/$TEST.config ] && . $PDIR/$TEST.config
+	exec >$TDIR/$TEST.log
+	PTSFILE=$TDIR/$TEST.pts
+	if [ ! -f $TDIR/compile.out ] ; then
+		echo >$PTSFILE "0 --"
+		die "No source file"
+	fi
+	if [ ! -f $TDIR/$PROBLEM ] ; then
+		echo >$PTSFILE "0 CE"
+		die "No executable file"
+	fi
+	pcont "<init> "
+	box-init
+	echo "Executable file: $TDIR/$PROBLEM"
+	cp $TDIR/$PROBLEM $BOXDIR/
+	echo "Input: $TDIR/$PROBLEM"
+	cp $PDIR/$TEST.in $BOXDIR/$PROBLEM.in
+	echo "Input files:"
+	ls -Al $BOXDIR
+	echo "Timeout: $TIME_LIMIT s"
+	echo "Memory: $MEM_LIMIT KB"
+	BOXOPTS="`eval echo $TEST_SANDBOX_OPTS`"
+	echo "Sandbox options: $BOXOPTS"
+
+	pcont "<run> "
+
+	echo "Test completed OK ($POINTS_PER_TEST points)"
+	echo >$PTSFILE "$POINTS_PER_TEST OK"
+	pend "OK"
+	)
+done

@@ -1,0 +1,18 @@
+# The Evaluator -- Initialize Task Directory
+# (c) 2001 Martin Mares <mj@ucw.cz>
+
+pstart "Initializing... "
+[ -d $PDIR ] || die "Problem not found"
+[ -d $SDIR ] || die "Solution not found"
+mkdir -p $TDIR
+rm -rf $TDIR
+cp -a $SDIR $TDIR
+cat >$TDIR/log <<EOF
+Contestant: $CT
+Problem: $PROBLEM
+Contestant's solution directory: $SDIR
+Problem directory: $PDIR
+Testing directory: $TDIR
+EOF
+>$TDIR/points
+pend "OK"

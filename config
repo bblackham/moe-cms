@@ -1,0 +1,17 @@
+# Configuration file for MO Evaluator
+# (c) 2001 Martin Mares <mj@ucw.cz>
+
+# Directories and users
+MO_ROOT=/aux/mo
+EVAL_USER=mo-eval
+EVAL_GROUP=mo-eval
+TEST_USERS="mo-test1 mo-test2"
+
+# Compilation commands
+COMP_C='/usr/bin/gcc -o $EXE $SRC'
+COMP_CXX='/usr/bin/g++ -o $EXE $SRC'
+COMP_P='/usr/bin/fpc -o $EXE $SRC'
+COMP_SANDBOX_OPTS='-c$BOXDIR -m65536 -t60 -w -e'
+
+# Testing commands
+TEST_SANDBOX_OPTS='-a2 -c$BOXDIR -f -m$MEM_LIMIT -t$TIME_LIMIT -w'

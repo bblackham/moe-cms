@@ -1,0 +1,11 @@
+# The Evaluator -- Directory Cleanup
+# (c) 2001 Martin Mares <mj@ucw.cz>
+
+if [ -z "$MO_ROOT" ] ; then
+	set -e -a
+	cd
+	[ -f config ] || ( echo "Missing config file. Please fix the installation." ; exit 1 )
+	. config
+	fi
+if [ -z "$CT" ] ; then
+	[ -n "$1" ] || ( echo "Usage: clean <contestant> <task>"

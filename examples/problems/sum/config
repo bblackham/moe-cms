@@ -1,0 +1,8 @@
+# Per-task config
+
+TESTS="1 2"
+POINTS_PER_TEST=1
+EXTRAS="extras.h"
+TEST_EXTRAS="extras.h"
+TIME_LIMIT=10
+MEM_LIMIT=16384

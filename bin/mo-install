@@ -1,0 +1,47 @@
+#!/bin/sh
+
+[ -f config ] || ( echo "Missing config file, check cwd." ; exit 1 )
+set -e
+. config
+
+H=`pwd`
+cd $MO_ROOT
+
+# mo-eval home
+echo "Creating $EVAL_USER"
+rm -rf ./$EVAL_USER
+mkdir $EVAL_USER
+cd $EVAL_USER
+cp -a $H/* .
+mv bin/profile .profile
+chmod +x bin/*
+cd ..
+chown -R $EVAL_USER.$EVAL_GROUP $EVAL_USER
+chmod 700 $EVAL_USER
+
+# mo-test home
+for u in $TEST_USERS ; do
+	echo "Creating $u"
+	rm -rf ./$u
+	mkdir $u
+	chown $u.$EVAL_GROUP $u
+	chmod 770 $u
+	cp $EVAL_USER/bin/box $EVAL_USER/bin/box-$u
+	chown $u.$EVAL_GROUP $EVAL_USER/bin/box-$u
+	chmod 4550 $EVAL_USER/bin/box-$u
+	done
+
+# common
+echo "Creating common"
+rm -rf common
+mkdir common
+cd common
+cd ..
+chown -R $EVAL_USER.$EVAL_GROUP common
+chmod 750 $EVAL_USER
+
+# SSH keys (FIXME)
+echo "Copying SSH keys"
+mkdir $EVAL_USER/.ssh
+cp ~mj/.ssh/authorized_keys $EVAL_USER/.ssh/
+chown -R $EVAL_USER $EVAL_USER/.ssh

@@ -1,12 +1,11 @@
-# Makefile for the ywho toolkit
-
-DEBUG=-ggdb
+#DEBUG=-ggdb
 CFLAGS=-O2 -Wall -W -Wno-parentheses -Wstrict-prototypes -Wmissing-prototypes -Winline $(DEBUG)
 
-all: box
+all: bin/box
 
-box.o: box.c
+bin/box: src/box.o
+	$(CC) $(LDFLAGS) -o $@ $<
 
 clean:
 	rm -f `find . -name "*~" -or -name "*.[oa]" -or -name "\#*\#" -or -name TAGS -or -name core`
-	rm -f box
+	rm -f bin/box

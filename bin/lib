@@ -1,0 +1,37 @@
+# The Evaluator -- Shell Function Library
+# (c) 2001 Martin Mares <mj@ucw.cz>
+
+# Logging functions.
+# File handles used: fd1=log, fd2=progress
+
+function pstart
+{
+	echo >&2 -n "$@"
+}
+
+function pcont
+{
+	echo >&2 -n "$@"
+}
+
+function pend
+{
+	echo >&2 "$@"
+}
+
+function die
+{
+	echo >&2 "$@"
+	[ -n "$HAVE_LOG" ] && echo "Fatal error: $@"
+	exit 1
+}
+
+# Sandbox subroutines
+
+function box-init
+{
+	BOXDIR=$MO_ROOT/$TEST_USER
+	BOXCMD=bin/box-$TEST_USER
+	[ -d $BOXDIR -a -f $BOXCMD ] || die "Sandbox set up incorrectly"
+	rm -rf $BOXDIR/*
+}
