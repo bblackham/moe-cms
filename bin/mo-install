@@ -25,16 +25,11 @@ chmod 700 $EVAL_USER
 
 ( cd $EVAL_USER ; bin/mo-create-testusers )
 
-# common
+# create public
 cd $MO_ROOT
 echo "Creating public"
 rm -rf public
 mkdir public
-cd public
-cp -a $H/bin $H/config .
-mkdir problems
-cp -a $H/public/* bin/
-chmod +x bin/*
-cd ..
-chown -R $EVAL_USER.$EVAL_GROUP public
-chmod 755 public
+
+# populate public
+( cd $EVAL_USER ; bin/mo-create-public )

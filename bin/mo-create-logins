@@ -1,0 +1,60 @@
+#!/bin/bash
+
+[ -f config ] || { echo "Missing config file, check cwd." ; exit 1 ; }
+set -e
+. config
+
+mode=$1
+
+case "$mode" in
+  eval) uid=$EVAL_UID_MIN;;
+  users) uid=$CT_UID_MIN;;
+  *) echo "Usage: $0 [eval|users]!"; exit 1;;
+esac
+
+>etcshadow >etcpasswd >etcgroup
+
+case $mode in
+  eval)
+    echo -n Zadejte heslo pro mo-eval:
+    read passwd
+    passwd=`echo $passwd | bin/md5crypt`
+    echo $EVAL_USER:x:$uid:$uid:MO Evaluator:$MO_ROOT/eval/$EVAL_USER:/bin/bash >> etcpasswd
+    echo $EVAL_GROUP:x:$uid:							>> etcgroup
+    echo $EVAL_USER:$passwd:$((`date +%s` / 86400 - 1)):0:99999:7:::		>> etcshadow
+    tuid=$(($uid + 1))
+
+    for tester in $TEST_USERS; do
+      echo $tester:x:$tuid:$uid:MO Tester `expr $tuid - $uid`:$MO_ROOT/eval/$tester:/bin/bash	>> etcpasswd
+      echo $tester:$passwd:$((`date +%s` / 86400 - 1)):0:99999:7:::				>> etcshadow
+      tuid=$(($tuid + 1))
+    done
+  ;;
+
+  users)
+#   if [ -f logins.tex ]; then echo "File logins.tex exists! Bailing out!"; exit 1; fi
+    cat > logins.tex <<- EOF
+	\\nopagenumbers
+	\\font\\next=cstt17\\next
+	\\raggedright
+	\\parindent=0pt
+	\\def\\user#1#2{\\vbox to 3cm{\\hsize=5cm \\vss#1\\vss#2\\vss}}
+	\\leavevmode
+	EOF
+    
+    bin/mo-get-users --full | while read user name; do
+      passwd=`apg -n1 -m6 -Mncl | cut -d" " -f1 | tr l1O0 '@*?-' `
+      passwd_md5=`echo $passwd | bin/md5crypt`
+      echo $user:x:$uid:$uid:$name:$MO_ROOT/users/$user/$user:/bin/bash			>> etcpasswd
+      echo $user:x:$uid:								>> etcgroup
+      echo $user:$passwd_md5:`expr \`date +%s\` / 86400 - 1`:0:99999:7:::		>> etcshadow
+      echo "\\user{$user}{$passwd}" 							>> logins.tex
+      uid=$(($uid + 1))
+    done
+
+    cat >> logins.tex <<- EOF
+	\\vfil
+	\\bye
+	EOF
+  ;;
+esac

@@ -11,7 +11,7 @@ rm -rf users2
 mkdir users2
 cd users2
 
-for a in `awk </etc/passwd -F: '{ if ($3 >= '$CT_UID_MIN' && $3 <= '$CT_UID_MAX') print $1; }'` ; do
+for a in `cd $H && bin/mo-get-users` ; do
 	echo "Creating $a"
 	mkdir $a $a/$a
 	chown root.$a $a
