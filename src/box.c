@@ -199,6 +199,7 @@ valid_syscall(struct user *u)
     case SYS_ftruncate64:
     case SYS_fstat64:
     case SYS_fcntl:
+    case SYS_fcntl64:
     case SYS_mmap:
     case SYS_munmap:
     case SYS_ioctl:
@@ -225,6 +226,7 @@ valid_syscall(struct user *u)
     case SYS_mprotect:
     case SYS_sigprocmask:
     case SYS_getdents:
+    case SYS_getdents64:
     case SYS__newselect:
     case SYS_fdatasync:
     case SYS_mremap:
@@ -239,6 +241,7 @@ valid_syscall(struct user *u)
     case SYS_rt_sigqueueinfo:
     case SYS_rt_sigsuspend:
     case SYS_mmap2:
+    case SYS__sysctl:
       return (filter_syscalls == 1);
     default:
       return 0;
