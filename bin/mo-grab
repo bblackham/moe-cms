@@ -19,7 +19,7 @@ for user in `bin/mo-get-users` ; do
 		done
 		echo
 	else
-		echo " No .submit directory"
+		echo " ---"
 	fi
 done
 chown -R $EVAL_USER solutions

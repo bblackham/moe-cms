@@ -4,8 +4,7 @@ box: konfigurovatelny pristup k timerum a /proc/self/stat (pripadne /proc/self/f
 score: better formatting of the score table
 interactive tasks: solve deadlocks?
 interactive tasks: logging of messages
-creating user accounts: start with userlist, create passwd items and passwords; replace CT_UID_xxx completely?
-fix mo-* to use mo-get-users
+STDIO TASKS!!!
 
 guide: compile <file>, not only <task>
 guide: status
@@ -13,3 +12,4 @@ guide: status
 Environment
 ~~~~~~~~~~~
 fpc: add switch -gl (runtime errors write line#)
+check versions of g++
