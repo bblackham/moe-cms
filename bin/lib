@@ -1,6 +1,9 @@
 # The Evaluator -- Shell Function Library
 # (c) 2001 Martin Mares <mj@ucw.cz>
 
+# General settings
+shopt -s dotglob
+
 # Logging functions.
 # File handles used: fd1=log, fd2=progress
 
