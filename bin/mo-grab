@@ -1,11 +1,11 @@
-#!/bin/sh
+#!/bin/bash
 
 [ -n "$1" ] || { echo "Usage: mo-grab <tasks>" ; exit 1 ; }
 [ -f config ] || { echo "Missing config file, check cwd." ; exit 1 ; }
 set -e
 . config
 
-for user in `awk -F: </etc/passwd '{ if ($3 >= 21000 && $3 < 30000) print $1; }'` ; do
+for user in `bin/mo-get-users` ; do
 	echo -n "$user:"
 	H=`eval echo ~$user`/.submit
 	if [ -d $H ] ; then

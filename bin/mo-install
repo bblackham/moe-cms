@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 [ -f config ] || { echo "Missing config file, check cwd." ; exit 1 ; }
 set -e
