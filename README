@@ -34,3 +34,14 @@ Run bin/mo-install to create the infrastructure.
 
 Run bin/mo-create-contestants to create contestants' home directories,
 files from template/* will be copied there automatically.
+
+If users are logging in remotely, set quotas and other limits for them.
+Don't use limits.conf for that since with sshd the limits would affect _root_
+(probably bug in interface between sshd and PAM). Just add to /etc/profile:
+
+	if [ $UID -ge 65100 -a $UID -le 65199 ] ; then
+		ulimit -Sc 8192		# core file size
+		ulimit -SHu 32		# processes
+		ulimit -SHn 256		# max open files
+		ulimit -SHv 262144	# max virtual memory
+	fi
