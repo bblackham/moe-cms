@@ -355,7 +355,7 @@ boxkeeper(void)
 	  timeradd(&rus.ru_utime, &rus.ru_stime, &total);
 	  wall = time(NULL) - start_time;
 	  if ((use_wall_clock ? wall : total.tv_sec) > timeout)
-	    die("Timeout exceeded (after exit).");
+	    die("Time limit exceeded (after exit).");
 	  fprintf(stderr, "OK (%d sec real, %d sec wall, %d syscalls)\n", (int) total.tv_sec, wall, syscall_count);
 	  exit(0);
 	}
