@@ -1,6 +1,6 @@
 ================================================================================
 
-			 The MO Contest Environment 1.0
+			 The MO Contest Environment @VERSION@
 
 		    (c) 2001--2005 Martin Mares <mj@ucw.cz>
 
@@ -10,7 +10,8 @@
 This is the programming contest environment used by the Czech Programming Olympiad
 and some other competitions.
 
-You will find a brief documentation in the doc/ directory, start with doc/index.html.
+You will find a brief documentation in the doc/ directory inside the package (start
+with doc/index.html) or on-line at http://atrey.karlin.mff.cuni.cz/~mj/mo-eval/.
 
 The whole package can be distributed and used under the terms of the GNU General
 Public License version 2.
