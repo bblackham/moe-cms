@@ -1,7 +1,6 @@
 #!/bin/bash
 
 [ -n "$1" ] || { echo "Usage: mo-ev-all <tasks>" ; exit 1 ; }
-set -e
 
 while [ -n "$1" ] ; do
 	for user in `bin/mo-get-users` ; do
