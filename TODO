@@ -8,6 +8,12 @@ konfigurovatelny pristup k timerum a /proc/self/stat (pripadne /proc/self/fd)
 better formatting of the score table
 online ukazovani runtime a memory
 score: alignment of table cells
+input files shouldn't be mandatory (esp. for interactive tasks)
+stdio tasks: don't allow them to read the files
+interactive tasks: allow logging to the main log?
+interactive tasks: solve deadlocks?
+weird characters in checker command descriptions: use automatic escaping?
+moving handling of points file to bin/ev
 
 Environment
 ~~~~~~~~~~~
