@@ -15,7 +15,7 @@ for a in `awk </etc/passwd -F: '{ if ($3 >= '$CT_UID_MIN' && $3 <= '$CT_UID_MAX'
 	mkdir $a $a/$a
 	chown root.$a $a
 	chmod 750 $a
-	cp -a `find $H/template -type f` $a/$a/
+	cp -a `find $H/template -type f -name ".*"` $a/$a/
 	chown $a.$a $a/$a -R
 	chmod 700 $a/$a
 done
