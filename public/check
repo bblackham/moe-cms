@@ -6,16 +6,27 @@ set -e
 . $MO_PUBLIC/bin/lib
 . $MO_PUBLIC/config
 
-[ -n "$1" ] || die "Usage: check <problem>"
+[ -n "$1" ] || die "Usage: check <problem> [<file>]"
 PROBLEM=$1
 public-setup
 . $PDIR/config
-locate-source
-compile
 PTSFILE=$TDIR/points
-for TEST in $SAMPLE_TESTS ; do
-	pstart "Checking on sample input $TEST: "
-	test-run
+if [ -n "$OPEN_DATA_PROBLEM" ] ; then
+	[ -n "$2" ] || die "You need to specify test number for open data problems."
+	TEST=$2
+	open-locate
+	pstart "Checking $TEST: "
 	syntax-check
 	pend "OK"
-done
+else
+	[ -z "$2" ] || die "No test number should be specified for normal problems."
+	locate-source
+	compile
+	for TEST in $SAMPLE_TESTS ; do
+		pstart "Checking on sample input $TEST: "
+		test-run
+		syntax-check
+		output-check
+		pend "OK"
+	done
+fi

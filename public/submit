@@ -11,23 +11,31 @@ if [ "$1" = --force ] ; then
 	FORCE=1
 	shift
 fi
-[ -n "$1" -o "$1" = "--help" ] || die "Usage: submit [--force] <problem>"
+[ -n "$1" -o "$1" = "--help" ] || die "Usage: submit [--force] <problem> [<test>]"
 PROBLEM=$1
 public-setup
 . $PDIR/config
-locate-source
-compile
 PTSFILE=$TDIR/points
 FAILED=0
-for TEST in $SAMPLE_TESTS ; do
-	pstart "Checking on sample input $TEST: "
-	if test-run && syntax-check ; then
-		pend "OK"
-	else
-		FAILED=$(($FAILED+1))
-	fi
-done
-pstart "Submiting... "
+if [ -n "$OPEN_DATA_PROBLEM" ] ; then
+	[ -n "$2" ] || die "You need to specify test number for open data problems."
+	TEST=$2
+	open-locate
+	syntax-check || FAILED=1
+else
+	[ -z "$2" ] || die "No test number should be specified for normal problems."
+	locate-source
+	compile
+	for TEST in $SAMPLE_TESTS ; do
+		pstart "Checking on sample input $TEST: "
+		if test-run && syntax-check && output-check ; then
+			pend "OK"
+		else
+			FAILED=$(($FAILED+1))
+		fi
+	done
+fi
+pstart "Submitting... "
 if [ $FAILED != 0 ] ; then
 	if [ $FORCE != 0 ] ; then
 		pcont "(tests failed, but --force given) "
@@ -37,7 +45,7 @@ if [ $FAILED != 0 ] ; then
 	fi
 fi
 mkdir -p ~/.submit
-rm -rf ~/.submit/$PROBLEM
-mkdir ~/.submit/$PROBLEM
+[ -z "$OPEN_DATA_PROBLEM" ] && rm -rf ~/.submit/$PROBLEM
+mkdir -p ~/.submit/$PROBLEM
 cp $SRCN ~/.submit/$PROBLEM/
 pend "OK"
