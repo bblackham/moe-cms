@@ -1,7 +1,7 @@
 /*
  *	A Simple Testing Sandbox
  *
- *	(c) 2001 Martin Mares <mj@ucw.cz>
+ *	(c) 2001--2004 Martin Mares <mj@ucw.cz>
  */
 
 #define _LARGEFILE64_SOURCE
@@ -431,6 +431,8 @@ box_inside(int argc, char **argv)
 
   memcpy(args, argv, argc * sizeof(char *));
   args[argc] = NULL;
+  if (set_cwd && chdir(set_cwd))
+    die("chdir: %m");
   if (redir_stdin)
     {
       close(0);
@@ -443,8 +445,6 @@ box_inside(int argc, char **argv)
       if (open(redir_stdout, O_WRONLY | O_CREAT | O_TRUNC, 0666) != 1)
 	die("open(\"%s\"): %m", redir_stdout);
     }
-  if (set_cwd && chdir(set_cwd))
-    die("chdir: %m");
   dup2(1, 2);
   setpgrp();
   if (memory_limit)
