@@ -1,19 +1,30 @@
-mo00	  Pavel	4/4	adresa, fasfsdadfsa,fsdfsdfsdfsdfds	00	2	-
-mo01	Pavel	4/4	adresa, fasdffssa	10	2	-
-mo02	Pavel	4/4	adresa, fasdfffsa	10	2	-
-mo03	Pavel	4/4	adresa, fasdfsa	20	2 	-
-mo04	pavel	4/4	adresa, fasdfsa	20	2 	-
-mo05	pavel	4/4	adresa, fasdfsa	30 	2 	-
-mo06	Pavel	4/4	adresa, fasdfsa	30 	2 	-
-mo07	Pavel	4/4	adresa, fasdfsa	40 	2 	-
-mo08	Pavel	4/4	adresa, fasdfsa	50 	2 	-
-mo09	pavel	4/4	adresa, fasdfsa	60 	2 	-
-mo10	Pavel	4/4	adresa, fasdfsa	40 	2 	-
-mo11	Pavel	4/4	adresa, fasdfsa	60 	2 	0
-mo12	Pavel	4/4	adresa, fasdfsa	70 	2 	-
-mo13	Pavel	4/4	adresa, fasdfsa	80 	4 	-
-mo14	Pavel	4/4	adresa, fasdfsa	50 	2 	-
-mo15	Pavel	4/4	adresa, fasdfsa	30 	2 	-
-mo16	Pavel	4/4	adresa, fasdfsa	50 	3 	-
-mo17	Pavel	4/4	adresa, fasdfsa	20 	2 	0
-mo18	Pavel	4/4	adresa, fasdfsa	30 	2 	0
+mo01	Zdenìk Sojka	4/4	SP©ST Panská, Praha	7	10	3
+mo02	Roman Smr¾	4/8	G Ohradní, Praha	0	3	4
+mo03	Daniel Marek	2/4	G Ch. Dopplera Zborovská, Praha	3	9	10
+mo04	Ján Zahornadský	3/4	G Ch. Dopplera Zborovská, Praha	4	10	4
+mo05	David Matou¹ek	8/8	G Ch. Dopplera Zborovská, Praha	9	7	8
+mo06	Daniel Bala¹	4/4	G Arabská, Praha	5	6	5
+mo07	Petr ©koda	8/8	G Ústavní, Praha	8	8	9
+mo08	Jaroslav Havlín	8/8	GOA Nádra¾ní, Sedlèany	0	8	5
+mo09	Petr ©vec	8/8	G Talichova, Beroun	10	4	2
+mo10	Jan Bulánek	7/8	G J. Vrchlického, Klatovy	4	8	10
+mo11	Vladimír Èunát	3/4	G Jírovcova, Èeské Budìjovice	4	2	4
+mo12	Petr ©»ovík	4/4	G J. K. Tyla, Hradec Králové	0	1	2
+mo13	Michal Vaner	6/8	G Jana Palacha, Turnov	4	3	9
+mo14	Jiøí Schejbal	8/8	G Jana Palacha, Turnov	0	5	4
+mo15	Oto Petøík	6/8	G Komenského, Vrchlabí	4	5	10
+mo16	Jindøich Flídr	8/8	G nám. J. M. Markù, Lan¹kroun	10	9	9
+mo17	Martin Dobroucký	7/8	G Svitavská, Moravská Tøebová	5	5	8
+mo18	Martin Køivánek	2/4	G tø. Kpt. Jaro¹e, Brno	4	7	7
+mo19	Jiøí Zelinka	2/4	G tø. Kpt. Jaro¹e, Brno	1	1	0
+mo20	Martin Vejnár	3/4	G tø. Kpt. Jaro¹e, Brno	6	10	10
+mo21	Jiøí ©tìpánek	4/4	G tø. Kpt. Jaro¹e, Brno	4	1	8
+mo22	Pavel Troubil	4/4	G tø. Kpt. Jaro¹e, Brno	4	9	5
+mo23	Kry¹tof Hoder	4/4	G tø. Kpt. Jaro¹e, Brno	10	10	9
+mo24	Jana Fabriková	4/4	G tø. Kpt. Jaro¹e, Brno	-	5	10
+mo25	Pavel Motloch	3/6	G P. Bezruèe, Frýdek--Místek	3	7	10
+mo26	Tomá¹ Gavenèiak	4/4	G M. Koperníka, Bílovec	3	7	10
+mo27	Ondøej Májek	4/4	G M. Koperníka, Bílovec	4	10	5
+mo28	Ondøej Bílka	2/4	G Lesní ètvr», Zlín	10	7	9
+mo29	Stanislav Basovník	7/8	G Masarykovo nám., Kromìøí¾	1	8	8
+mo30	Jan Matou¹ek	8/8	G J. Wolkera, Prostìjov	4	3	4
