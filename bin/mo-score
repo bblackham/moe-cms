@@ -1,0 +1,52 @@
+#!/usr/bin/perl
+
+# Syntax: mo-score <expr> ...  (one expr per column)
+# where <expr> is ["title":]<perl-expression> containing
+#	$user		short user name
+#	$full		full user name
+#	$<number>	value in specified column
+#	$<task>		total number of points for this task or failure indicator
+#	$<task>:<test>	number of points per specified test
+
+print "Scanning contestants... ";
+open (CT, "bin/mo-get-users --full |") || die "Cannot get list of contestants";
+while (<CT>) {
+	chomp;
+	($u,$f) = split /\t/;
+	$users{$u}=$f;
+}
+close CT;
+print 0+keys %users, "\n";
+
+print "Scanning task results... ";
+foreach $u (keys %users) {
+	opendir (D, "testing/$u") or next;
+	foreach $t (readdir(D)) {
+		$t =~ /^\./ && next;
+		$tt = "testing/$u/$t/points";
+		-f $tt || next;
+		print "$u/$t ";
+		open (X, $tt) || die "Unable to open $tt";
+		while (<X>) {
+			chomp;
+			/^(\d+) (\d+)(.*)/ || die "Parse error: $_";
+			$ttest = $1;
+			$tpts = $2;
+			$trem = $3;
+			$results{$u}{$t}{$ttest} = $tpts;
+			$remarks{$u}{$t}{$ttest} = $trem;
+			$cmt = "";
+			if ($tpts == 0) {
+				$msg = $3;
+				if $msg =~ /^Compile / { $cmt = "CE"; }
+				elif $msg =~ /^Time limit exceeded/ { $cmt = "TO"; }
+				elif $msg =~ /^Exited with error / { $cmt = "RE"; }
+				elif $msg =~ /^Caught fatal signal / { $cmt = "SG"; }
+			}
+			$comment{$u}{$t}{$ttest} = $cmt;
+		}
+		close X;
+	}
+	closedir D;
+}
+print "OK\n";
