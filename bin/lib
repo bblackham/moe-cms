@@ -4,6 +4,12 @@
 # Logging functions.
 # File handles used: fd1=log, fd2=progress
 
+function log-init
+{
+	exec >>$TDIR/log
+	HAVE_LOG=1
+}
+
 function pstart
 {
 	echo >&2 -n "$@"
@@ -30,8 +36,149 @@ function die
 
 function box-init
 {
-	BOXDIR=$MO_ROOT/$TEST_USER
-	BOXCMD=bin/box-$TEST_USER
+	pstart "Preparing sandbox... "
+	[ -n "$TEST_USER" ] || die "TEST_USER not set. Please fix."
+	if [ $TEST_USER == $EVAL_USER ] ; then
+		pcont "running locally (INSECURE), "
+		BOXDIR=box
+		BOXCMD=bin/box
+		mkdir -p box
+	else
+		pcont "used account $TEST_USER, "
+		BOXDIR=$MO_ROOT/$TEST_USER
+		BOXCMD=bin/box-$TEST_USER
+	fi
 	[ -d $BOXDIR -a -f $BOXCMD ] || die "Sandbox set up incorrectly"
+	BOXCMD="$BOXCMD -c$BOXDIR"
+	echo "Sandbox directory: $BOXDIR"
+	echo "Sandbox command: $BOXCMD"
+	box-clean
+	pend "OK"
+}
+
+function box-clean
+{
+	[ -n "$BOXCMD" ] || die "box-init not called"
+	# FIXME: Dot files
 	rm -rf $BOXDIR/*
+}
+
+# Initialization of testing directories
+
+function dir-init
+{
+	pstart "Initializing... "
+	PDIR=problems/$PROBLEM
+	SDIR=solutions/$CONTESTANT/$PROBLEM
+	TDIR=testing/$CONTESTANT/$PROBLEM
+	[ -d $PDIR ] || die "Problem $PROBLEM not known"
+	[ -d $SDIR ] || die "Solution of $PROBLEM not found"
+	mkdir -p $TDIR
+	rm -rf $TDIR
+	cp -a $SDIR $TDIR
+	cat >$TDIR/log <<EOF
+Testing solution of $PROBLEM by $CONTESTANT
+Test started at `date`
+Contestant's solution directory: $SDIR
+Problem directory: $PDIR
+Testing directory: $TDIR
+EOF
+	>$TDIR/points
+	pend "OK"
+}
+
+# Locating source file in SDIR, pass name in SRCN (without path) and extension in SRCEXT
+
+function locate-source
+{
+	pstart "Locating source... "
+	for a in $EXTENSIONS ; do
+		if [ -f $SDIR/$PROBLEM.$a ] ; then
+			[ -z "$SRCN" ] || die "Multiple source files found: $SDIR/$PROBLEM.$a and $SDIR/$SRCN. Please fix."
+			SRCN=$PROBLEM.$a
+			SRCEXT=$a
+		fi
+	done
+	[ -n "$SRCN" ] || die "NOT FOUND"
+	pend $SRCN
+	echo "Found source file: $SDIR/$SRCN"
+}
+
+# Compilation (compile SDIR/SRCN with PDIR/EXTRAS to EXE=TDIR/PROBLEM)
+
+function compile
+{
+	pstart "Compiling... "
+	cp -a $SDIR/$SRCN $TDIR/$SRCN
+	if [ -n "$EXTRAS" ] ; then
+		echo "Extras: $EXTRAS"
+		for a in $EXTRAS ; do cp $PDIR/$a $TDIR/ ; done
+	fi
+	box-clean
+	for a in $SRCN $EXTRAS ; do cp $TDIR/$a $BOXDIR/ ; done
+	SRC=$SRCN
+	EXE=$PROBLEM
+	CCMD=COMP_$SRCEXT
+	CCMD="`eval echo ${!CCMD}`"
+	COMP_SANDBOX_OPTS="`eval echo $COMP_SANDBOX_OPTS`"
+	echo "Compiler command: $CCMD"
+	echo "Compiler sandbox options: $COMP_SANDBOX_OPTS"
+
+	echo "Compiler input files:"
+	ls -Al $BOXDIR
+	if ! $BOXCMD $COMP_SANDBOX_OPTS -- $CCMD 2>$TDIR/compile.out ; then
+		COMPILE_MSG="`cat $TDIR/compile.out`"
+		pend "FAILED: $COMPILE_MSG"
+		echo "$COMPILE_MSG"
+		return 1
+	fi
+	cat $TDIR/compile.out
+	echo "Compiler output files:"
+	ls -Al $BOXDIR
+	if [ ! -f $BOXDIR/$PROBLEM ] ; then
+		pend "FAILED: Missing executable file"
+		echo "Missing executable file"
+		return 1
+	fi
+	EXE=$TDIR/$PROBLEM
+	cp -a $BOXDIR/$PROBLEM $EXE
+	echo "Compiled OK, result copied to $EXE"
+	pend "OK"
+}
+
+# Running of test program with file input/output
+
+function test-run-with-files
+{
+	pcont "<init> "
+	box-clean
+	echo "Executable file: $TDIR/$PROBLEM"
+	cp $TDIR/$PROBLEM $BOXDIR/
+	echo "Input: $TDIR/$PROBLEM"
+	cp $PDIR/$TEST.in $BOXDIR/$PROBLEM.in
+	echo "Input files:"
+	ls -Al $BOXDIR
+
+	pcont "<run> "
+	echo "Timeout: $TIME_LIMIT s"
+	echo "Memory: $MEM_LIMIT KB"
+	BOXOPTS="`eval echo $TEST_SANDBOX_OPTS`"
+	echo "Sandbox options: $BOXOPTS"
+	if ! $BOXCMD $BOXOPTS -- ./$PROBLEM 2>$TDIR/exec.out ; then
+		TEST_MSG="`cat $TDIR/exec.out`"
+		pend "$TEST_MSG"
+		echo "$TEST_MSG"
+		# FIXME: Better recognition of run-time errors
+		echo >$PTSFILE "0 RT"
+		return 1
+	fi
+	echo "Output files:"
+	ls -Al $BOXDIR
+	if [ ! -f $BOXDIR/$PROBLEM.out ] ; then
+		pend "No output file."
+		echo "No output file."
+		echo >$PTSFILE "0 NO"
+		return 1
+	fi
+		cp $BOXDIR/$PROBLEM.out $TDIR/$PROBLEM.out
 }

@@ -7,11 +7,18 @@ EVAL_USER=mo-eval
 EVAL_GROUP=mo-eval
 TEST_USERS="mo-test1 mo-test2"
 
+# Currently used test user
+TEST_USER=mo-eval
+
 # Compilation commands
-COMP_C='/usr/bin/gcc -o $EXE $SRC'
-COMP_CXX='/usr/bin/g++ -o $EXE $SRC'
-COMP_P='/usr/bin/fpc -o $EXE $SRC'
-COMP_SANDBOX_OPTS='-c$BOXDIR -m65536 -t60 -w -e'
+EXTENSIONS="c C cpp p pas"
+COMP_c='/usr/bin/gcc -o $EXE $SRC'
+COMP_C='/usr/bin/g++ -o $EXE $SRC'
+COMP_cpp="$COMP_C"
+COMP_p='/usr/bin/fpc -o $EXE $SRC'
+COMP_pas="$COMP_p"
+COMP_SANDBOX_OPTS='-m65536 -t60 -w -e'
 
 # Testing commands
-TEST_SANDBOX_OPTS='-a2 -c$BOXDIR -f -m$MEM_LIMIT -t$TIME_LIMIT -w'
+TEST_RUN_METHOD="test-run-with-files"
+TEST_SANDBOX_OPTS='-a2 -f -m$MEM_LIMIT -t$TIME_LIMIT -w'

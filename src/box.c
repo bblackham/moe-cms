@@ -201,6 +201,7 @@ valid_syscall(struct user *u)
     case SYS_mmap:
     case SYS_munmap:
     case SYS_ioctl:
+    case SYS_uname:
       return 1;
     case SYS_time:
     case SYS_alarm:
