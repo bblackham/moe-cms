@@ -144,7 +144,9 @@ valid_filename(unsigned long addr)
 	return;
       if (!strcmp(namebuf, "/dev/null") ||
 	  !strcmp(namebuf, "/dev/zero") ||
-	  !strcmp(namebuf, "/proc/meminfo"))
+	  !strcmp(namebuf, "/proc/meminfo") ||
+	  !strcmp(namebuf, "/proc/self/stat") ||
+	  !strncmp(namebuf, "/usr/share/zoneinfo/", 20))
 	return;
     }
   die("Forbidden access to file `%s'.", namebuf);
