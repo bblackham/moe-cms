@@ -18,7 +18,6 @@ echo "Creating $EVAL_USER"
 mkdir $EVAL_USER
 cd $EVAL_USER
 cp -a $H/* .
-mv bin/profile .profile
 chmod +x bin/*
 cd ..
 chown -R $EVAL_USER.$EVAL_GROUP $EVAL_USER
