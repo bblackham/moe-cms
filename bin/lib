@@ -190,6 +190,11 @@ function test-run-file
 	fi
 	cat $TDIR/exec.out
 	rm $TDIR/exec.out
+	test-fetch-output || return 1
+}
+
+function test-fetch-output
+{
 	echo "Output files:"
 	ls -Al $BOXDIR
 	if [ ! -s $BOXDIR/$PROBLEM.out ] ; then
@@ -234,6 +239,7 @@ function test-run-interactive
 	fi
 	cat $TDIR/exec.out
 	rm $TDIR/exec.out
+	[ -z "$OUTPUT_CHECK" ] || test-fetch-output || return 1
 }
 
 # Syntax checks

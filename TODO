@@ -1,5 +1,6 @@
 Evaluator
 ~~~~~~~~~
+!!! timed-out interactive tasks !!!
 lepsi time limity
 zkopirovat *.ok i kdyz program spadne na run-time error
 konfigurovatelne vstupni a vystupni soubory
