@@ -39,9 +39,3 @@ chmod +x bin/*
 cd ..
 chown -R $EVAL_USER.$EVAL_GROUP public
 chmod 755 public
-
-# SSH keys (FIXME)
-#echo "Copying SSH keys"
-#mkdir $EVAL_USER/.ssh
-#cp ~mj/.ssh/authorized_keys $EVAL_USER/.ssh/
-#chown -R $EVAL_USER $EVAL_USER/.ssh
