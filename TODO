@@ -1,18 +1,16 @@
 Evaluator
 ~~~~~~~~~
 mo-install: don't copy private test data to public
-generator vysledkovych listin
 lepsi time limity
 zkopirovat *.ok i kdyz program spadne na run-time error
 
 Environment
 ~~~~~~~~~~~
-disable `write' command
-/tmp
+nezapomenout vzit s sebou poznamky k povidani o prostredi
+per-user tmp ?
 spousteni rhide z mc
 limit na # procesu per user
 NR_TASKS ?
 shift+sipky v rhide
-Delete key
 rhide: debugging Pascal programs: variable names must be upper-cased
-script na vyhazovani uzivatelu na konci souteze
+deleting of user data after competition
