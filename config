@@ -16,6 +16,9 @@ TEST_USER=${TEST_USER:mo-test1}
 
 ### all of the following variables can be overriden in per-task config file
 
+# Default task type (file or interactive)
+TASK_TYPE=file
+
 # Known source file extensions
 EXTENSIONS="c C cpp p pas"
 

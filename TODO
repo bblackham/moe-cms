@@ -3,6 +3,9 @@ Evaluator
 mo-install: don't copy private test data to public
 lepsi time limity
 zkopirovat *.ok i kdyz program spadne na run-time error
+submit: do real test?
+
+giant: sample input?
 
 Environment
 ~~~~~~~~~~~

@@ -151,9 +151,16 @@ function compile
 	pend "OK"
 }
 
-# Running of test program with file input/output
+# Running of test program according to current task type
 
 function test-run
+{
+	test-run-$TASK_TYPE
+}
+
+# Running of test program with file input/output
+
+function test-run-file
 {
 	pcont "<init> "
 	box-clean
@@ -190,6 +197,38 @@ function test-run
 	cp $BOXDIR/$PROBLEM.out $TDIR/$TEST.out
 }
 
+# Running of interactive test programs
+
+function test-run-interactive
+{
+	pcont "<init> "
+	box-clean
+	echo "Executable file: $TDIR/$PROBLEM"
+	cp $TDIR/$PROBLEM $BOXDIR/
+	echo "Input: $TDIR/$PROBLEM"
+	ln $PDIR/$TEST.in $TDIR/$TEST.in
+	cp $PDIR/$TEST.in $BOXDIR/$PROBLEM.in
+	echo "Input files:"
+	ls -Al $BOXDIR
+
+	pcont "<run> "
+	echo "Timeout: $TIME_LIMIT s"
+	echo "Memory: $MEM_LIMIT KB"
+	BOXOPTS="`eval echo $TEST_SANDBOX_OPTS`"
+	echo "Sandbox options: $BOXOPTS"
+	ICCMD="`eval echo $IA_CHECK`"
+	echo "Interactive checker: $ICCMD"
+	if ! bin/iwrapper $BOXCMD $BOXOPTS -- ./$PROBLEM @@ $ICCMD 2>$TDIR/exec.out ; then
+		TEST_MSG="`cat $TDIR/exec.out`"
+		pend "$TEST_MSG"
+		echo "$TEST_MSG"
+		echo >>$PTSFILE "0 $TEST_MSG"
+		return 1
+	fi
+	cat $TDIR/exec.out
+	rm $TDIR/exec.out
+}
+
 # Syntax checks
 
 function syntax-check
@@ -209,6 +248,7 @@ function syntax-check
 
 function output-check
 {
+	[ -n "$OUTPUT_CHECK" ] || return 0
 	pcont "<check> "
 	ln $PDIR/$TEST.out $TDIR/$TEST.ok
 	OCHECK="`eval echo $OUTPUT_CHECK`"
