@@ -1,15 +1,16 @@
 #!/usr/bin/perl
 
 $tex = 0;
-$theory = 3;
-$praxis = 2;
-$usage = "Usage: mo-score2004 [--tex] task1 task2 ...";
+$usage = "Usage: mo-score2004 [--tex] theoretical_tasks_nr praxis_tasks_nr task1 task2 ...";
 while (($arg = $ARGV[0]) =~ /^--([a-z]+)$/) {
 	shift @ARGV;
 	$var = "\$$1";
 	if (!eval "defined $var") { die $usage; }
 	eval "$var = 1;";
 }
+@ARGV >=2 || die $usage;
+$theory=shift @ARGV;
+$praxis=shift @ARGV;
 @ARGV >= $praxis || die $usage;
 
 print STDERR "Scanning contestants... ";
@@ -18,7 +19,7 @@ while (<CT>) {
 	chomp;
 	($u,$f) = split /\t/;
 	($u eq "somebody") && next;
-	$users{$u}=$f;
+        $users{$u}=$f;
 }
 close CT;
 print STDERR 0+keys %users, "\n";
@@ -123,6 +124,7 @@ print STDERR "OK\n";
 if ($tex) {
 	print
 '\language=\czech
+\frenchspacing
 \font\head=csr12 scaled \magstephalf
 \font\hexx=csti12
 \font\xxit=csti10
@@ -130,8 +132,6 @@ if ($tex) {
 \let\hb=\relax
 \parindent=0pt
 \nopagenumbers
-\advance\hsize by 0.2cm
-\advance\hoffset by 1cm
 
 \centerline{\head Výsledková listina celostátního kola 53. roèníku MO kategorie P}
 \bigskip
@@ -143,7 +143,7 @@ if ($tex) {
 \bigskip
 
 \centerline{\vbox{\halign{%
-#\hfil \enspace&#\hfil\enspace & #\hfil & \quad #\hfil&
+#\hfil &~~#\hfil &\quad #\hfil &~~#\hfil&\quad
 \hfil # &
 \hfil # &
 \hfil # & \kern0.4em
