@@ -1,0 +1,21 @@
+#!/bin/bash
+
+[ -f config ] || { echo "Missing config file, check cwd." ; exit 1 ; }
+set -e
+. config
+
+H=`pwd`
+cd $MO_ROOT
+rm -rf users
+mkdir users
+cd users
+
+for a in `awk </etc/passwd -F: '{ if ($3 >= '$CT_UID_MIN' && $3 <= '$CT_UID_MAX') print $1; }'` ; do
+	echo "Creating $a"
+	mkdir $a $a/$a
+	chown root.$a $a
+	chmod 750 $a
+	cp -a `find $H/template -type f` $a/$a/
+	chown $a.$a $a/$a -R
+	chmod 700 $a/$a
+done

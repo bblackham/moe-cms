@@ -6,7 +6,7 @@ set -e
 make
 
 H=`pwd`
-cd $MO_ROOT
+cd $MO_ROOT/eval
 
 # mo-test home
 for u in $TEST_USERS ; do

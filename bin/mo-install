@@ -6,11 +6,15 @@ set -e
 make
 
 H=`pwd`
-cd $MO_ROOT
 
 # mo-eval home
+cd $MO_ROOT
+rm -rf eval
+mkdir eval
+chgrp $EVAL_GROUP eval
+chmod 550 eval
+cd eval
 echo "Creating $EVAL_USER"
-rm -rf ./$EVAL_USER
 mkdir $EVAL_USER
 cd $EVAL_USER
 cp -a $H/* .
@@ -23,6 +27,7 @@ chmod 700 $EVAL_USER
 ( cd $EVAL_USER ; bin/mo-create-testusers )
 
 # common
+cd $MO_ROOT
 echo "Creating public"
 rm -rf public
 mkdir public
