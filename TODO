@@ -9,7 +9,6 @@ fix mo-* to use mo-get-users
 
 guide: compile <file>, not only <task>
 guide: status
-guide for CPSPC: stdio, not files, should be used for I/O
 
 Environment
 ~~~~~~~~~~~
