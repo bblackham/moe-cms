@@ -37,6 +37,7 @@ static int verbose;
 static int memory_limit;
 static int allow_times;
 static char *redir_stdin, *redir_stdout;
+static char *set_cwd;
 
 static pid_t box_pid;
 static int is_ptraced;
@@ -442,8 +443,9 @@ box_inside(int argc, char **argv)
       if (open(redir_stdout, O_WRONLY | O_CREAT | O_TRUNC, 0666) != 1)
 	die("open(\"%s\"): %m", redir_stdout);
     }
-  close(2);
-  dup(1);
+  if (set_cwd && chdir(set_cwd))
+    die("chdir: %m");
+  dup2(1, 2);
   setpgrp();
   if (memory_limit)
     {
@@ -488,7 +490,6 @@ main(int argc, char **argv)
 {
   int c;
   uid_t uid;
-  char *cwd = NULL;
 
   while ((c = getopt(argc, argv, "a:c:efi:m:o:t:Tvw")) >= 0)
     switch (c)
@@ -497,7 +498,7 @@ main(int argc, char **argv)
 	file_access = atol(optarg);
 	break;
       case 'c':
-	cwd = optarg;
+	set_cwd = optarg;
 	break;
       case 'e':
 	pass_environ = 1;
@@ -535,8 +536,6 @@ main(int argc, char **argv)
   uid = geteuid();
   if (setreuid(uid, uid) < 0)
     die("setreuid: %m");
-  if (cwd && chdir(cwd))
-    die("chdir: %m");
   box_pid = fork();
   if (box_pid < 0)
     die("fork: %m");
