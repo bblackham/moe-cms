@@ -12,12 +12,13 @@ public-setup
 . $PDIR/config
 locate-source
 compile
-TEST=$SAMPLE_TEST
 PTSFILE=$TDIR/points
-pstart "Checking on sample input: "
-test-run
-syntax-check
-pend "OK"
+for TEST in $SAMPLE_TESTS ; do
+	pstart "Checking on sample input $TEST: "
+	test-run
+	syntax-check
+	pend "OK"
+done
 pstart "Submiting: "
 mkdir -p ~/.submit/$PROBLEM
 rm -rf ~/.submit/$PROBLEM/*

@@ -1,2 +1,3 @@
 -static ?
 multiple check inputs?
+mo-install: don't copy private test data to public

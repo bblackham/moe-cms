@@ -5,8 +5,7 @@ PATH="$PATH:~/bin"
 #echo -n "User to use for testing: "
 #read TEST_USER
 
-# FIXME
-#echo "Setting TEST_USER=mo-test1"
-#TEST_USER=mo-test1
+echo "Setting TEST_USER=mo-test1"
+TEST_USER=mo-test1
 
 export TEST_USER
