@@ -143,7 +143,8 @@ valid_filename(unsigned long addr)
 	  && !strstr(namebuf, ".."))
 	return;
       if (!strcmp(namebuf, "/dev/null") ||
-	  !strcmp(namebuf, "/dev/zero"))
+	  !strcmp(namebuf, "/dev/zero") ||
+	  !strcmp(namebuf, "/proc/meminfo"))
 	return;
     }
   die("Forbidden access to file `%s'.", namebuf);
