@@ -1,0 +1,19 @@
+# The Evaluator -- Public Compilation Script
+# (c) 2001 Martin Mares <mj@ucw.cz>
+
+set -e
+[ -n "$MO_PUBLIC" -a -d "$MO_PUBLIC" ] || { echo >&2 "MO_PUBLIC not set, giving up." ; exit 1 ; }
+. $MO_PUBLIC/bin/lib
+. $MO_PUBLIC/config
+
+[ -n "$1" ] || die "Usage: compile <problem>"
+PROBLEM=$1
+public-setup
+. $PDIR/config
+locate-source
+if compile ; then
+	mv $TDIR/$PROBLEM .
+else
+	echo >&2
+	sed <log >&2 '1,/^Compiler output:/d;/^Compiler output files:/,$d;/^Exited /d'
+fi

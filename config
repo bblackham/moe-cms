@@ -25,9 +25,6 @@ COMP_pas="$COMP_p"
 # Sandbox options used when compiling
 COMP_SANDBOX_OPTS='-m65536 -t60 -w -e'
 
-# Shell command used to run the tests
-TEST_RUN_METHOD="test-run-with-files"
-
 # Sandbox options used when testing
 TEST_SANDBOX_OPTS='-a2 -f -m$MEM_LIMIT -t$TIME_LIMIT -w'
 # For stdio tasks append '-i$PROBLEM.in -o$PROBLEM.out'

@@ -1,0 +1,20 @@
+# The Evaluator -- Public Checking Script
+# (c) 2001 Martin Mares <mj@ucw.cz>
+
+set -e
+[ -n "$MO_PUBLIC" -a -d "$MO_PUBLIC" ] || { echo >&2 "MO_PUBLIC not set, giving up." ; exit 1 ; }
+. $MO_PUBLIC/bin/lib
+. $MO_PUBLIC/config
+
+[ -n "$1" ] || die "Usage: check <problem>"
+PROBLEM=$1
+public-setup
+. $PDIR/config
+locate-source
+compile
+TEST=$SAMPLE_TEST
+PTSFILE=$TDIR/points
+pstart "Checking on sample input: "
+test-run
+syntax-check
+pend "OK"

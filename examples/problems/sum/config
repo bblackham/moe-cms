@@ -4,6 +4,9 @@
 # A list of all tests
 TESTS="1 2"
 
+# Test with example input
+SAMPLE_TEST=1
+
 # Number of points per test
 POINTS_PER_TEST=1
 

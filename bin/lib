@@ -93,7 +93,7 @@ EOF
 
 function locate-source
 {
-	pstart "Locating source... "
+	pstart "Finding source... "
 	for a in $EXTENSIONS ; do
 		if [ -f $SDIR/$PROBLEM.$a ] ; then
 			[ -z "$SRCN" ] || die "Multiple source files found: $SDIR/$PROBLEM.$a and $SDIR/$SRCN. Please fix."
@@ -128,6 +128,7 @@ function compile
 
 	echo "Compiler input files:"
 	ls -Al $BOXDIR
+	echo "Compiler output:"
 	if ! $BOXCMD $COMP_SANDBOX_OPTS -- $CCMD 2>$TDIR/compile.out ; then
 		COMPILE_MSG="`cat $TDIR/compile.out`"
 		pend "FAILED: $COMPILE_MSG"
@@ -151,7 +152,7 @@ function compile
 
 # Running of test program with file input/output
 
-function test-run-with-files
+function test-run
 {
 	pcont "<init> "
 	box-clean
@@ -171,7 +172,7 @@ function test-run-with-files
 		TEST_MSG="`cat $TDIR/exec.out`"
 		pend "$TEST_MSG"
 		echo "$TEST_MSG"
-		echo >$PTSFILE "0 $TEST_MSG"
+		echo >>$PTSFILE "0 $TEST_MSG"
 		return 1
 	fi
 	cat $TDIR/exec.out
@@ -181,7 +182,7 @@ function test-run-with-files
 	if [ ! -s $BOXDIR/$PROBLEM.out ] ; then
 		pend "No output file."
 		echo "No output file."
-		echo >$PTSFILE "0 No output."
+		echo >>$PTSFILE "0 No output."
 		return 1
 	fi
 	cp $BOXDIR/$PROBLEM.out $TDIR/$TEST.out
@@ -198,7 +199,7 @@ function syntax-check
 	$SCHECK && return 0
 	pend "Wrong syntax."
 	echo "Wrong syntax."
-	echo >$PTSFILE "0 Wrong syntax."
+	echo >>$PTSFILE "0 Wrong syntax."
 	return 1
 }
 
@@ -213,6 +214,26 @@ function output-check
 	$OCHECK && return 0
 	pend "Wrong answer."
 	echo "Wrong answer."
-	echo >$PTSFILE "0 Wrong answer."
+	echo >>$PTSFILE "0 Wrong answer."
 	return 1
+}
+
+# Setup of public commands
+
+function public-setup
+{
+	PDIR=$MO_PUBLIC/problems/$PROBLEM
+	SDIR=.
+	TDIR=~/.test
+	[ -d $PDIR ] || die "Unknown problem $PROBLEM"
+
+	pstart "Initializing... "
+	mkdir -p $TDIR
+	rm -rf $TDIR/*
+	BOXDIR=~/.box
+	mkdir -p $BOXDIR
+	rm -rf $BOXDIR/*
+	BOXCMD="$MO_PUBLIC/bin/box -c$BOXDIR"
+	exec >log
+	pend "OK  (see 'log' for details)"
 }
