@@ -15,10 +15,14 @@ interactive tasks: solve deadlocks?
 weird characters in checker command descriptions: use automatic escaping?
 moving handling of points file to bin/ev
 
+better messages on failed submit
+
 Environment
 ~~~~~~~~~~~
 per-user tmp ?
 rhide: debugging Pascal programs: variable names must be upper-cased
+fpc: add switch -gl (runtime errors write line#)
+
 
 Contest
 ~~~~~~~
