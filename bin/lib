@@ -94,10 +94,11 @@ EOF
 function locate-source
 {
 	pstart "Finding source... "
+	SBASE=${1:-$PROBLEM}
 	for a in $EXTENSIONS ; do
-		if [ -f $SDIR/$PROBLEM.$a ] ; then
+		if [ -f $SDIR/$SBASE.$a ] ; then
 			[ -z "$SRCN" ] || die "Multiple source files found: $SDIR/$PROBLEM.$a and $SDIR/$SRCN. Please fix."
-			SRCN=$PROBLEM.$a
+			SRCN=$SBASE.$a
 			SRCEXT=$a
 		fi
 	done
