@@ -1,0 +1,36 @@
+How to set up the evaluator:
+----------------------------
+
+Edit `config', especially MO_ROOT, EVAL_USER, EVAL_GROUP, TEST_USERS, CT_UID_MIN and CT_UID_MAX.
+
+Create $MO_ROOT  (here we assume it's /aux/mo)
+
+Create the evaluation users (outside $CT_UID_MIN .. $CT_UID_MAX):
+
+	mo-eval:x:65000:65000:MO Evaluator:/aux/mo/eval/mo-eval:/bin/bash
+	mo-test1:x:65001:65000:MO Tester 1:/aux/mo/eval/mo-test1:/bin/bash
+	mo-test2:x:65002:65000:MO Tester 2:/aux/mo/eval/mo-test2:/bin/bash
+
+Create the evaluation group:
+
+	mo-eval:x:65000:
+
+Create the contestant users (inside $CT_UID_MIN .. $CT_UID_MAX; as many as you wish;
+the names don't matter):
+
+	mo00:x:65100:65100:MO Contestant 00:/aux/mo/users/mo00/mo00:/bin/bash
+	...
+	mo99:x:65199:65199:MO Contestant 99:/aux/mo/users/mo99/mo99:/bin/bash
+
+... and their groups (preferably with the same ID's):
+
+	mo00:x:65100:
+	...
+	mo99:x:65199:
+
+... and their passwords ...
+
+Run bin/mo-install to create the infrastructure.
+
+Run bin/mo-create-contestants to create contestants' home directories,
+files from template/* will be copied there automatically.
