@@ -35,6 +35,7 @@ static int use_wall_clock;
 static int file_access;
 static int verbose;
 static int memory_limit;
+static char *redir_stdin, *redir_stdout;
 
 static pid_t box_pid;
 static int is_ptraced;
@@ -419,6 +420,18 @@ box_inside(int argc, char **argv)
 
   memcpy(args, argv, argc * sizeof(char *));
   args[argc] = NULL;
+  if (redir_stdin)
+    {
+      close(0);
+      if (open(redir_stdin, O_RDONLY) != 0)
+	die("open(\"%s\"): %m", redir_stdin);
+    }
+  if (redir_stdout)
+    {
+      close(1);
+      if (open(redir_stdout, O_WRONLY | O_CREAT | O_TRUNC, 0666) != 1)
+	die("open(\"%s\"): %m", redir_stdout);
+    }
   close(2);
   dup(1);
   setpgrp();
@@ -449,7 +462,9 @@ Options:\n\
 -c <dir>\tChange directory to <dir> first\n\
 -e\t\tPass full environment of parent process\n\
 -f\t\tFilter system calls (-ff=very restricted)\n\
+-i <file>\tRedirect stdin from <file>\n\
 -m <size>\tLimit address space to <size> KB\n\
+-o <file>\tRedirect stdout to <file>\n\
 -t <time>\tStop after <time> seconds\n\
 -v\t\tBe verbose\n\
 -w\t\tMeasure wall clock time instead of run time\n\
@@ -464,7 +479,7 @@ main(int argc, char **argv)
   uid_t uid;
   char *cwd = NULL;
 
-  while ((c = getopt(argc, argv, "a:c:efm:t:vw")) >= 0)
+  while ((c = getopt(argc, argv, "a:c:efi:m:o:t:vw")) >= 0)
     switch (c)
       {
       case 'a':
@@ -479,8 +494,14 @@ main(int argc, char **argv)
       case 'f':
 	filter_syscalls++;
 	break;
+      case 'i':
+	redir_stdin = optarg;
+	break;
       case 'm':
 	memory_limit = atol(optarg);
+	break;
+      case 'o':
+	redir_stdout = optarg;
 	break;
       case 't':
 	timeout = atol(optarg);

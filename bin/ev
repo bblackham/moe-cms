@@ -31,21 +31,18 @@ compile
 # Perform the tests
 for TEST in $TESTS ; do
 	(
-	pstart "Test $TEST... "
 	[ -f $PDIR/$TEST.config ] && . $PDIR/$TEST.config
 	exec >$TDIR/$TEST.log
 	PTSFILE=$TDIR/$TEST.pts
+	pstart "Test $TEST ($POINTS_PER_TEST points)... "
 	echo "Test $TEST ($POINTS_PER_TEST points)"
-	if [ ! -f $TDIR/compile.out ] ; then
-		echo >$PTSFILE "0 --"
-		die "No source file"
-	fi
 	if [ ! -f $TDIR/$PROBLEM ] ; then
-		echo >$PTSFILE "0 CE"
+		echo >$PTSFILE "0 Compile error."
 		die "No executable file"
 	fi
 	$TEST_RUN_METHOD || exit 0
-
+	syntax-check || exit 0
+	output-check || exit 0
 	echo "Test completed OK ($POINTS_PER_TEST points)"
 	echo >$PTSFILE "$POINTS_PER_TEST OK"
 	pend "OK"

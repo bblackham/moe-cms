@@ -10,15 +10,24 @@ TEST_USERS="mo-test1 mo-test2"
 # Currently used test user
 TEST_USER=mo-eval
 
-# Compilation commands
+### all of the following variables can be overriden in per-task config file
+
+# Known source file extensions
 EXTENSIONS="c C cpp p pas"
+
+# For each source extension, we must give compiler command
 COMP_c='/usr/bin/gcc -o $EXE $SRC'
 COMP_C='/usr/bin/g++ -o $EXE $SRC'
 COMP_cpp="$COMP_C"
 COMP_p='/usr/bin/fpc -o $EXE $SRC'
 COMP_pas="$COMP_p"
+
+# Sandbox options used when compiling
 COMP_SANDBOX_OPTS='-m65536 -t60 -w -e'
 
-# Testing commands
+# Shell command used to run the tests
 TEST_RUN_METHOD="test-run-with-files"
+
+# Sandbox options used when testing
 TEST_SANDBOX_OPTS='-a2 -f -m$MEM_LIMIT -t$TIME_LIMIT -w'
+# For stdio tasks append '-i$PROBLEM.in -o$PROBLEM.out'

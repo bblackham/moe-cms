@@ -59,7 +59,6 @@ function box-init
 function box-clean
 {
 	[ -n "$BOXCMD" ] || die "box-init not called"
-	# FIXME: Dot files
 	rm -rf $BOXDIR/*
 }
 
@@ -133,6 +132,7 @@ function compile
 		return 1
 	fi
 	cat $TDIR/compile.out
+	rm $TDIR/compile.out
 	echo "Compiler output files:"
 	ls -Al $BOXDIR
 	if [ ! -f $BOXDIR/$PROBLEM ] ; then
@@ -168,17 +168,48 @@ function test-run-with-files
 		TEST_MSG="`cat $TDIR/exec.out`"
 		pend "$TEST_MSG"
 		echo "$TEST_MSG"
-		# FIXME: Better recognition of run-time errors
-		echo >$PTSFILE "0 RT"
+		echo >$PTSFILE "0 $TEST_MSG"
 		return 1
 	fi
+	cat $TDIR/exec.out
+	rm $TDIR/exec.out
 	echo "Output files:"
 	ls -Al $BOXDIR
-	if [ ! -f $BOXDIR/$PROBLEM.out ] ; then
+	if [ ! -s $BOXDIR/$PROBLEM.out ] ; then
 		pend "No output file."
 		echo "No output file."
-		echo >$PTSFILE "0 NO"
+		echo >$PTSFILE "0 No output."
 		return 1
 	fi
-		cp $BOXDIR/$PROBLEM.out $TDIR/$PROBLEM.out
+	cp $BOXDIR/$PROBLEM.out $TDIR/$TEST.out
+}
+
+# Syntax checks
+
+function syntax-check
+{
+	[ -n "$SYNTAX_CHECK" ] || return 0
+	pcont "<syntax> "
+	SCHECK="`eval echo $SYNTAX_CHECK`"
+	echo "Syntax check command: $SCHECK"
+	$SCHECK && return 0
+	pend "Wrong syntax."
+	echo "Wrong syntax."
+	echo >$PTSFILE "0 Wrong syntax."
+	return 1
+}
+
+# Output checks
+
+function output-check
+{
+	pcont "<check> "
+	ln $PDIR/$TEST.out $TDIR/$TEST.ok
+	OCHECK="`eval echo $OUTPUT_CHECK`"
+	echo "Output check command: $OCHECK"
+	$OCHECK && return 0
+	pend "Wrong answer."
+	echo "Wrong answer."
+	echo >$PTSFILE "0 Wrong answer."
+	return 1
 }
