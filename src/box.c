@@ -253,7 +253,7 @@ valid_syscall(struct user *u)
       return allow_times;
     case SYS_kill:
       if (u->regs.ebx == box_pid)
-	die("Commited suicide by signal %d", (int)u->regs.ecx);
+	die("Commited suicide by signal %d.", (int)u->regs.ecx);
       return 0;
     default:
       return 0;
