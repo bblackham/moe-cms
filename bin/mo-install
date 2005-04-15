@@ -32,4 +32,4 @@ rm -rf public
 mkdir public
 
 # populate public
-( cd $EVAL_USER ; bin/mo-create-public )
+( cd eval/$EVAL_USER ; bin/mo-create-public )

@@ -12,7 +12,7 @@ case "$mode" in
   *) echo "Usage: $0 [eval|users]!"; exit 1;;
 esac
 
->etcshadow >etcpasswd >etcgroup
+>>etcshadow >>etcpasswd >>etcgroup
 
 case $mode in
   eval)
