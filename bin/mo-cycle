@@ -1,0 +1,27 @@
+#!/bin/sh
+
+rm -rf solutions/mo* testing/mo*
+
+for m in mo0{01,02,03,04,05,06,07,08,09,10,11,12,13,14,15} mo1{01,02,03,04,05,06,07,08,09,10,11,12,13,14,15,16,99} ; do
+	u=`echo $m | sed 's/^mo099/00/;s/^mo199/39/;s/^mo0//;s/^mo10/2/;s/^mo11/3/;s/^/mo/'`
+	echo -n "$m ($u): "
+	rm -rf tmp/grab
+	mkdir tmp/grab
+	pushd tmp/grab >/dev/null
+	ssh root@$m 'cd /aux/mo/users/mo39/mo39 ; tar czf - .' | tar xzf -
+	popd >/dev/null
+	if [ -d tmp/grab/.submit ] ; then
+		if [ -d solutions/$u ] ; then
+			echo -n "<DUP!!!>"
+		else
+			cp -a tmp/grab/.submit solutions/$u
+			( cd solutions/$u && ls )
+		fi
+	fi
+	echo
+done
+bin/mo-ev-all fact power
+bin/mo-score-hack --detail --html power fact >cycle.results.html
+lynx -width 100 -dump cycle.results.html | sed '1,3d' >cycle.results.new
+cat cycle.results.new | ssh root@mo101 'cat >/tmp/cycle.results.new && mv /tmp/cycle.results.new /tmp/cycle.results'
+mv cycle.results.new cycle.results
