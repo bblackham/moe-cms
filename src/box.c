@@ -159,99 +159,104 @@ valid_syscall(struct user *u)
 {
   switch (u->regs.orig_eax)
     {
-    case SYS_execve:
+    case __NR_execve:
       {
 	static int exec_counter;
 	return !exec_counter++;
       }
-    case SYS_open:
-    case SYS_creat:
-    case SYS_unlink:
-    case SYS_oldstat:
-    case SYS_access:			
-    case SYS_oldlstat:			
-    case SYS_truncate:
-    case SYS_stat:
-    case SYS_lstat:
-    case SYS_truncate64:
-    case SYS_stat64:
-    case SYS_lstat64:
+    case __NR_open:
+    case __NR_creat:
+    case __NR_unlink:
+    case __NR_oldstat:
+    case __NR_access:			
+    case __NR_oldlstat:			
+    case __NR_truncate:
+    case __NR_stat:
+    case __NR_lstat:
+    case __NR_truncate64:
+    case __NR_stat64:
+    case __NR_lstat64:
       valid_filename(u->regs.ebx);
       return 1;
-    case SYS_exit:
-    case SYS_read:
-    case SYS_write:
-    case SYS_close:
-    case SYS_lseek:
-    case SYS_getpid:
-    case SYS_getuid:
-    case SYS_oldfstat:
-    case SYS_dup:
-    case SYS_brk:
-    case SYS_getgid:
-    case SYS_geteuid:
-    case SYS_getegid:
-    case SYS_dup2:
-    case SYS_ftruncate:
-    case SYS_fstat:
-    case SYS_personality:
-    case SYS__llseek:
-    case SYS_readv:
-    case SYS_writev:
-    case SYS_getresuid:
-    case SYS_pread:
-    case SYS_pwrite:
-    case SYS_ftruncate64:
-    case SYS_fstat64:
-    case SYS_fcntl:
-    case SYS_fcntl64:
-    case SYS_mmap:
-    case SYS_munmap:
-    case SYS_ioctl:
-    case SYS_uname:
+    case __NR_exit:
+    case __NR_read:
+    case __NR_write:
+    case __NR_close:
+    case __NR_lseek:
+    case __NR_getpid:
+    case __NR_getuid:
+    case __NR_oldfstat:
+    case __NR_dup:
+    case __NR_brk:
+    case __NR_getgid:
+    case __NR_geteuid:
+    case __NR_getegid:
+    case __NR_dup2:
+    case __NR_ftruncate:
+    case __NR_fstat:
+    case __NR_personality:
+    case __NR__llseek:
+    case __NR_readv:
+    case __NR_writev:
+    case __NR_getresuid:
+#ifdef __NR_pread64
+    case __NR_pread64:
+    case __NR_pwrite64:
+#else
+    case __NR_pread:
+    case __NR_pwrite:
+#endif
+    case __NR_ftruncate64:
+    case __NR_fstat64:
+    case __NR_fcntl:
+    case __NR_fcntl64:
+    case __NR_mmap:
+    case __NR_munmap:
+    case __NR_ioctl:
+    case __NR_uname:
     case 252:
       return 1;
-    case SYS_time:
-    case SYS_alarm:
-    case SYS_pause:
-    case SYS_signal:
-    case SYS_fchmod:
-    case SYS_sigaction:
-    case SYS_sgetmask:
-    case SYS_ssetmask:
-    case SYS_sigsuspend:
-    case SYS_sigpending:
-    case SYS_getrlimit:
-    case SYS_getrusage:
-    case SYS_gettimeofday:
-    case SYS_select:
-    case SYS_readdir:
-    case SYS_setitimer:
-    case SYS_getitimer:
-    case SYS_sigreturn:
-    case SYS_mprotect:
-    case SYS_sigprocmask:
-    case SYS_getdents:
-    case SYS_getdents64:
-    case SYS__newselect:
-    case SYS_fdatasync:
-    case SYS_mremap:
-    case SYS_poll:
-    case SYS_getcwd:
-    case SYS_nanosleep:
-    case SYS_rt_sigreturn:
-    case SYS_rt_sigaction:
-    case SYS_rt_sigprocmask:
-    case SYS_rt_sigpending:
-    case SYS_rt_sigtimedwait:
-    case SYS_rt_sigqueueinfo:
-    case SYS_rt_sigsuspend:
-    case SYS_mmap2:
-    case SYS__sysctl:
+    case __NR_time:
+    case __NR_alarm:
+    case __NR_pause:
+    case __NR_signal:
+    case __NR_fchmod:
+    case __NR_sigaction:
+    case __NR_sgetmask:
+    case __NR_ssetmask:
+    case __NR_sigsuspend:
+    case __NR_sigpending:
+    case __NR_getrlimit:
+    case __NR_getrusage:
+    case __NR_gettimeofday:
+    case __NR_select:
+    case __NR_readdir:
+    case __NR_setitimer:
+    case __NR_getitimer:
+    case __NR_sigreturn:
+    case __NR_mprotect:
+    case __NR_sigprocmask:
+    case __NR_getdents:
+    case __NR_getdents64:
+    case __NR__newselect:
+    case __NR_fdatasync:
+    case __NR_mremap:
+    case __NR_poll:
+    case __NR_getcwd:
+    case __NR_nanosleep:
+    case __NR_rt_sigreturn:
+    case __NR_rt_sigaction:
+    case __NR_rt_sigprocmask:
+    case __NR_rt_sigpending:
+    case __NR_rt_sigtimedwait:
+    case __NR_rt_sigqueueinfo:
+    case __NR_rt_sigsuspend:
+    case __NR_mmap2:
+    case __NR__sysctl:
       return (filter_syscalls == 1);
-    case SYS_times:
+    case __NR_times:
       return allow_times;
-    case SYS_kill:
+    case __NR_kill:
       if (u->regs.ebx == box_pid)
 	die("Commited suicide by signal %d.", (int)u->regs.ecx);
       return 0;
