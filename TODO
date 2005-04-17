@@ -16,6 +16,8 @@ Distribution:
 - kernel sources
 - remove cups
 - /aux/mo/public/bin/submit -- missing x-bit
-- zminka o pousteni rhide z mc
 - STL docs
 - ? distribuovatko testingu do home directories
+- pripsat do guide.tex, ze se rhide nema spoustet z mc
+- rhide: backslashe na konci radku v Pascalu -> strange compilation error
+- problemy s gpm po nastaveni fontu
