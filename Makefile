@@ -14,7 +14,7 @@ bin/pedant: src/pedant.o
 
 clean:
 	rm -f `find . -name "*~" -or -name "*.[oa]" -or -name "\#*\#" -or -name TAGS -or -name core`
-	rm -f bin/box bin/iwrapper bin/md5crypt
+	rm -f bin/box bin/iwrapper bin/md5crypt bin/pedant
 
 distclean: clean
 
