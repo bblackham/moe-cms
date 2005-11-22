@@ -1,4 +1,4 @@
-VERSION=1.0
+VERSION=1.0.1
 #DEBUG=-ggdb
 CFLAGS=-O2 -Wall -W -Wno-parentheses -Wstrict-prototypes -Wmissing-prototypes -Winline $(DEBUG)
 
