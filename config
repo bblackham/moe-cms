@@ -44,7 +44,7 @@ COMP_c='/usr/bin/gcc -O2 -g -o $EXE $EXTRA_CFLAGS $SRC'
 COMP_C='/usr/bin/g++ -O2 -g -o $EXE $EXTRA_CFLAGS $SRC'
 COMP_cpp="$COMP_C"
 COMP_cc="$COMP_C"
-COMP_p='/usr/bin/fpc -Ci -Cr -g -O2 -So -Sg -o$EXE $EXTRA_PFLAGS $SRC'
+COMP_p='/usr/bin/fpc -Ci -Cr -Ct -g -gl -O2 -Sg -o$EXE $EXTRA_PFLAGS $SRC'
 COMP_pas="$COMP_p"
 
 # Sandbox options used when compiling
