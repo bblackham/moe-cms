@@ -141,13 +141,15 @@ valid_filename(unsigned long addr)
     {
       if ((!strncmp(namebuf, "/etc/", 5) ||
 	   !strncmp(namebuf, "/lib/", 5) ||
-	   !strncmp(namebuf, "/usr/lib/", 9))
+	   !strncmp(namebuf, "/usr/lib/", 9) ||
+	   !strncmp(namebuf, "/opt/lib/", 9))
 	  && !strstr(namebuf, ".."))
 	return;
       if (!strcmp(namebuf, "/dev/null") ||
 	  !strcmp(namebuf, "/dev/zero") ||
 	  !strcmp(namebuf, "/proc/meminfo") ||
 	  !strcmp(namebuf, "/proc/self/stat") ||
+	  !strcmp(namebuf, "/proc/self/exe") ||			/* Needed by FPC 2.0.x runtime */
 	  !strncmp(namebuf, "/usr/share/zoneinfo/", 20))
 	return;
     }
@@ -176,6 +178,7 @@ valid_syscall(struct user *u)
     case __NR_truncate64:
     case __NR_stat64:
     case __NR_lstat64:
+    case __NR_readlink:
       valid_filename(u->regs.ebx);
       return 1;
     case __NR_exit:
@@ -214,7 +217,10 @@ valid_syscall(struct user *u)
     case __NR_munmap:
     case __NR_ioctl:
     case __NR_uname:
-    case 252:
+    case __NR_gettid:
+    case __NR_set_thread_area:
+    case __NR_get_thread_area:
+    case __NR_exit_group:
       return 1;
     case __NR_time:
     case __NR_alarm:
