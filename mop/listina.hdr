@@ -1,0 +1,30 @@
+\language=\czech
+\frenchspacing
+\font\head=csr12 scaled \magstephalf
+\font\hexx=csti12
+\font\xxit=csti10
+\def\xit{\xxit\kern-0.1em\relax}
+\let\hb=\relax
+\parindent=0pt
+\nopagenumbers
+
+\centerline{\head Výsledková listina ústøedního kola 56. roèníku MO kategorie P}
+\bigskip
+\centerline{\hexx 21. -- 24. bøezna 2007 ve Zlínì}
+\bigskip
+\bigskip
+
+\hrule
+\bigskip
+
+\centerline{\vbox{\halign{%
+#\hfil &~~#\hfil &\quad #\hfil &~~#\hfil&\quad
+\hfil # &
+\hfil # &
+\hfil # & \kern0.4em
+\hfil # &
+\hfil # & \kern1em
+\hb\quad\hfil # \cr
+\noalign{\bigskip\bigskip\hbox{\xit Vítìzové}\bigskip}
+%\noalign{\bigskip\bigskip\hbox{\xit Úspì¹ní øe¹itelé}\bigskip}
+%\noalign{\bigskip\bigskip\hbox{\xit Ostatní úèastníci}\bigskip}

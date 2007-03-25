@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 $tex = 0;
-$usage = "Usage: mo-score2004 [--tex] theoretical_tasks_nr praxis_tasks_nr task1 task2 ...";
+$usage = "Usage: mo-score-mop [--tex] theoretical_tasks_nr praxis_tasks_nr task1 task2 ...";
 while (($arg = $ARGV[0]) =~ /^--([a-z]+)$/) {
 	shift @ARGV;
 	$var = "\$$1";
@@ -26,7 +26,7 @@ close CT;
 print STDERR 0+keys %users, "\n";
 
 print STDERR "Scanning teoretical results... ";
-if (open (EX, "teorie.txt")) {
+if (open (EX, "mop/teorie.txt")) {
 	while (<EX>) {
 		chomp;
 		(/^$/ || /^#/) && next;
@@ -41,7 +41,7 @@ if (open (EX, "teorie.txt")) {
 	}
 	close EX;
 	print STDERR "OK\n";
-} else {die "none\n";}
+} else {die "none, cannot find file mop/teorie.txt!\n";}
 
 print STDERR "Scanning task results... ";
 $need_tasks = join("|", @ARGV);
@@ -78,6 +78,7 @@ print STDERR "OK\n";
 print STDERR "Filling in results... ";
 @table = ();
 foreach $u (keys %users) {
+	next unless defined $names{$u}; # don't show any user not defined in teorie.txt
 	$row = [];
 	$row_index=0;
 	$row_sum=0;
@@ -123,16 +124,15 @@ while ($i < @table) {
 print STDERR "OK\n";
 
 if ($tex) {
-        open HDR,"teorie.hdr" or die "Cannot open file teorie.hdr with TeX template!";
+        open HDR,"mop/listina.hdr" or die "Cannot open file mop/listina.hdr with TeX template!";
 	while (<HDR>) {print; }
 	close HDR;
 	
 	foreach $r (@table) { print join('&',@$r), "\\cr\n";}
 
-print '}}}
-
-\bye
-';
+        open FTR,"mop/listina.ftr" or die "Cannot open file mop/listina.ftr with TeX template!";
+	while (<FTR>) {print; }
+	close FTR;
 } else {
 	foreach $r (@table) { print join("\t",@$r), "\n"; }
 }
