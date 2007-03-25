@@ -1,7 +1,12 @@
 #!/bin/bash
 
-[ -n "$1" ] || { echo "Usage: mo-ev-inc <tasks>" ; exit 1 ; }
+[ -n "$1" ] || { echo "Usage: mo-ev-inc [--force] --<tasks>" ; exit 1 ; }
 
+force=0
+if [ "$1" == --force ] ; then
+	force=1
+	shift
+fi
 for user in `bin/mo-get-users` ; do
 	for task in "$@" ; do
 		echo -n "$user/$task: "
@@ -14,6 +19,9 @@ for user in `bin/mo-get-users` ; do
 			O=`cat testing/$user/$task/sum`
 		else
 			O=none
+		fi
+		if [ $force == 1 -a $N != none ] ; then
+			O=forced
 		fi
 		echo -n "($O $N) "
 		if [ $O == $N ] ; then
