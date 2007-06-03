@@ -121,6 +121,24 @@ int main(int argc UNUSED, char **argv UNUSED)
   if (connect(sk, (struct sockaddr *) &sa, sizeof(sa)) < 0)
     die("Cannot connect: %m");
 
+  log(L_INFO, "Waiting for initial message");
+  byte msg[256];
+  int i = 0;
+  do
+    {
+      if (i >= (int)sizeof(msg))
+	die("Response too long");
+      int c = read(sk, msg+i, sizeof(msg)-i);
+      if (c <= 0)
+	die("Connection broken");
+      i += c;
+    }
+  while (msg[i-1] != '\n');
+  msg[i-1] = 0;
+  if (msg[0] != '+')
+    die("%s", msg);
+  log(L_INFO, "%s", msg);
+
   gnutls_session_t s;
   gnutls_init(&s, GNUTLS_CLIENT);
   gnutls_set_default_priority(s);

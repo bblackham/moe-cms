@@ -4,6 +4,9 @@ TLSLF:=$(shell libgnutls-config --libs)
 CFLAGS=-O2 -Iinclude -g -Wall -W -Wno-parentheses -Wstrict-prototypes -Wmissing-prototypes -Wundef -Wredundant-decls -std=gnu99 $(TLSCF)
 LDFLAGS=$(TLSLF)
 
+CC=gcc-4.1.1
+CFLAGS+=-Wno-pointer-sign -Wdisabled-optimization -Wno-missing-field-initializers
+
 all: submitd connect
 
 submitd: submitd.o lib/libucw.a lib/libsh.a
