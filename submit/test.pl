@@ -6,6 +6,9 @@ use warnings;
 use IO::Socket::INET;
 use IO::Socket::SSL; # qw(debug3);
 
+use lib "lib/perl5";
+use Sherlock::Object;
+
 my $sk = new IO::Socket::INET(
 #	PeerAddr => "nikam.ms.mff.cuni.cz:443",
 	PeerAddr => "localhost:8888",
@@ -56,17 +59,31 @@ sub printobj($) {
 	}
 }
 
-sendobj({ 'U' => 'testuser' });
-recvobj();
+sub req($) {
+	my $x = shift @_;
+	$x->write($sk);
+	print $sk "\n";
+}
 
-#sendobj({ '!' => 'SUBMIT', 'T' => 'plans', 'S' => 100, 'X' => 'c' });
-#recvobj();
-#print $sk "<";
-#foreach my $x (1..98) { print $sk "."; }
-#print $sk ">";
-#recvobj();
+sub reply() {
+	my $x = new Sherlock::Object;
+	$x->read($sk) or die "Incomplete reply";
+	$x->get('+') or die "-" . $x->get('-') . "\n";
+	return $x;
+}
 
-sendobj({ '!' => 'STATUS' });
-printobj(recvobj());
+my $req;
+my $reply;
+
+$req = new Sherlock::Object;
+$req->set("U" => "testuser");
+req($req);
+$reply = reply();
+
+$req = new Sherlock::Object;
+$req->set("!" => "STATUS");
+req($req);
+$reply = reply();
+$reply->write(*STDOUT);
 
 close $sk;
