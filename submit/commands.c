@@ -1,5 +1,5 @@
 /*
- *  The Submit Daemon: Processing of Commands
+ *  The Submit Daemon: High-Level Part of the Protocol
  *
  *  (c) 2007 Martin Mares <mj@ucw.cz>
  */
@@ -136,6 +136,7 @@ execute_init(struct conn *c)
       return;
     }
   obj_set_attr(c->reply, '+', "OK");
+  c->user = xstrdup(user);
 }
 
 int

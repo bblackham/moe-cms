@@ -105,6 +105,8 @@ conn_new(void)
 static void
 conn_free(struct conn *c)
 {
+  xfree(c->ip_string);
+  xfree(c->cert_name);
   clist_remove(&c->n);
   num_conn--;
   xfree(c);
@@ -249,9 +251,9 @@ tls_log_params(struct conn *c)
     proto, kx, cert, comp, cipher, mac);
 }
 
-/*** SOCKET FASTBUFS ***/
+/*** FASTBUFS OVER SOCKETS AND TLS ***/
 
-void NONRET
+void NONRET				// Fatal protocol violation
 client_error(char *msg, ...)
 {
   va_list args;
@@ -353,6 +355,7 @@ sigalrm_handler(int sig UNUSED)
 static void
 client_loop(struct conn *c)
 {
+  setproctitle("submitd: client %s", c->ip_string);
   log_pid = c->id;
   init_sk_fastbufs(c);
 
@@ -387,12 +390,15 @@ client_loop(struct conn *c)
   if (!process_init(c))
     log(L_ERROR, "Protocol handshake failed");
   else
-    for (;;)
-      {
-	alarm(session_timeout);
-	if (!process_command(c))
-	  break;
-      }
+    {
+      setproctitle("submitd: client %s (%s)", c->ip_string, c->user);
+      for (;;)
+	{
+	  alarm(session_timeout);
+	  if (!process_command(c))
+	    break;
+	}
+    }
 
   if (c->tls)
     gnutls_bye(c->tls, GNUTLS_SHUT_WR);
@@ -493,6 +499,7 @@ sk_accept(void)
 	(rule->plain_text ? "plain-text" : "TLS"),
 	(rule->allow_admin ? "admin" : "user"));
   c->ip = addr;
+  c->ip_string = xstrdup(ipbuf);
   c->sk = sk;
   c->rule = rule;
 
@@ -551,6 +558,7 @@ int main(int argc, char **argv)
 
   for (;;)
     {
+      setproctitle("submitd: %d connections", num_conn);
       int status;
       pid_t pid = waitpid(-1, &status, WNOHANG);
       if (pid > 0)

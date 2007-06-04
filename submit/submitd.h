@@ -26,11 +26,12 @@ struct conn {
   // Set up by the master process
   cnode n;
   u32 ip;
+  byte *ip_string;			// (xmalloced)
   pid_t pid;
   uns id;
   struct access_rule *rule;		// Rule matched by this connection
   int sk;				// Client socket
-  byte *cert_name;			// Client name from the certificate (NULL if no TLS)
+  byte *cert_name;			// Client name from the certificate (NULL if no TLS) (xmalloced)
 
   // Used by the child process
   gnutls_session_t tls;			// TLS session
