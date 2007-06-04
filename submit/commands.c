@@ -14,6 +14,8 @@
 
 #include "submitd.h"
 
+/*** REQUESTS AND REPLIES ***/
+
 static void NONRET
 read_error_cb(struct obj_read_state *st UNUSED, byte *msg)
 {
@@ -77,6 +79,8 @@ write_reply(struct conn *c)
   bflush(&c->tx_fb);
 }
 
+/*** COMMAND MUX ***/
+
 static void
 execute_command(struct conn *c)
 {
@@ -100,6 +104,8 @@ process_command(struct conn *c)
   write_reply(c);
   return 1;
 }
+
+/*** INITIAL HANDSHAKE ***/
 
 static int
 user_exists_p(byte *user)
