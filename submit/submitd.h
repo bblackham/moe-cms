@@ -53,4 +53,17 @@ void NONRET client_error(char *msg, ...);
 int process_init(struct conn *c);
 int process_command(struct conn *c);
 
+/* tasks.c */
+
+struct task {
+  cnode n;
+  byte *name;
+};
+
+extern clist task_list;
+extern struct cf_section tasks_conf;
+
+struct task *task_find(byte *name);
+int user_exists_p(byte *user);
+
 #endif

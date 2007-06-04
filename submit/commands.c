@@ -6,11 +6,8 @@
 
 #include "lib/lib.h"
 #include "lib/mempool.h"
-#include "lib/stkstring.h"
 #include "sherlock/object.h"
 #include "sherlock/objread.h"
-
-#include <sys/stat.h>
 
 #include "submitd.h"
 
@@ -63,6 +60,8 @@ read_request(struct conn *c)
 static void
 write_reply(struct conn *c)
 {
+  if (!obj_find_attr(c->reply, '-') && !obj_find_attr(c->reply, '+'))
+    obj_set_attr(c->reply, '+', "OK");
   if (trace_commands)
     {
       byte *msg;
@@ -79,6 +78,31 @@ write_reply(struct conn *c)
   bflush(&c->tx_fb);
 }
 
+static void
+err(struct conn *c, byte *msg)
+{
+  obj_set_attr(c->reply, '-', msg);
+}
+
+/*** SUBMIT ***/
+
+static void
+cmd_submit(struct conn *c)
+{
+  byte *tname = obj_find_aval(c->request, 'T');
+  if (!tname)
+    {
+      err(c, "No task specified");
+      return;
+    }
+  struct task *task = task_find(tname);
+  if (!task)
+    {
+      err(c, "No such task");
+      return;
+    }
+}
+
 /*** COMMAND MUX ***/
 
 static void
@@ -87,12 +111,15 @@ execute_command(struct conn *c)
   byte *cmd = obj_find_aval(c->request, '!');
   if (!cmd)
     {
-      obj_set_attr(c->reply, '-', "Missing command");
+      err(c, "Missing command");
       return;
     }
   if (trace_commands)
     log(L_DEBUG, "<< %s", cmd);
-  obj_set_attr(c->reply, '-', "Unknown command");
+  if (!strcasecmp(cmd, "SUBMIT"))
+    cmd_submit(c);
+  else
+    err(c, "Unknown command");
 }
 
 int
@@ -107,21 +134,13 @@ process_command(struct conn *c)
 
 /*** INITIAL HANDSHAKE ***/
 
-static int
-user_exists_p(byte *user)
-{
-  byte *fn = stk_printf("solutions/%s/status", user);
-  struct stat st;
-  return !stat(fn, &st) && S_ISREG(st.st_mode);
-}
-
 static void
 execute_init(struct conn *c)
 {
   byte *user = obj_find_aval(c->request, 'U');
   if (!user)
     {
-      obj_set_attr(c->reply, '-', "Missing user");
+      err(c, "Missing user");
       return;
     }
   if (!c->cert_name ||
@@ -130,18 +149,17 @@ execute_init(struct conn *c)
     {
       if (!user_exists_p(user))
 	{
-	  obj_set_attr(c->reply, '-', "Unknown user");
+	  err(c, "Unknown user");
 	  return;
 	}
       log(L_INFO, "Logged in %s", user);
     }
   else
     {
-      obj_set_attr(c->reply, '-', "Permission denied");
+      err(c, "Permission denied");
       log(L_ERROR, "Unauthorized attempt to log in as %s", user);
       return;
     }
-  obj_set_attr(c->reply, '+', "OK");
   c->user = xstrdup(user);
 }
 
@@ -152,5 +170,5 @@ process_init(struct conn *c)
     return 0;
   execute_init(c);
   write_reply(c);
-  return !!obj_find_attr(c->reply, '+');
+  return !obj_find_attr(c->reply, '-');
 }

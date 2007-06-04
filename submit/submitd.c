@@ -7,6 +7,7 @@
 /*
  *  FIXME:
  *	- competition timeout & per-contestant exceptions
+ *	- open-data problems
  */
 
 #undef LOCAL_DEBUG
@@ -538,6 +539,7 @@ int main(int argc, char **argv)
   setproctitle_init(argc, argv);
   cf_def_file = "config";
   cf_declare_section("SubmitD", &submitd_conf, 0);
+  cf_declare_section("Tasks", &tasks_conf, 0);
 
   int opt;
   if ((opt = cf_getopt(argc, argv, CF_SHORT_OPTS, CF_NO_LONG_OPTS, NULL)) >= 0)

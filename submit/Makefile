@@ -9,9 +9,10 @@ CFLAGS+=-Wno-pointer-sign -Wdisabled-optimization -Wno-missing-field-initializer
 
 all: submitd connect
 
-submitd: submitd.o commands.o lib/libsh.a lib/libucw.a
+submitd: submitd.o commands.o tasks.o lib/libsh.a lib/libucw.a
 submitd.o: submitd.c submitd.h
 commands.o: commands.c submitd.h
+tasks.o: tasks.c submitd.h
 connect: connect.o lib/libucw.a
 connect.o: connect.c
 

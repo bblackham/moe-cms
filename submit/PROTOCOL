@@ -25,3 +25,18 @@ Hello request:
 Hello reply:
 
 	(only status)
+
+Submit request:
+
+	!SUBMIT
+	Ttask
+	Ssize
+	(after the request is ACK-ed, the client sends raw data and then server sends a 2nd reply)
+
+Submit reply:
+
+	(only status)
+
+Submit reply after data:
+
+	(only status)
