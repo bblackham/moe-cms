@@ -39,6 +39,8 @@ struct conn {
   struct mempool *pool;
   struct odes *request;
   struct odes *reply;
+  struct odes *task_status;
+  int task_lock_fd;
   byte *user;
 };
 
@@ -65,5 +67,9 @@ extern struct cf_section tasks_conf;
 
 struct task *task_find(byte *name);
 int user_exists_p(byte *user);
+void task_lock_status(struct conn *c);
+void task_unlock_status(struct conn *c, uns write_back);
+void task_submit(struct conn *c, struct task *t, struct fastbuf *fb, byte *filename);
+struct odes *task_status_find_task(struct conn *c, struct task *t);
 
 #endif

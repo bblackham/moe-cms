@@ -72,8 +72,7 @@ write_reply(struct conn *c)
       else
 	log(L_DEBUG, ">> ???");
     }
-  put_attr_set_type(BUCKET_TYPE_PLAIN);
-  bput_object(&c->tx_fb, c->reply);
+  obj_write(&c->tx_fb, c->reply, BUCKET_TYPE_PLAIN);
   bputc(&c->tx_fb, '\n');
   bflush(&c->tx_fb);
 }
@@ -85,6 +84,38 @@ err(struct conn *c, byte *msg)
 }
 
 /*** SUBMIT ***/
+
+static struct fastbuf *
+read_attachment(struct conn *c)
+{
+  uns size = obj_find_anum(c->request, 'S', 0);
+  if (size > max_attachment_size)
+    {
+      err(c, "Submission too large");
+      return NULL;
+    }
+  obj_set_attr(c->reply, '+', "Go on");
+  write_reply(c);
+  obj_set_attr(c->reply, '+', NULL);
+
+  // This is less efficient than bbcopy(), but we want our own error handling.
+  struct fastbuf *fb = bopen_tmp(4096);
+  byte buf[4096];
+  uns remains = size;
+  while (remains)
+    {
+      uns cnt = bread(&c->rx_fb, buf, MIN(remains, (uns)sizeof(buf)));
+      if (!cnt)
+	{
+	  bclose(fb);
+	  client_error("Truncated attachment");
+	}
+      bwrite(fb, buf, cnt);
+      remains -= cnt;
+    }
+  brewind(fb);
+  return fb;
+}
 
 static void
 cmd_submit(struct conn *c)
@@ -101,6 +132,19 @@ cmd_submit(struct conn *c)
       err(c, "No such task");
       return;
     }
+  struct fastbuf *fb = read_attachment(c);
+  if (!fb)
+    return;
+
+  // FIXME: Check contest time
+  // FIXME: Keep history of submitted tasks
+  // FIXME: File names
+
+  task_lock_status(c);
+  struct odes *o = task_status_find_task(c, task);
+  task_submit(c, task, fb, task->name);
+  log(L_INFO, "User %s submitted task %s", c->user, task->name);
+  task_unlock_status(c, 1);
 }
 
 /*** COMMAND MUX ***/

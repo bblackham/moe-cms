@@ -6,6 +6,7 @@ LDFLAGS=$(TLSLF)
 
 CC=gcc-4.1.1
 CFLAGS+=-Wno-pointer-sign -Wdisabled-optimization -Wno-missing-field-initializers
+LDFLAGS+=-lpthread	# FIXME: Use libucw without threads
 
 all: submitd connect
 
