@@ -32,33 +32,6 @@ if ($z =~ /TLS/) {
 	) or die "Cannot establish TLS connection: " . IO::Socket::SSL::errstr() . "\n";
 }
 
-sub sendobj($) {
-	my ($h) = @_;
-	foreach my $x (keys %{$h}) {
-		print $sk $x, $h->{$x}, "\n";
-	}
-	print $sk "\n";
-	# FIXME: flush
-};
-
-sub recvobj() {
-	my $h = {};
-	while (<$sk>) {
-		chomp;
-		/^(.)(.*)$/ || last;
-		$h->{$1} = $2;
-	}
-	if (defined $h->{'-'}) { die "-" . $h->{'-'} . "\n"; }
-	return $h;
-}
-
-sub printobj($) {
-	my ($h) = @_;
-	foreach my $x (keys %{$h}) {
-		print $x, $h->{$x}, "\n";
-	}
-}
-
 sub req($) {
 	my $x = shift @_;
 	$x->write($sk);
@@ -80,10 +53,17 @@ $req->set("U" => "testuser");
 req($req);
 $reply = reply();
 
+#$req = new Sherlock::Object;
+#$req->set("!" => "SUBMIT", "T" => "plans", "X" => "pas", "S" => 100);
+#req($req);
+#$reply = reply();
+#print $sk "<..................................................................................................>";
+#$reply = reply();
+
 $req = new Sherlock::Object;
 $req->set("!" => "STATUS");
 req($req);
 $reply = reply();
-$reply->write(*STDOUT);
+$reply->write_indented(*STDOUT);
 
 close $sk;
