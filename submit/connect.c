@@ -156,20 +156,36 @@ int main(int argc UNUSED, char **argv UNUSED)
   for (;;)
     {
       byte buf[1024];
-      if (!fgets(buf, sizeof(buf), stdin))
-	break;
-      int len = strlen(buf);
-      err = gnutls_record_send(s, buf, len); TLS_CHECK(gnutls_record_send);
-      err = gnutls_record_recv(s, buf, len); TLS_CHECK(gnutls_record_recv);
-      if (!err)
+      do
 	{
-	  log(L_INFO, "Connection closed");
-	  break;
+	  if (!fgets(buf, sizeof(buf), stdin))
+	    goto done;
+	  int len = strlen(buf);
+	  err = gnutls_record_send(s, buf, len); TLS_CHECK(gnutls_record_send);
 	}
-      fwrite(buf, 1, err, stdout);
+      while (buf[0] != '\n');
+      int last = 0;
+      for (;;)
+	{
+	  err = gnutls_record_recv(s, buf, sizeof(buf)); TLS_CHECK(gnutls_record_recv);
+	  if (!err)
+	    {
+	      log(L_INFO, "Connection closed");
+	      break;
+	    }
+	  fwrite(buf, 1, err, stdout);
+	  for (int i=0; i<err; i++)
+	    {
+	      if (buf[i] == '\n' && last == '\n')
+		goto next;
+	      last = buf[i];
+	    }
+	}
+next:
       fflush(stdout);
     }
 
+done:
   gnutls_bye(s, GNUTLS_SHUT_RDWR);
   close(sk);
   gnutls_deinit(s);

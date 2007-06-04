@@ -14,8 +14,6 @@
 #include "lib/lib.h"
 #include "lib/conf.h"
 #include "lib/getopt.h"
-#include "lib/ipaccess.h"
-#include "lib/fastbuf.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -27,8 +25,8 @@
 #include <sys/wait.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
-#include <gnutls/gnutls.h>
-#include <gnutls/x509.h>
+
+#include "submitd.h"
 
 /*** CONFIGURATION ***/
 
@@ -40,14 +38,10 @@ static byte *ca_cert_name = "?";
 static byte *server_cert_name = "?";
 static byte *server_key_name = "?";
 static clist access_rules;
-
-struct access_rule {
-  cnode n;
-  struct ip_addrmask addrmask;
-  uns allow_admin;
-  uns plain_text;
-  uns max_conn;
-};
+static uns trace_tls;
+uns max_request_size;
+uns max_attachment_size;
+uns trace_commands;
 
 static struct cf_section access_conf = {
   CF_TYPE(struct access_rule),
@@ -74,26 +68,19 @@ static struct cf_section submitd_conf = {
     CF_UNS("DHBits", &dh_bits),
     CF_UNS("MaxConn", &max_conn),
     CF_UNS("SessionTimeout", &session_timeout),
+    CF_UNS("MaxRequestSize", &max_request_size),
+    CF_UNS("MaxAttachSize", &max_attachment_size),
     CF_STRING("CACert", &ca_cert_name),
     CF_STRING("ServerCert", &server_cert_name),
     CF_STRING("ServerKey", &server_key_name),
     CF_LIST("Access", &access_rules, &access_conf),
+    CF_UNS("TraceTLS", &trace_tls),
+    CF_UNS("TraceCommands", &trace_commands),
     CF_END
   }
 };
 
 /*** CONNECTIONS ***/
-
-struct conn {
-  cnode n;
-  u32 ip;				// Used by the main loop connection logic
-  pid_t pid;
-  uns id;
-  struct access_rule *rule;		// Rule matched by this connection
-  int sk;				// Client socket
-  gnutls_session_t tls;			// TLS session
-  struct fastbuf rx_fb, tx_fb;		// Fastbufs for communication with the client
-};
 
 static clist connections;
 static uns last_conn_id;
@@ -108,7 +95,7 @@ conn_init(void)
 static struct conn *
 conn_new(void)
 {
-  struct conn *c = xmalloc(sizeof(*c));
+  struct conn *c = xmalloc_zero(sizeof(*c));
   c->id = ++last_conn_id;
   clist_add_tail(&connections, &c->n);
   num_conn++;
@@ -187,8 +174,9 @@ tls_new_session(int sk)
 }
 
 static const char *
-tls_verify_cert(gnutls_session_t s)
+tls_verify_cert(struct conn *c)
 {
+  gnutls_session_t s = c->tls;
   uns status, num_certs;
   int err;
   gnutls_x509_crt_t cert;
@@ -223,7 +211,9 @@ tls_verify_cert(gnutls_session_t s)
   err = gnutls_x509_crt_get_dn_by_oid(cert, GNUTLS_OID_X520_COMMON_NAME, 0, 0, dn, &dn_len);
   if (err < 0)
     return "Cannot retrieve common name";
-  log(L_INFO, "Cert CN: %s", dn);
+  if (trace_tls)
+    log(L_INFO, "Cert CN: %s", dn);
+  c->cert_name = xstrdup(dn);
 
   /* Check certificate purpose */
   byte purp[256];
@@ -244,8 +234,11 @@ tls_verify_cert(gnutls_session_t s)
 }
 
 static void
-tls_log_params(gnutls_session_t s)
+tls_log_params(struct conn *c)
 {
+  if (!trace_tls)
+    return;
+  gnutls_session_t s = c->tls;
   const char *proto = gnutls_protocol_get_name(gnutls_protocol_get_version(s));
   const char *kx = gnutls_kx_get_name(gnutls_kx_get(s));
   const char *cert = gnutls_certificate_type_get_name(gnutls_certificate_type_get(s));
@@ -258,7 +251,7 @@ tls_log_params(gnutls_session_t s)
 
 /*** SOCKET FASTBUFS ***/
 
-static void NONRET
+void NONRET
 client_error(char *msg, ...)
 {
   va_list args;
@@ -383,22 +376,23 @@ client_loop(struct conn *c)
       int err = gnutls_handshake(c->tls);
       if (err < 0)
 	client_error("TLS handshake failed: %s", gnutls_strerror(err));
-      tls_log_params(c->tls);
-      const char *cert_err = tls_verify_cert(c->tls);
+      tls_log_params(c);
+      const char *cert_err = tls_verify_cert(c);
       if (cert_err)
 	client_error("TLS certificate failure: %s", cert_err);
       init_tls_fastbufs(c);
     }
 
-  for (;;)
-    {
-      alarm(session_timeout);
-      byte buf[1024];
-      if (!bgets(&c->rx_fb, buf, sizeof(buf)))
-	break;
-      bputsn(&c->tx_fb, buf);
-      bflush(&c->tx_fb);
-    }
+  alarm(session_timeout);
+  if (!process_init(c))
+    log(L_ERROR, "Protocol handshake failed");
+  else
+    for (;;)
+      {
+	alarm(session_timeout);
+	if (!process_command(c))
+	  break;
+      }
 
   if (c->tls)
     gnutls_bye(c->tls, GNUTLS_SHUT_WR);
