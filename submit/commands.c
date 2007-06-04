@@ -6,8 +6,12 @@
 
 #include "lib/lib.h"
 #include "lib/mempool.h"
+#include "lib/simple-lists.h"
+#include "lib/stkstring.h"
 #include "sherlock/object.h"
 #include "sherlock/objread.h"
+
+#include <time.h>
 
 #include "submitd.h"
 
@@ -83,6 +87,44 @@ err(struct conn *c, byte *msg)
   obj_set_attr(c->reply, '-', msg);
 }
 
+/*** STATUS ***/
+
+static void
+copy_attrs(struct odes *dest, struct odes *src)
+{
+  for (struct oattr *a = src->attrs ; a; a=a->next)
+    for (struct oattr *aa = a; aa; aa=aa->same)
+      obj_add_attr(dest, aa->attr, aa->val);
+}
+
+static void
+cmd_status(struct conn *c)
+{
+  uns verbose = obj_find_anum(c->request, 'V', 0);
+  task_load_status(c);
+
+  CLIST_FOR_EACH(struct task *, t, task_list)
+    {
+      struct odes *to = task_status_find_task(c, t, 1);
+      struct odes *tr = obj_add_son(c->reply, 'T' + OBJ_ATTR_SON);
+      copy_attrs(tr, to);
+      CLIST_FOR_EACH(simp_node *, p, t->parts)
+	{
+	  struct odes *po = task_status_find_part(to, p->s, 1);
+	  struct odes *pr = obj_add_son(tr, 'P' + OBJ_ATTR_SON);
+	  copy_attrs(pr, po);
+	  uns current_ver = obj_find_anum(po, 'V', 0);
+	  for (struct oattr *v = obj_find_attr(po, 'V' + OBJ_ATTR_SON); v; v=v->same)
+	    {
+	      struct odes *vo = v->son;
+	      uns ver = obj_find_anum(vo, 'V', 0);
+	      if (ver == current_ver || verbose)
+		obj_add_son_ref(pr, 'V' + OBJ_ATTR_SON, vo);
+	    }
+	}
+    }
+}
+
 /*** SUBMIT ***/
 
 static struct fastbuf *
@@ -132,19 +174,69 @@ cmd_submit(struct conn *c)
       err(c, "No such task");
       return;
     }
+
+  byte *pname = obj_find_aval(c->request, 'P');
+  if (!pname)
+    {
+      simp_node *s = clist_head(&task->parts);
+      ASSERT(s);
+      pname = s->s;
+    }
+  else if (!part_exists_p(task, pname))
+    {
+      err(c, "No such task part");
+      return;
+    }
+
+  byte *ext = obj_find_aval(c->request, 'X');
+  if (!ext || !ext_exists_p(task, ext))
+    {
+      err(c, "Missing or invalid extension");
+      return;
+    }
+
   struct fastbuf *fb = read_attachment(c);
   if (!fb)
     return;
 
   // FIXME: Check contest time
   // FIXME: Keep history of submitted tasks
-  // FIXME: File names
 
   task_lock_status(c);
-  struct odes *o = task_status_find_task(c, task);
-  task_submit(c, task, fb, task->name);
-  log(L_INFO, "User %s submitted task %s", c->user, task->name);
+  struct odes *tasko = task_status_find_task(c, task, 1);
+  struct odes *parto = task_status_find_part(tasko, pname, 1);
+  uns current_ver = obj_find_anum(parto, 'V', 0);
+  uns last_ver = 0;
+  uns replaced_ver = 0;
+  for (struct oattr *a = obj_find_attr(parto, 'V' + OBJ_ATTR_SON); a; a=a->same)
+    {
+      uns ver = obj_find_anum(a->son, 'V', 0);
+      byte *ext = obj_find_aval(a->son, 'X');
+      ASSERT(ver && ext);
+      last_ver = MAX(last_ver, ver);
+      if (ver == current_ver)
+        {
+	  task_delete_part(c->user, tname, pname, ext, ver);
+	  obj_set_attr(a->son, 'S', "replaced");
+	  replaced_ver = current_ver;
+	}
+    }
+  struct odes *vero = obj_add_son(parto, 'V' + OBJ_ATTR_SON);
+  obj_set_attr_num(vero, 'V', ++last_ver);
+  obj_set_attr_num(vero, 'T', time(NULL));
+  obj_set_attr(vero, 'S', "submitted");
+  obj_set_attr(vero, 'X', ext);
+  // FIXME: hash
+  // FIXME: remove old versions from the status file?
+  task_submit_part(c->user, tname, pname, ext, last_ver, fb);
+  obj_set_attr_num(parto, 'V', last_ver);
   task_unlock_status(c, 1);
+
+  log(L_INFO, "User %s submitted task %s%s (version %d%s)",
+	c->user, tname,
+	(strcmp(tname, pname) ? stk_printf("/%s", pname) : ""),
+	last_ver,
+	(replaced_ver ? stk_printf(", replaced %d", replaced_ver) : ""));
 }
 
 /*** COMMAND MUX ***/
@@ -162,6 +254,8 @@ execute_command(struct conn *c)
     log(L_DEBUG, "<< %s", cmd);
   if (!strcasecmp(cmd, "SUBMIT"))
     cmd_submit(c);
+  else if (!strcasecmp(cmd, "STATUS"))
+    cmd_status(c);
   else
     err(c, "Unknown command");
 }

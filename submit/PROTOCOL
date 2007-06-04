@@ -30,7 +30,9 @@ Submit request:
 
 	!SUBMIT
 	Ttask
+	Ppart			<-- optional part ID
 	Ssize
+	Xextension
 	(after the request is ACK-ed, the client sends raw data and then server sends a 2nd reply)
 
 Submit reply:
@@ -40,3 +42,21 @@ Submit reply:
 Submit reply after data:
 
 	(only status)
+
+
+Task status objects
+~~~~~~~~~~~~~~~~~~~
+(T				<-- task
+	Tname
+	(P			<-- task part
+		Pname
+		Vid		<-- which version is current
+		(V		<-- submitted version
+			Vid
+			Tsubmit_time
+			Sstatus
+			Hhash
+			Xextension
+		)
+	)
+)

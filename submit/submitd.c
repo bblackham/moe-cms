@@ -55,15 +55,7 @@ static struct cf_section access_conf = {
   }
 };
 
-static byte *
-config_init(void)
-{
-  clist_init(&access_rules);
-  return NULL;
-}
-
 static struct cf_section submitd_conf = {
-  CF_INIT(config_init),
   CF_ITEMS {
     CF_UNS("Port", &port),
     CF_UNS("DHBits", &dh_bits),

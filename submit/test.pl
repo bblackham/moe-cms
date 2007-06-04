@@ -29,7 +29,44 @@ if ($z =~ /TLS/) {
 	) or die "Cannot establish TLS connection: " . IO::Socket::SSL::errstr() . "\n";
 }
 
-print $sk "Hello, world!\n";
-my $y = <$sk>;
-print $y;
+sub sendobj($) {
+	my ($h) = @_;
+	foreach my $x (keys %{$h}) {
+		print $sk $x, $h->{$x}, "\n";
+	}
+	print $sk "\n";
+	# FIXME: flush
+};
+
+sub recvobj() {
+	my $h = {};
+	while (<$sk>) {
+		chomp;
+		/^(.)(.*)$/ || last;
+		$h->{$1} = $2;
+	}
+	if (defined $h->{'-'}) { die "-" . $h->{'-'} . "\n"; }
+	return $h;
+}
+
+sub printobj($) {
+	my ($h) = @_;
+	foreach my $x (keys %{$h}) {
+		print $x, $h->{$x}, "\n";
+	}
+}
+
+sendobj({ 'U' => 'testuser' });
+recvobj();
+
+#sendobj({ '!' => 'SUBMIT', 'T' => 'plans', 'S' => 100, 'X' => 'c' });
+#recvobj();
+#print $sk "<";
+#foreach my $x (1..98) { print $sk "."; }
+#print $sk ">";
+#recvobj();
+
+sendobj({ '!' => 'STATUS' });
+printobj(recvobj());
+
 close $sk;
