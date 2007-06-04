@@ -43,6 +43,17 @@ Submit reply after data:
 
 	(only status)
 
+Status request:
+
+	!STATUS
+
+Status reply:
+
+	task status objects defined below with the following added:
+	(T
+		Aallowed_extension
+	)
+
 
 Task status objects
 ~~~~~~~~~~~~~~~~~~~

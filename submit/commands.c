@@ -108,6 +108,8 @@ cmd_status(struct conn *c)
       struct odes *to = task_status_find_task(c, t, 1);
       struct odes *tr = obj_add_son(c->reply, 'T' + OBJ_ATTR_SON);
       copy_attrs(tr, to);
+      CLIST_FOR_EACH(simp_node *, x, *t->extensions)
+	obj_add_attr(tr, 'A', x->s);
       CLIST_FOR_EACH(simp_node *, p, t->parts)
 	{
 	  struct odes *po = task_status_find_part(to, p->s, 1);
