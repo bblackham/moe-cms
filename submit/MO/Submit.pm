@@ -11,17 +11,20 @@ use IO::Socket::SSL; # qw(debug3);
 use Sherlock::Object;
 
 sub new($) {
+	my $user = $ENV{"USER"} or die "Environment variable USER not set\n";
+	my $home = $ENV{"HOME"} or die "Environment variable HOME not set\n";
+	my $mo = "$home/.mo";
+	my $root = $ENV{"MO_ROOT"} or die "Environment variable MO_ROOT not set\n";
 	my $self = {
 		"Server" => "localhost:8888",
-		"Key" => "client-key.pem",
-		"Cert" => "client-cert.pem",
-		"CACert" => "ca-cert.pem",
-		"Trace" => 0,
-		"user" => "testuser",
+		"Key" => "$mo/key.pem",
+		"Cert" => "$mo/cert.pem",
+		"CACert" => "$mo/ca-cert.pem",
+		"Trace" => defined $ENV{"MO_SUBMIT_TRACE"},
+		"user" => $user,
 		"sk" => undef,
 		"error" => undef,
 	};
-	# FIXME: Read config file
 	return bless $self;
 }
 
@@ -86,9 +89,9 @@ sub connect($) {
 			$sk,
 			SSL_version => 'TLSv1',
 			SSL_use_cert => 1,
-			SSL_key_file => "client-key.pem",
-			SSL_cert_file => "client-cert.pem",
-			SSL_ca_file => "ca-cert.pem",
+			SSL_key_file => $self->{"Key"},
+			SSL_cert_file => $self->{"Cert"},
+			SSL_ca_file => $self->{"CACert"},
 			SSL_verify_mode => 3,
 		);
 		if (!defined $sk) {
