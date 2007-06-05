@@ -16,6 +16,7 @@ sub new($) {
 		"Key" => "client-key.pem",
 		"Cert" => "client-cert.pem",
 		"CACert" => "ca-cert.pem",
+		"Trace" => 0,
 		"user" => "testuser",
 		"sk" => undef,
 		"error" => undef,
@@ -24,15 +25,21 @@ sub new($) {
 	return bless $self;
 }
 
+sub DESTROY($) {
+	my $self = shift @_;
+	$self->disconnect;
+}
+
 sub log($$) {
 	my ($self, $msg) = @_;
-	print STDERR "LOG: $msg\n";
+	print STDERR "LOG: $msg\n" if $self->{"Trace"};
 }
 
 sub err($$) {
 	my ($self, $msg) = @_;
-	print STDERR "ERROR: $msg\n";
+	print STDERR "ERROR: $msg\n" if $self->{"Trace"};
 	$self->{"error"} = $msg;
+	$self->disconnect;
 }
 
 sub is_connected($) {
@@ -51,7 +58,7 @@ sub disconnect($) {
 
 sub connect($) {
 	my $self = shift @_;
-	!defined $self->{"sk"} or close $self->{"sk"};
+	$self->disconnect;
 	$self->log("Connecting to submit server");
 	my $sk = new IO::Socket::INET(
 		PeerAddr => $self->{"Server"},
@@ -97,7 +104,6 @@ sub connect($) {
 	my $err = $reply->get("-");
 	if (defined $err) {
 		$self->err("Cannot log in: $err");
-		$self->disconnect;
 		return undef;
 	}
 
@@ -109,6 +115,10 @@ sub request($$) {
 	my ($self, $obj) = @_;
 	my $sk = $self->{"sk"};
 	$obj->write($sk);	### FIXME: Flushing
+	if ($sk->error) {
+		$self->err("Connection broken");
+		return undef;
+	}
 	print $sk "\n";
 	return $self->reply;
 }
@@ -123,6 +133,26 @@ sub reply($) {
 		$self->err("Connection broken");
 		return undef;
 	}
+}
+
+sub send_file($$$) {
+	my ($self, $fh, $size) = @_;
+	my $sk = $self->{"sk"};
+	while ($size) {
+		my $l = ($size < 4096 ? $size : 4096);
+		my $buf = "";
+		if ($fh->read($buf, $l) != $l) {
+			$self->err("File shrunk during upload");
+			return undef;
+		}
+		$sk->write($buf, $l);
+		if ($sk->error) {
+			$self->err("Connection broken");
+			return undef;
+		}
+		$size -= $l;
+	}
+	return $self->reply;
 }
 
 1;
