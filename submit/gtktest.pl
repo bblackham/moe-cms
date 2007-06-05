@@ -25,6 +25,7 @@ my $box = Gtk2::HBox->new();
 $box->pack_start_defaults($b1);
 $box->pack_start_defaults($b2);
 $box->pack_start_defaults($b3);
+$box->set_border_width(5);
 
 my $bb = Gtk2::Button->new ('Brum!');
 $bb->signal_connect (clicked => sub {
@@ -47,6 +48,15 @@ my $col = Gtk2::TreeViewColumn->new_with_attributes("Int", $rend, "text", 0);
 $tree->append_column($col);
 $col = Gtk2::TreeViewColumn->new_with_attributes("String", $rend, "text", 1);
 $tree->append_column($col);
+$tree->set_headers_visible(0);
+
+my $lay = Gtk2::ScrolledWindow->new;
+$lay->set_policy("automatic", "automatic");
+$lay->add($tree);
+$lay->set_border_width(5);
+
+my $frame = Gtk2::Frame->new("A list");
+$frame->add($lay);
 
 my $sel = $tree->get_selection;
 $sel->set_mode('single');
@@ -55,10 +65,6 @@ $sel->signal_connect(changed => sub {
 	my $val = $store->get($iter, 0);
 	print "Selected $val\n";
 	});
-
-my $lay = Gtk2::ScrolledWindow->new;
-$lay->set_policy("automatic", "automatic");
-$lay->add($tree);
 
 my $lab = Gtk2::Label->new;
 $lab->set_markup("<span size='x-large'>Welcome to the Cave</span>");
@@ -70,7 +76,7 @@ $bar->push($barctx, "Ready");
 my $bbox = Gtk2::VBox->new();
 $bbox->pack_start($lab, 0, 0, 0);
 $bbox->pack_start($box, 0, 0, 0);
-$bbox->pack_start($lay, 1, 1, 0);
+$bbox->pack_start($frame, 1, 1, 0);
 $bbox->pack_start($bb, 0, 0, 0);
 $bbox->pack_start($bar, 0, 0, 0);
 
@@ -81,7 +87,7 @@ $window->set_default_size(320, 400);
 $window->add ($bbox);
 $window->show_all;
 
-$window->window->set_cursor($cursor);
+#$window->window->set_cursor($cursor);
 #$window->window->set_cursor(undef);
 
 Gtk2->main;
