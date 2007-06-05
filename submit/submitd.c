@@ -4,12 +4,6 @@
  *  (c) 2007 Martin Mares <mj@ucw.cz>
  */
 
-/*
- *  FIXME:
- *	- competition timeout & per-contestant exceptions
- *	- open-data problems
- */
-
 #undef LOCAL_DEBUG
 
 #include "lib/lib.h"
