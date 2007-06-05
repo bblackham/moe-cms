@@ -23,6 +23,7 @@ my $conn = new MO::Submit;
 sub init_refresh();
 sub timed_refresh();
 sub refresh($);
+sub submit();
 
 my $busy_cursor = Gtk2::Gdk::Cursor->new('watch');
 
@@ -39,7 +40,7 @@ $title_lab->set_markup("<span size='x-large'>" . $conn->{"Contest"} . "</span>")
 
 # The row of buttons
 my $b_submit = Gtk2::Button->new('Submit');
-$b_submit->signal_connect(clicked => sub { Gtk2->main_quit });
+$b_submit->signal_connect(clicked => \&submit);
 $b_submit->set_sensitive(0);
 
 my $b_check = Gtk2::Button->new('Check');
@@ -81,7 +82,6 @@ $task_sel->signal_connect(changed => sub {
 	my $iter = $_[0]->get_selected;
 	if ($iter) {
 		$selected_task = $task_store->get($iter, 0);
-		print "Selected $selected_task\n";
 		$b_submit->set_sensitive(1);
 		$b_check->set_sensitive(1);
 	} else {
@@ -105,7 +105,7 @@ $window->add($vbox);
 $window->signal_connect("expose-event" => sub { init_refresh(); return 0; });
 $window->show_all;
 
-### ACTIONS ###
+### REFRESHING ###
 
 my $last_status_id;
 
@@ -231,6 +231,46 @@ sub refresh($)
 		$conn->log("Retrying");
 		refresh(1);
 	}
+}
+
+### SUBMITTING ###
+
+my $subwin;
+
+sub end_submit($) {
+	my ($close) = @_;
+	# $subwin->signal_emit("delete-event");
+}
+
+sub submit() {
+	## FIXME: Stop the status timer?
+	$subwin = Gtk2::Window->new('toplevel');
+	$subwin->set_modal(1);
+	$subwin->set_transient_for($window);
+	$subwin->set_destroy_with_parent(1);
+	$subwin->set_title("Submit task $selected_task");
+	$subwin->set_wmclass("submitter", "Submitter");
+	$subwin->signal_connect("delete-event" => sub { end_submit(0) });
+
+	my $bb_submit = Gtk2::Button->new('Submit');
+	$bb_submit->signal_connect(clicked => sub { end_submit(1) });
+	#$bb_submit->set_sensitive(0);
+
+	my $bb_cancel = Gtk2::Button->new('Cancel');
+	$bb_cancel->signal_connect(clicked => sub { end_submit(1) });
+
+	my $bbutton_box = Gtk2::HBox->new;
+	$bbutton_box->pack_start_defaults($bb_submit);
+	$bbutton_box->pack_start_defaults($bb_cancel);
+	$bbutton_box->set_border_width(5);
+
+	$subwin->add($bbutton_box);
+	$subwin->show_all;
+
+	#my $dialog = Gtk2::MessageDialog->new($window, [qw/modal destroy-with-parent/], 'question', 'ok-cancel', "So what?");
+	#$dialog->set_default_response("ok");
+	#$dialog->signal_connect (response => sub { $_[0]->destroy });
+	#$dialog->show_all;
 }
 
 ### MAIN ###
