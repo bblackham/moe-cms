@@ -13,6 +13,7 @@ use lib $ENV{"MO_ROOT"} . "/submit/lib/perl5";
 
 use MO::Submit;
 use Sherlock::Object;
+use POSIX;
 use Gtk2 -init;
 
 my $conn = new MO::Submit;
@@ -30,7 +31,7 @@ my $window = Gtk2::Window->new('toplevel');
 $window->signal_connect("delete-event" => sub { Gtk2->main_quit });
 $window->set_title($conn->{"Contest"} . " Submitter");
 $window->set_wmclass("submitter", "Submitter");
-$window->set_default_size(320, 400);
+$window->set_default_size(640, 480);
 
 # The title label
 my $title_lab = Gtk2::Label->new;
@@ -55,16 +56,14 @@ $button_box->pack_start_defaults($b_refresh);
 $button_box->set_border_width(5);
 
 # The list of tasks
-my $task_store = Gtk2::ListStore->new('Glib::String', 'Glib::String', 'Glib::String');
+my $task_store = Gtk2::ListStore->new('Glib::String', 'Glib::String');
 
 my $task_view = Gtk2::TreeView->new($task_store);
 my $task_renderer = Gtk2::CellRendererText->new;
 my $task_col1 = Gtk2::TreeViewColumn->new_with_attributes("Task", $task_renderer, "text", 0);
 $task_view->append_column($task_col1);
-my $task_col2 = Gtk2::TreeViewColumn->new_with_attributes("Part", $task_renderer, "text", 1);
+my $task_col2 = Gtk2::TreeViewColumn->new_with_attributes("Status", $task_renderer, "text", 1);
 $task_view->append_column($task_col2);
-my $task_col3 = Gtk2::TreeViewColumn->new_with_attributes("Status", $task_renderer, "text", 2);
-$task_view->append_column($task_col3);
 $task_view->set_headers_visible(0);
 
 my $task_scroll = Gtk2::ScrolledWindow->new;
@@ -106,10 +105,6 @@ $window->add($vbox);
 $window->signal_connect("expose-event" => sub { init_refresh(); return 0; });
 $window->show_all;
 
-Glib::Timeout->add(5000, \&timed_refresh);
-Gtk2->main;
-exit 0;
-
 ### ACTIONS ###
 
 my $last_status_id;
@@ -149,24 +144,61 @@ sub timed_refresh()
 }
 
 my $task_status_object;
-my $task_parts = {};
+my @task_parts = ();
+my @task_stat = ();
 
 sub recalc_task_list() {
-	$task_parts = {};
-	$task_store->clear;
+	my @new_tp = ();
+	my @new_stat = ();
 	foreach my $t ($task_status_object->getarray("(T")) {
 		my $task = $t->get("T");
 		foreach my $p ($t->getarray("(P")) {
 			my $part = $p->get("P");
-			$task_parts->{$task}->{$part} = $p;
+			my $taskpart = ($task eq $part) ? $task : "$task/$part";
+			push @new_tp, $taskpart;
 			my $status = "---";
-			my $iter = $task_store->append;
-			$task_store->set($iter,
-				0, $task,
-				1, ($task eq $part ? "" : $part),
-				2, $status);
+			my $current_ver = $p->get("V");
+			foreach my $v ($p->getarray("(V")) {
+				if ($v->get("V") == $current_ver) {
+					my $time = strftime("%H:%M:%S", localtime $v->get("T"));
+					$status = "OK (" .
+						"$part." . $v->get("X") . ", " .
+						$v->get("L") . " bytes, " .
+						$v->get("S") . " $time)";
+					last;
+				}
+			}
+			push @new_stat, $status;
 		}
 	}
+
+	if (join("\n", @new_tp) ne join("\n", @task_parts)) {
+		# The tasks have changed, repopulate the whole structure
+		$task_store->clear;
+		my @s = @new_stat;
+		foreach my $taskpart (@new_tp) {
+			my $iter = $task_store->append;
+			$task_store->set($iter,
+				0, $taskpart,
+				1, shift @s);
+		}
+	} else {
+		# Update the task status
+		my @s = @task_stat;
+		my @ns = @new_stat;
+		$task_store->foreach(sub {
+			my ($obj, $path, $iter) = @_;
+			if ($s[0] ne $ns[0]) {
+				$task_store->set($iter, 1, $ns[0]);
+			}
+			shift @s;
+			shift @ns;
+			return 0;
+		});
+	}
+
+	@task_parts = @new_tp;
+	@task_stat = @new_stat;
 }
 
 sub refresh($)
@@ -200,3 +232,9 @@ sub refresh($)
 		refresh(1);
 	}
 }
+
+### MAIN ###
+
+Glib::Timeout->add(5000, \&timed_refresh);
+Gtk2->main;
+exit 0;

@@ -41,7 +41,7 @@ foreach my $t ($r->getarray("(T")) {
 		my $current_ver = $p->get("V");
 		my $printed = 0;
 		foreach my $v ($p->getarray("(V")) {
-			if ($v && $v->get("V") == $current_ver) {
+			if ($v->get("V") == $current_ver) {
 				my $time = strftime("%H:%M:%S", localtime $v->get("T"));
 				print "OK (",
 					"$part.", $v->get("X"), ", ",
