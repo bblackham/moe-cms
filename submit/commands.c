@@ -202,9 +202,6 @@ cmd_submit(struct conn *c)
   if (!fb)
     return;
 
-  // FIXME: Check contest time
-  // FIXME: Keep history of submitted tasks
-
   task_lock_status(c);
   struct odes *tasko = task_status_find_task(c, task, 1);
   struct odes *parto = task_status_find_part(tasko, pname, 1);
@@ -230,8 +227,6 @@ cmd_submit(struct conn *c)
   obj_set_attr_num(vero, 'L', obj_find_anum(c->request, 'S', 0));
   obj_set_attr(vero, 'S', "submitted");
   obj_set_attr(vero, 'X', ext);
-  // FIXME: hash
-  // FIXME: remove old versions from the status file?
   task_submit_part(c->user, tname, pname, ext, last_ver, fb);
   obj_set_attr_num(parto, 'V', last_ver);
   task_unlock_status(c, 1);

@@ -1,0 +1,6 @@
+- MO_ROOT vs. MO_PUBLIC
+
+submitd:
+- Checking of contest time
+- Keeping history and pruning status files
+- Remember hashes
