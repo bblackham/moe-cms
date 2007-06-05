@@ -30,16 +30,10 @@ $r = $conn->request($r);
 or_die($r);
 #$r->write_indented(*STDOUT);
 
-my %tasks = map { $_->get("T") => $_ } $r->getarray("(T");
-foreach my $task (sort keys %tasks) {
-	my $t = $tasks{$task};
-	my %parts = map { $_->get("P") => $_ } $t->getarray("(P");
-	my @pp = keys %parts;
-	if (@pp != 1) {
-		@pp = sort { $a <=> $b } @pp;	# We expect that the parts are numeric
-	}
-	foreach my $part (@pp) {
-		my $p = $parts{$part};
+foreach my $t ($r->getarray("(T")) {
+	my $task = $t->get("T");
+	foreach my $p ($t->getarray("(P")) {
+		my $part = $p->get("P");
 		my $name = $task;
 		$part eq $task or $name .= "/$part";
 		printf "%-16s", $name;
