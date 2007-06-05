@@ -93,8 +93,9 @@ static void
 copy_attrs(struct odes *dest, struct odes *src)
 {
   for (struct oattr *a = src->attrs ; a; a=a->next)
-    for (struct oattr *aa = a; aa; aa=aa->same)
-      obj_add_attr(dest, aa->attr, aa->val);
+    if (a->attr < OBJ_ATTR_SON)
+      for (struct oattr *aa = a; aa; aa=aa->same)
+	obj_add_attr(dest, aa->attr, aa->val);
 }
 
 static void
@@ -226,6 +227,7 @@ cmd_submit(struct conn *c)
   struct odes *vero = obj_add_son(parto, 'V' + OBJ_ATTR_SON);
   obj_set_attr_num(vero, 'V', ++last_ver);
   obj_set_attr_num(vero, 'T', time(NULL));
+  obj_set_attr_num(vero, 'L', obj_find_anum(c->request, 'S', 0));
   obj_set_attr(vero, 'S', "submitted");
   obj_set_attr(vero, 'X', ext);
   // FIXME: hash
