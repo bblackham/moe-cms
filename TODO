@@ -8,7 +8,6 @@ interactive tasks: logging of messages
 Environment
 ~~~~~~~~~~~
 fpc: add switch -gl (runtime errors write line#)
-check versions of g++
 
 Distribution:
 ~~~~~~~~~~~~~
@@ -21,3 +20,10 @@ Distribution:
 - pripsat do guide.tex, ze se rhide nema spoustet z mc
 - rhide: backslashe na konci radku v Pascalu -> strange compilation error
 - problemy s gpm po nastaveni fontu
+
+New submitter:
+- MO_ROOT vs. MO_PUBLIC
+- Checking of contest time (and per-contestant exceptions)
+- Keeping history and pruning status files
+- Remember hashes
+- create tmp directory
