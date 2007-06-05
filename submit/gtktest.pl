@@ -11,6 +11,8 @@ sub timer {
 }
 Glib::Timeout->add(5000, \&timer);
 
+my $cursor = Gtk2::Gdk::Cursor->new('watch');
+
 my $window = Gtk2::Window->new ('toplevel');
 
 my $b1 = Gtk2::Button->new ('Quit');
@@ -31,6 +33,7 @@ $bb->signal_connect (clicked => sub {
 		$dialog->signal_connect (response => sub { $_[0]->destroy });
 		$dialog->show_all;
 	});
+#$bb->set_sensitive(0);
 
 my $store = Gtk2::ListStore->new('Glib::Uint', 'Glib::String');
 for (my $i=0; $i<10; $i++) {
@@ -60,14 +63,25 @@ $lay->add($tree);
 my $lab = Gtk2::Label->new;
 $lab->set_markup("<span size='x-large'>Welcome to the Cave</span>");
 
+my $bar = Gtk2::Statusbar->new;
+my $barctx = $bar->get_context_id('xyzzy');
+$bar->push($barctx, "Ready");
+
 my $bbox = Gtk2::VBox->new();
-$bbox->pack_start_defaults($lab);
-$bbox->pack_start_defaults($box);
-$bbox->pack_start_defaults($lay);
-$bbox->pack_start_defaults($bb);
+$bbox->pack_start($lab, 0, 0, 0);
+$bbox->pack_start($box, 0, 0, 0);
+$bbox->pack_start($lay, 1, 1, 0);
+$bbox->pack_start($bb, 0, 0, 0);
+$bbox->pack_start($bar, 0, 0, 0);
 
 $window->signal_connect ("delete-event" => sub { Gtk2->main_quit });
-$window->set ("title" => "Brum");
+$window->set_title("Brum");
+$window->set_wmclass("submit", "Submit");
+$window->set_default_size(320, 400);
 $window->add ($bbox);
 $window->show_all;
+
+$window->window->set_cursor($cursor);
+#$window->window->set_cursor(undef);
+
 Gtk2->main;
