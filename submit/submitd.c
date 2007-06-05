@@ -523,7 +523,7 @@ reject2: ;
 int main(int argc, char **argv)
 {
   setproctitle_init(argc, argv);
-  cf_def_file = "config";
+  cf_def_file = "submit/config";
   cf_declare_section("SubmitD", &submitd_conf, 0);
   cf_declare_section("Tasks", &tasks_conf, 0);
 

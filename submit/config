@@ -1,0 +1,68 @@
+# Configuration file for the submit server
+
+SubmitD {
+
+# Port number
+Port			8888
+
+# Maximum number of connections allowed
+MaxConn			4
+
+# Time in seconds after which inactive connections are closed (0=none)
+SessionTimeout		300
+
+# Maximum size of a request
+MaxRequestSize		4K
+
+# Maximum size of an attachment (i.e., a submitted solution)
+MaxAttachSize		256K
+
+# Number of bits for the Diffie-Hellman key exchange
+DHBits			1024
+
+# Certificate of our internal CA which is used to validate all contestants
+CACert			certs/ca-cert.pem
+
+# The certificate (issued by our CA) and secret key for this server
+ServerCert		certs/server-cert.pem
+ServerKey		certs/server-key.pem
+
+# Rules for accepting connections (first matching rule is used)
+Access {
+	# IP address range matched by this rule
+	IP		127.0.0.1
+
+	# Administrator access allowed
+	Admin		1
+
+	# Plain-text connections without any user authentication allowed
+	PlainText	0
+
+	# Maximum number of connections per IP address allowed
+	MaxConn		1
+}
+
+# Trace TLS parameters
+TraceTLS		1
+
+# Trace command and their results
+TraceCommands		1
+
+}
+
+# Competition tasks
+
+Tasks {
+	Task plans
+	Task { Name world; OpenData 10; }
+
+	Extension	c cpp pas
+	OpenDataExt	out
+}
+
+# Library configuration
+
+# Need to put temporary files locally to make sure they are on the same device
+# as the submission directories, so that we can rename the files to their final
+# locations.
+Tempfiles.Prefix	tmp/temp

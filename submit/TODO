@@ -4,3 +4,4 @@ submitd:
 - Checking of contest time (and per-contestant exceptions)
 - Keeping history and pruning status files
 - Remember hashes
+- create tmp directory
