@@ -39,7 +39,7 @@ Access {
 	PlainText	0
 
 	# Maximum number of connections per IP address allowed
-	MaxConn		1
+	MaxConn		2
 }
 
 # Trace TLS parameters

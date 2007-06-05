@@ -1,0 +1,202 @@
+#!/usr/bin/perl
+# Contest UI for the MO Submitter
+# (c) 2007 Martin Mares <mj@ucw.cz>
+
+use strict;
+use warnings;
+
+BEGIN {
+	defined $ENV{"MO_ROOT"} or die "Please set MO_ROOT to the contest root directory first.\n";
+}
+use lib $ENV{"MO_ROOT"} . "/submit";
+use lib $ENV{"MO_ROOT"} . "/submit/lib/perl5";
+
+use MO::Submit;
+use Sherlock::Object;
+use Gtk2 -init;
+
+my $conn = new MO::Submit;
+
+### GUI INITIALIZATION ###
+
+sub init_refresh();
+sub timed_refresh();
+sub refresh($);
+
+my $busy_cursor = Gtk2::Gdk::Cursor->new('watch');
+
+# The main window
+my $window = Gtk2::Window->new('toplevel');
+$window->signal_connect("delete-event" => sub { Gtk2->main_quit });
+$window->set_title($conn->{"Contest"} . " Submitter");
+$window->set_wmclass("submitter", "Submitter");
+$window->set_default_size(320, 400);
+
+# The title label
+my $title_lab = Gtk2::Label->new;
+$title_lab->set_markup("<span size='x-large'>" . $conn->{"Contest"} . "</span>");
+
+# The row of buttons
+my $b_submit = Gtk2::Button->new('Submit');
+$b_submit->signal_connect(clicked => sub { Gtk2->main_quit });
+$b_submit->set_sensitive(0);
+
+my $b_check = Gtk2::Button->new('Check');
+$b_check->signal_connect(clicked => sub { Gtk2->main_quit });
+$b_check->set_sensitive(0);
+
+my $b_refresh = Gtk2::Button->new('Refresh');
+$b_refresh->signal_connect(clicked => sub { refresh(0) });
+
+my $button_box = Gtk2::HBox->new;
+$button_box->pack_start_defaults($b_submit);
+$button_box->pack_start_defaults($b_check);
+$button_box->pack_start_defaults($b_refresh);
+$button_box->set_border_width(5);
+
+# The list of tasks
+my $task_store = Gtk2::ListStore->new('Glib::String', 'Glib::String', 'Glib::String');
+
+my $task_view = Gtk2::TreeView->new($task_store);
+my $task_renderer = Gtk2::CellRendererText->new;
+my $task_col1 = Gtk2::TreeViewColumn->new_with_attributes("Task", $task_renderer, "text", 0);
+$task_view->append_column($task_col1);
+my $task_col2 = Gtk2::TreeViewColumn->new_with_attributes("Part", $task_renderer, "text", 1);
+$task_view->append_column($task_col2);
+my $task_col3 = Gtk2::TreeViewColumn->new_with_attributes("Status", $task_renderer, "text", 2);
+$task_view->append_column($task_col3);
+$task_view->set_headers_visible(0);
+
+my $task_scroll = Gtk2::ScrolledWindow->new;
+$task_scroll->set_policy("automatic", "automatic");
+$task_scroll->add($task_view);
+$task_scroll->set_border_width(5);
+
+my $task_frame = Gtk2::Frame->new("Tasks");
+$task_frame->add($task_scroll);
+
+my $selected_task;
+my $task_sel = $task_view->get_selection;
+$task_sel->set_mode('single');
+$task_sel->signal_connect(changed => sub {
+	my $iter = $_[0]->get_selected;
+	if ($iter) {
+		$selected_task = $task_store->get($iter, 0);
+		print "Selected $selected_task\n";
+		$b_submit->set_sensitive(1);
+		$b_check->set_sensitive(1);
+	} else {
+		$selected_task = undef;
+		print "Deselected task\n";
+		$b_submit->set_sensitive(0);
+		$b_check->set_sensitive(0);
+	}
+});
+
+my $status_bar = Gtk2::Statusbar->new;
+my $bar_ctx = $status_bar->get_context_id('xyzzy');
+
+my $vbox = Gtk2::VBox->new;
+$vbox->pack_start($title_lab, 0, 0, 10);
+$vbox->pack_start($task_frame, 1, 1, 0);
+$vbox->pack_start($button_box, 0, 0, 0);
+$vbox->pack_start($status_bar, 0, 0, 0);
+
+$window->add($vbox);
+$window->signal_connect("expose-event" => sub { init_refresh(); return 0; });
+$window->show_all;
+
+Glib::Timeout->add(5000, \&timed_refresh);
+Gtk2->main;
+exit 0;
+
+### ACTIONS ###
+
+my $last_status_id;
+
+sub status($) {
+	print "GUI: ", $_[0], "\n" if $conn->{"Trace"};
+	defined $last_status_id and $status_bar->remove($bar_ctx, $last_status_id);
+	$last_status_id = $status_bar->push($bar_ctx, shift @_);
+}
+
+sub busy($) {
+	status($_[0]);
+	$window->window->set_cursor($busy_cursor);
+	$window->Gtk2::Gdk::flush;
+}
+
+sub ready($) {
+	status($_[0]);
+	$window->window->set_cursor(undef);
+	$window->Gtk2::Gdk::flush;
+}
+
+my $window_inited = 0;
+sub init_refresh()
+{
+	if (!$window_inited) {
+		refresh(1);
+		$window_inited = 1;
+	}
+	return 1;
+}
+
+sub timed_refresh()
+{
+	refresh(0);	# FIXME: If-modified-since version?
+	return 1;	# We wish to re-run the timer
+}
+
+my $task_status_object;
+my $task_parts = {};
+
+sub recalc_task_list() {
+	$task_parts = {};
+	$task_store->clear;
+	foreach my $t ($task_status_object->getarray("(T")) {
+		my $task = $t->get("T");
+		foreach my $p ($t->getarray("(P")) {
+			my $part = $p->get("P");
+			$task_parts->{$task}->{$part} = $p;
+			my $status = "---";
+			my $iter = $task_store->append;
+			$task_store->set($iter,
+				0, $task,
+				1, ($task eq $part ? "" : $part),
+				2, $status);
+		}
+	}
+}
+
+sub refresh($)
+{
+	my $force = shift @_;
+	if (!$conn->is_connected || $force) {
+		busy("Connecting to server...");
+		if ($conn->connect) {
+			ready("Connected successfully");
+		} else {
+			ready($conn->{"error"});
+		}
+	}
+	if ($conn->is_connected) {
+		busy("Updating status...");
+		my $r = new Sherlock::Object("!" => "STATUS");
+		$r = $conn->request($r);
+		if (!defined $r) {
+			ready($conn->{"error"});
+		} elsif ($r->get("-")) {
+			ready($r->get("-"));
+		} else {
+			$task_status_object = $r;
+			recalc_task_list;
+			ready("Ready");
+		}
+	}
+	if (!$conn->is_connected && !$force) {
+		# Retry
+		$conn->log("Retrying");
+		refresh(1);
+	}
+}

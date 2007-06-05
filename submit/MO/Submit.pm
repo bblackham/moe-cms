@@ -16,6 +16,7 @@ sub new($) {
 	my $mo = "$home/.mo";
 	my $root = $ENV{"MO_ROOT"} or die "Environment variable MO_ROOT not set\n";
 	my $self = {
+		"Contest" => "CPSPC 2007",
 		"Server" => "localhost:8888",
 		"Key" => "$mo/key.pem",
 		"Cert" => "$mo/cert.pem",
@@ -35,7 +36,7 @@ sub DESTROY($) {
 
 sub log($$) {
 	my ($self, $msg) = @_;
-	print STDERR "LOG: $msg\n" if $self->{"Trace"};
+	print STDERR "SUBMIT: $msg\n" if $self->{"Trace"};
 }
 
 sub err($$) {
