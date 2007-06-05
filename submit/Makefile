@@ -9,7 +9,7 @@ CC=gcc-4.1.1
 CFLAGS+=-Wno-pointer-sign -Wdisabled-optimization -Wno-missing-field-initializers
 LDFLAGS+=-lpthread	# FIXME: Use libucw without threads
 
-all: submitd connect privkey
+all: submitd privkey
 
 submitd: submitd.o commands.o tasks.o lib/libsh.a lib/libucw.a
 submitd.o: submitd.c submitd.h
@@ -33,4 +33,4 @@ certs:
 
 clean:
 	rm -f `find . -name "*~" -or -name "*.[oa]" -or -name "\#*\#" -or -name TAGS -or -name core -or -name .depend -or -name .#*`
-	rm -f submitd connect
+	rm -f submitd connect privkey
