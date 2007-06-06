@@ -14,6 +14,8 @@ use lib $ENV{"MO_ROOT"} . "/submit/lib/perl5";
 use MO::Submit;
 use Sherlock::Object;
 use POSIX;
+use IO::File;
+use File::stat;
 use Gtk2 -init;
 
 my $conn = new MO::Submit;
@@ -21,9 +23,12 @@ my $conn = new MO::Submit;
 ### GUI INITIALIZATION ###
 
 sub init_refresh();
-sub timed_refresh();
-sub refresh($);
-sub submit();
+sub start_refresh_timer($);
+sub stop_refresh_timer();
+my $force_refresh = 0;
+sub refresh();
+
+sub submit($);
 
 my $busy_cursor = Gtk2::Gdk::Cursor->new('watch');
 
@@ -40,15 +45,15 @@ $title_lab->set_markup("<span size='x-large'>" . $conn->{"Contest"} . "</span>")
 
 # The row of buttons
 my $b_submit = Gtk2::Button->new('Submit');
-$b_submit->signal_connect(clicked => \&submit);
+$b_submit->signal_connect(clicked => sub { submit(0) });
 $b_submit->set_sensitive(0);
 
 my $b_check = Gtk2::Button->new('Check');
-$b_check->signal_connect(clicked => sub { Gtk2->main_quit });
+$b_check->signal_connect(clicked => sub { submit(1) });
 $b_check->set_sensitive(0);
 
 my $b_refresh = Gtk2::Button->new('Refresh');
-$b_refresh->signal_connect(clicked => sub { refresh(0) });
+$b_refresh->signal_connect(clicked => sub { start_refresh_timer(1) });
 
 my $button_box = Gtk2::HBox->new;
 $button_box->pack_start_defaults($b_submit);
@@ -109,8 +114,12 @@ $window->show_all;
 
 my $last_status_id;
 
-sub status($) {
+sub msg($) {
 	print "GUI: ", $_[0], "\n" if $conn->{"Trace"};
+}
+
+sub status($) {
+	msg($_[0]);
 	defined $last_status_id and $status_bar->remove($bar_ctx, $last_status_id);
 	$last_status_id = $status_bar->push($bar_ctx, shift @_);
 }
@@ -131,16 +140,33 @@ my $window_inited = 0;
 sub init_refresh()
 {
 	if (!$window_inited) {
-		refresh(1);
+		$force_refresh = 1;
+		start_refresh_timer(1);
 		$window_inited = 1;
 	}
 	return 1;
 }
 
+my $refresh_timer_id;
+
 sub timed_refresh()
 {
-	refresh(0);	# FIXME: If-modified-since version?
+	refresh();	# FIXME: If-modified-since version?
 	return 1;	# We wish to re-run the timer
+}
+
+sub start_refresh_timer($) {
+	my ($go) = @_;
+	stop_refresh_timer();
+	refresh() if $go;
+	$refresh_timer_id = Glib::Timeout->add(5000, \&timed_refresh);
+}
+
+sub stop_refresh_timer() {
+	if (defined $refresh_timer_id) {
+		Glib::Source->remove($refresh_timer_id);
+		$refresh_timer_id = undef;
+	}
 }
 
 my $task_status_object;
@@ -201,10 +227,9 @@ sub recalc_task_list() {
 	@task_stat = @new_stat;
 }
 
-sub refresh($)
+sub refresh()
 {
-	my $force = shift @_;
-	if (!$conn->is_connected || $force) {
+	if (!$conn->is_connected || $force_refresh) {
 		busy("Connecting to server...");
 		if ($conn->connect) {
 			ready("Connected successfully");
@@ -223,13 +248,14 @@ sub refresh($)
 		} else {
 			$task_status_object = $r;
 			recalc_task_list;
+			$force_refresh = 0;
 			ready("Ready");
 		}
 	}
-	if (!$conn->is_connected && !$force) {
+	if (!$conn->is_connected && !$force_refresh) {
 		# Retry
 		$conn->log("Retrying");
-		refresh(1);
+		refresh();
 	}
 }
 
@@ -242,11 +268,15 @@ my $subwin_label;
 my $bbutton_box;
 my $submitting_label;
 my $status_label;
+my $check_only;
 my $submit_filename;
+my $submit_extension;
+my %submit_fn_cache = ();
 
 sub end_submit($) {
 	my ($close) = @_;
 	$subwin->destroy if $close;
+	start_refresh_timer(0);
 	### FIXME: ... and refresh status
 }
 
@@ -258,12 +288,15 @@ sub finish_submit() {
 	$bbutton_box->pack_start_defaults($button);
 	$subwin_vbox->pack_start($bbutton_box, 0, 0, 10);
 
+	ready("Ready");
 	$subwin->show_all;
+	$subwin->window->set_cursor(undef);
 }
 
 sub submit_ok() {
 	$status_label->set_markup("<span size='large'>Submitted OK</span>");
 	$submitting_label->set_markup("<span size='large'>The task has been successfully submitted.</span>");
+	refresh();
 	finish_submit();
 }
 
@@ -275,9 +308,57 @@ sub submit_failed($) {
 }
 
 sub run_submit() {
-	sleep 1;
-	submit_failed("Xyzzy");
-	#submit_ok();
+	if ($conn->is_connected) {
+		### FIXME: Busy cursor should be started earlier
+		busy("Checking server status...");
+		my $r = new Sherlock::Object("!" => "STATUS");	### FIXME: use a NOP command
+		$r = $conn->request($r);
+	}
+	if (!$conn->is_connected) {
+		busy("Reconnecting to server...");
+		if (!$conn->connect) {
+			ready($conn->{"error"});
+			submit_failed("Unable to connect to the server");	### FIXME: Mention local submit
+		}
+	}
+	busy("Submitting...");
+
+	my ($task, $part) = split /\//, $selected_task;
+	defined $part or $part = $task;
+
+	my $fh = new IO::File($submit_filename);
+	if (!$fh) {
+		submit_failed("Unable to open $submit_filename\n($!)");
+		return;
+	}
+	my $stat = File::stat::populate($fh->stat);
+	if (!$stat) {
+		submit_failed("Unable to stat $submit_filename\n($!)");
+		return;
+	}
+	my $size = $stat->size;
+
+	my $r = new Sherlock::Object("!" => "SUBMIT", "T" => $task, "P" => $part, "X" => $submit_extension, "S" => $size);
+	$r = $conn->request($r);
+	if (!defined($r)) {
+		submit_failed("Connection to the server lost");
+		return;
+	} elsif ($r->get("-")) {
+		submit_failed($r->get("-"));
+		return;
+	}
+
+	$r = $conn->send_file($fh, $size);
+	if (!defined($r)) {
+		submit_failed("Connection to the server lost");
+		return;
+	} elsif ($r->get("-")) {
+		submit_failed($r->get("-"));
+		return;
+	}
+
+	close $fh;
+	submit_ok();
 }
 
 sub checks_failed($) {
@@ -299,6 +380,13 @@ sub checks_failed($) {
 }
 
 sub checks_ok() {
+	if ($check_only) {
+		$status_label->set_markup("<span size='large'>Checked successfully</span>");
+		$submitting_label->set_markup("<span size='large'>The task has passed the checks.</span>");
+		finish_submit();
+		return;
+	}
+
 	### FIXME: Record to local history here
 
 	$status_label->set_markup("<span size='large'>Submitting</span>");
@@ -313,16 +401,22 @@ sub checks_ok() {
 }
 
 sub run_checks() {
+	($submit_extension) = ($submit_filename =~ /\.([^.]+)$/);
+	if (!$submit_extension) {
+		checks_failed("The filename does not have a valid extension");
+		return;
+	}
 	sleep 1;
 	#checks_failed("One\nTwo\nThree...\n");
 	checks_ok();
 }
 
 sub do_submit() {
-	my $submit_filename = $chooser->get_filename;
+	$submit_filename = $chooser->get_filename;
+	$submit_fn_cache{$selected_task} = $submit_filename;
+	msg "Selected $submit_filename";
 	defined $submit_filename or return;
 	-f $submit_filename or return;
-	$conn->log("Selected $submit_filename for submit");
 
 	$chooser->destroy;
 	$bbutton_box->destroy;
@@ -332,6 +426,7 @@ sub do_submit() {
 	$submitting_label = Gtk2::Label->new("Please wait...");
 	$subwin_vbox->pack_start_defaults($submitting_label);
 	$subwin->show_all;
+	$subwin->window->set_cursor($busy_cursor);
 
 	# Continue when everything is displayed
 	Glib::Idle->add(sub {
@@ -341,8 +436,11 @@ sub do_submit() {
 	});
 }
 
-sub submit() {
-	## FIXME: Stop the status timer?
+sub submit($) {
+	$check_only = shift @_;
+
+	stop_refresh_timer();
+
 	$subwin = Gtk2::Window->new('toplevel');
 	$subwin->set_default_size(640, 480);
 	$subwin->set_modal(1);
@@ -352,7 +450,7 @@ sub submit() {
 	$subwin->set_wmclass("submitter", "Submitter");
 	$subwin->signal_connect("delete-event" => sub { end_submit(0); return 0; });
 
-	my $bb_submit = Gtk2::Button->new('Submit');
+	my $bb_submit = Gtk2::Button->new($check_only ? 'Check' : 'Submit');
 	$bb_submit->signal_connect(clicked => \&do_submit);
 	#$bb_submit->set_sensitive(0);
 
@@ -365,14 +463,15 @@ sub submit() {
 	$bbutton_box->set_border_width(5);
 
 	my $subwin_label = Gtk2::Label->new;
-	$subwin_label->set_markup("<span size='x-large'>Submitting $selected_task</span>");
+	$subwin_label->set_markup("<span size='x-large'>" . ($check_only ? "Checking" : "Submitting") . " $selected_task</span>");
 
 	$status_label = Gtk2::Label->new;
-	$status_label->set_markup("<span size='large'>Please select file to submit</span>");
+	$status_label->set_markup("<span size='large'>Please select file to " . ($check_only ? "check" : "submit") . "</span>");
 
 	$chooser = Gtk2::FileChooserWidget->new("open");
 	$chooser->set_local_only(1);
 	$chooser->signal_connect("file-activated" => \&do_submit);
+	$chooser->set_filename($submit_fn_cache{$selected_task}) if defined $submit_fn_cache{$selected_task};
 
 	$subwin_vbox = Gtk2::VBox->new;
 	$subwin_vbox->pack_start($subwin_label, 0, 0, 10);
@@ -386,6 +485,5 @@ sub submit() {
 
 ### MAIN ###
 
-Glib::Timeout->add(5000, \&timed_refresh);
 Gtk2->main;
 exit 0;
