@@ -236,41 +236,152 @@ sub refresh($)
 ### SUBMITTING ###
 
 my $subwin;
+my $chooser;
+my $subwin_vbox;
+my $subwin_label;
+my $bbutton_box;
+my $submitting_label;
+my $status_label;
+my $submit_filename;
 
 sub end_submit($) {
 	my ($close) = @_;
-	# $subwin->signal_emit("delete-event");
+	$subwin->destroy if $close;
+	### FIXME: ... and refresh status
+}
+
+sub finish_submit() {
+	my $button = Gtk2::Button->new('Return');
+	$button->signal_connect(clicked => sub { end_submit(1) });
+
+	$bbutton_box = Gtk2::HButtonBox->new;
+	$bbutton_box->pack_start_defaults($button);
+	$subwin_vbox->pack_start($bbutton_box, 0, 0, 10);
+
+	$subwin->show_all;
+}
+
+sub submit_ok() {
+	$status_label->set_markup("<span size='large'>Submitted OK</span>");
+	$submitting_label->set_markup("<span size='large'>The task has been successfully submitted.</span>");
+	finish_submit();
+}
+
+sub submit_failed($) {
+	my ($msg) = @_;
+	$status_label->set_markup("<span size='large'>Submit failed</span>");
+	$submitting_label->set_markup("<span size='large'>$msg</span>");
+	finish_submit();
+}
+
+sub run_submit() {
+	sleep 1;
+	submit_failed("Xyzzy");
+	#submit_ok();
+}
+
+sub checks_failed($) {
+	my ($msg) = @_;
+
+	$status_label->set_markup("<span size='large'>Check failed</span>");
+
+	my $text_buffer = Gtk2::TextBuffer->new;
+	$text_buffer->set_text($msg);
+
+	my $text_view = Gtk2::TextView->new_with_buffer($text_buffer);
+	$text_view->set_editable(0);
+	$text_view->set_cursor_visible(0);
+
+	$submitting_label->destroy;
+	$subwin_vbox->pack_start_defaults($text_view);
+
+	finish_submit();
+}
+
+sub checks_ok() {
+	### FIXME: Record to local history here
+
+	$status_label->set_markup("<span size='large'>Submitting</span>");
+	$subwin->show_all;
+
+	# Continue when everything is displayed
+	Glib::Idle->add(sub {
+		$window->Gtk2::Gdk::flush;
+		run_submit();
+		return 0;
+	});
+}
+
+sub run_checks() {
+	sleep 1;
+	#checks_failed("One\nTwo\nThree...\n");
+	checks_ok();
+}
+
+sub do_submit() {
+	my $submit_filename = $chooser->get_filename;
+	defined $submit_filename or return;
+	-f $submit_filename or return;
+	$conn->log("Selected $submit_filename for submit");
+
+	$chooser->destroy;
+	$bbutton_box->destroy;
+
+	$status_label->set_markup("<span size='large'>Checking</span>");
+
+	$submitting_label = Gtk2::Label->new("Please wait...");
+	$subwin_vbox->pack_start_defaults($submitting_label);
+	$subwin->show_all;
+
+	# Continue when everything is displayed
+	Glib::Idle->add(sub {
+		$window->Gtk2::Gdk::flush;
+		run_checks();
+		return 0;
+	});
 }
 
 sub submit() {
 	## FIXME: Stop the status timer?
 	$subwin = Gtk2::Window->new('toplevel');
+	$subwin->set_default_size(640, 480);
 	$subwin->set_modal(1);
 	$subwin->set_transient_for($window);
 	$subwin->set_destroy_with_parent(1);
 	$subwin->set_title("Submit task $selected_task");
 	$subwin->set_wmclass("submitter", "Submitter");
-	$subwin->signal_connect("delete-event" => sub { end_submit(0) });
+	$subwin->signal_connect("delete-event" => sub { end_submit(0); return 0; });
 
 	my $bb_submit = Gtk2::Button->new('Submit');
-	$bb_submit->signal_connect(clicked => sub { end_submit(1) });
+	$bb_submit->signal_connect(clicked => \&do_submit);
 	#$bb_submit->set_sensitive(0);
 
 	my $bb_cancel = Gtk2::Button->new('Cancel');
 	$bb_cancel->signal_connect(clicked => sub { end_submit(1) });
 
-	my $bbutton_box = Gtk2::HBox->new;
+	$bbutton_box = Gtk2::HButtonBox->new;
 	$bbutton_box->pack_start_defaults($bb_submit);
 	$bbutton_box->pack_start_defaults($bb_cancel);
 	$bbutton_box->set_border_width(5);
 
-	$subwin->add($bbutton_box);
-	$subwin->show_all;
+	my $subwin_label = Gtk2::Label->new;
+	$subwin_label->set_markup("<span size='x-large'>Submitting $selected_task</span>");
 
-	#my $dialog = Gtk2::MessageDialog->new($window, [qw/modal destroy-with-parent/], 'question', 'ok-cancel', "So what?");
-	#$dialog->set_default_response("ok");
-	#$dialog->signal_connect (response => sub { $_[0]->destroy });
-	#$dialog->show_all;
+	$status_label = Gtk2::Label->new;
+	$status_label->set_markup("<span size='large'>Please select file to submit</span>");
+
+	$chooser = Gtk2::FileChooserWidget->new("open");
+	$chooser->set_local_only(1);
+	$chooser->signal_connect("file-activated" => \&do_submit);
+
+	$subwin_vbox = Gtk2::VBox->new;
+	$subwin_vbox->pack_start($subwin_label, 0, 0, 10);
+	$subwin_vbox->pack_start($status_label, 0, 0, 10);
+	$subwin_vbox->pack_start_defaults($chooser);
+	$subwin_vbox->pack_start($bbutton_box, 0, 0, 0);
+
+	$subwin->add($subwin_vbox);
+	$subwin->show_all;
 }
 
 ### MAIN ###
