@@ -9,6 +9,7 @@ use warnings;
 use IO::Socket::INET;
 use IO::Socket::SSL; # qw(debug3);
 use Sherlock::Object;
+use POSIX;
 
 sub new($) {
 	my $user = $ENV{"USER"} or die "Environment variable USER not set\n";
@@ -18,10 +19,12 @@ sub new($) {
 	my $self = {
 		"Contest" => "CPSPC 2007",
 		"Server" => "localhost:8888",
-		"Key" => "$mo/key.pem",
+		"Key" => "$mo/key.pem",		# Keys and certificates
 		"Cert" => "$mo/cert.pem",
 		"CACert" => "$mo/ca-cert.pem",
 		"Trace" => defined $ENV{"MO_SUBMIT_TRACE"},
+		"History" => "$home/.history";	# Keep submission history in this directory
+		"RefreshTimer" => 5000,		# How often GUI sends STATUS commands [ms]
 		"user" => $user,
 		"sk" => undef,
 		"error" => undef,
@@ -157,6 +160,13 @@ sub send_file($$$) {
 		$size -= $l;
 	}
 	return $self->reply;
+}
+
+sub local_submit($$$$$) {
+	my ($self, $task, $part, $ext, $filename) = @_;
+	my $hist = $self->{"History"};
+	-d $hist or mkdir $hist or return "Unable to create $hist: $!";
+	### FIXME: Unfinished
 }
 
 1;

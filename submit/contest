@@ -159,7 +159,7 @@ sub start_refresh_timer($) {
 	my ($go) = @_;
 	stop_refresh_timer();
 	refresh() if $go;
-	$refresh_timer_id = Glib::Timeout->add(5000, \&timed_refresh);
+	$refresh_timer_id = Glib::Timeout->add($conn->{"RefreshTimer}, \&timed_refresh);
 }
 
 sub stop_refresh_timer() {
@@ -308,8 +308,19 @@ sub submit_failed($) {
 }
 
 sub run_submit() {
+	my ($task, $part) = split /\//, $selected_task;
+	defined $part or $part = $task;
+
+	if (defined $conn->{"History"}) {
+		busy("Submitting locally");
+		my $err = $conn->local_submit($task, $part, $submit_extension, $submit_filename);
+		if (defined $err) {
+			submit_failed("Recording to local history failed\n($err)");
+			return;
+		}
+	}
+
 	if ($conn->is_connected) {
-		### FIXME: Busy cursor should be started earlier
 		busy("Checking server status...");
 		my $r = new Sherlock::Object("!" => "STATUS");	### FIXME: use a NOP command
 		$r = $conn->request($r);
@@ -319,12 +330,10 @@ sub run_submit() {
 		if (!$conn->connect) {
 			ready($conn->{"error"});
 			submit_failed("Unable to connect to the server");	### FIXME: Mention local submit
+			return;
 		}
 	}
 	busy("Submitting...");
-
-	my ($task, $part) = split /\//, $selected_task;
-	defined $part or $part = $task;
 
 	my $fh = new IO::File($submit_filename);
 	if (!$fh) {
