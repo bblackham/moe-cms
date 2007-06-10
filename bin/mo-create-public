@@ -7,7 +7,7 @@ set -e
 echo "Populating $MO_ROOT/public"
 H=`pwd`
 cd $MO_ROOT/public
-rm -rf bin submit
+rm -rf bin lib
 
 sed '/^\(TEST_USER\|MO_ROOT\)=/s/^/#/' <$H/config >config
 
