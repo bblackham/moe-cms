@@ -2,7 +2,7 @@
 
 SubmitD {
 
-# Log file
+# Log file (optional)
 LogFile			log/submitd
 
 # Port number
