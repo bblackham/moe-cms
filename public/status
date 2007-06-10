@@ -2,17 +2,17 @@
 # (c) 2004 Martin Mares <mj@ucw.cz>
 
 set -e
-[ -n "$MO_PUBLIC" -a -d "$MO_PUBLIC" ] || { echo >&2 "MO_PUBLIC not set, giving up." ; exit 1 ; }
-. $MO_PUBLIC/bin/lib
-. $MO_PUBLIC/config
+[ -n "$MO_ROOT" -a -d "$MO_ROOT" ] || { echo >&2 "MO_ROOT not set, giving up." ; exit 1 ; }
+. $MO_ROOT/bin/lib
+. $MO_ROOT/config
 
 [ -z "$1" ] || die "Usage: status"
 
 echo -e "Submitted tasks:\n"
 
-for PROBLEM in `cd $MO_PUBLIC/problems/ ; echo *` ; do
+for PROBLEM in `cd $MO_ROOT/problems/ ; echo *` ; do
 	(
-	PDIR=$MO_PUBLIC/problems/$PROBLEM
+	PDIR=$MO_ROOT/problems/$PROBLEM
 	SUBDIR=~/.submit/$PROBLEM
 	[ -f $PDIR/config ] || exit 0
 	echo -n "$PROBLEM: "

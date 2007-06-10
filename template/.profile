@@ -1,2 +1,2 @@
-export MO_PUBLIC=/aux/mo/public
-PATH=$PATH:$MO_PUBLIC/bin
+export MO_ROOT=/aux/mo/public
+PATH=$PATH:$MO_ROOT/bin

@@ -2,9 +2,9 @@
 # (c) 2001--2004 Martin Mares <mj@ucw.cz>
 
 set -e
-[ -n "$MO_PUBLIC" -a -d "$MO_PUBLIC" ] || { echo >&2 "MO_PUBLIC not set, giving up." ; exit 1 ; }
-. $MO_PUBLIC/bin/lib
-. $MO_PUBLIC/config
+[ -n "$MO_ROOT" -a -d "$MO_ROOT" ] || { echo >&2 "MO_ROOT not set, giving up." ; exit 1 ; }
+. $MO_ROOT/bin/lib
+. $MO_ROOT/config
 
 [ -n "$1" ] || die "Usage: check <problem> [<test-number>]"
 PROBLEM=$1

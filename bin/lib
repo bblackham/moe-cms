@@ -321,8 +321,8 @@ function output-check
 
 function public-setup
 {
-	HDIR=$MO_PUBLIC
-	PDIR=$MO_PUBLIC/problems/$PROBLEM
+	HDIR=$MO_ROOT
+	PDIR=$MO_ROOT/problems/$PROBLEM
 	SDIR=.
 	TDIR=~/.test
 	TMPDIR=~/.test
@@ -334,7 +334,7 @@ function public-setup
 	BOXDIR=~/.box
 	mkdir -p $BOXDIR
 	rm -rf $BOXDIR/*
-	BOXCMD="$MO_PUBLIC/bin/box -c$BOXDIR"
+	BOXCMD="$MO_ROOT/bin/box -c$BOXDIR"
 	exec >log
 	pend "OK  (see 'log' for details)"
 }
