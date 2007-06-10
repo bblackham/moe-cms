@@ -2,6 +2,9 @@
 
 SubmitD {
 
+# Log file
+LogFile			log/submitd
+
 # Port number
 Port			8888
 

@@ -25,6 +25,7 @@
 
 /*** CONFIGURATION ***/
 
+static byte *log_name;
 static uns port = 8888;
 static uns dh_bits = 1024;
 static uns max_conn = 10;
@@ -51,6 +52,7 @@ static struct cf_section access_conf = {
 
 static struct cf_section submitd_conf = {
   CF_ITEMS {
+    CF_STRING("LogFile", &log_name),
     CF_UNS("Port", &port),
     CF_UNS("DHBits", &dh_bits),
     CF_UNS("MaxConn", &max_conn),
@@ -530,6 +532,8 @@ int main(int argc, char **argv)
   int opt;
   if ((opt = cf_getopt(argc, argv, CF_SHORT_OPTS, CF_NO_LONG_OPTS, NULL)) >= 0)
     die("This program has no options");
+
+  log_file(log_name);
 
   log(L_INFO, "Initializing TLS");
   tls_init();
