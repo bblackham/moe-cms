@@ -1,0 +1,29 @@
+#!/bin/bash
+
+[ -f config ] || { echo "Missing config file, check cwd." ; exit 1 ; }
+set -e
+. config
+[ -n "$REMOTE_SUBMIT" ] || { echo "Remote submit not enabled." ; exit 1 ; }
+make
+
+echo "Creating submit directory"
+
+H=`pwd`
+cd $MO_ROOT/eval/submit
+mkdir -p certs
+cp $H/certs/server* certs/
+cp $H/certs/ca-cert.pem certs/
+
+rm -rf submit
+mkdir -p submit
+cp $H/submit/submitd submit/
+cp $H/submit/config submit/
+
+mkdir -p solutions 
+for a in `cd $H && bin/mo-get-users` ; do
+	mkdir -p solutions/$a
+done
+
+mkdir tmp
+
+chown -R $REMOTE_SUBMIT_USER.$REMOTE_SUBMIT_GROUP $MO_ROOT/eval/submit

@@ -13,20 +13,32 @@ case "$mode" in
 esac
 
 >>etcshadow >>etcpasswd >>etcgroup
+expire=$((`date +%s` / 86400 - 1))
 
 case $mode in
   eval)
-    echo -n Enter password for mo-eval:
+    echo -n Enter password for evaluation users:
     read passwd
     passwd=`echo $passwd | bin/md5crypt`
-    echo $EVAL_USER:x:$uid:$uid:MO Evaluator:$MO_ROOT/eval/$EVAL_USER:/bin/bash >> etcpasswd
-    echo $EVAL_GROUP:x:$uid:							>> etcgroup
-    echo $EVAL_USER:$passwd:$((`date +%s` / 86400 - 1)):0:99999:7:::		>> etcshadow
-    tuid=$(($uid + 1))
+    gid=$uid
+    tgid=$(($gid+1))
+    rgid=$(($gid+2))
+    echo $EVAL_USER:x:$uid:$gid:MO Evaluator:$MO_ROOT/eval/eval:/bin/bash >> etcpasswd
+    echo $EVAL_USER:$passwd:$expire:0:99999:7:::		>> etcshadow
+    echo $EVAL_GROUP:x:$gid:					>> etcgroup
+    echo $TEST_GROUP:x:$tgid:$EVAL_USER				>> etcgroup
 
+    if [ -n "$REMOTE_SUBMIT" ] ; then
+      uid=$(($uid + 1))
+      echo $REMOTE_SUBMIT_USER:x:$uid:$rgid:MO Submitter:$MO_ROOT/eval/submit:/bin/bash	>> etcpasswd
+      echo $REMOTE_SUBMIT_USER:$passwd:$expire:0:99999:7:::				>> etcshadow
+      echo $REMOTE_SUBMIT_GROUP:x:$rgid:						>> etcgroup
+    fi
+
+    tuid=$(($uid + 1))
     for tester in $TEST_USERS; do
-      echo $tester:x:$tuid:$uid:MO Tester `expr $tuid - $uid`:$MO_ROOT/eval/$tester:/bin/bash	>> etcpasswd
-      echo $tester:$passwd:$((`date +%s` / 86400 - 1)):0:99999:7:::				>> etcshadow
+      echo $tester:x:$tuid:$tgid:MO Tester `expr $tuid - $uid`:$MO_ROOT/eval/$tester:/bin/bash	>> etcpasswd
+      echo $tester:$passwd:$expire:0:99999:7:::				>> etcshadow
       tuid=$(($tuid + 1))
     done
   ;;

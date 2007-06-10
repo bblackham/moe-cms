@@ -13,9 +13,9 @@ for u in $TEST_USERS ; do
 	echo "Creating $u"
 	rm -rf ./$u
 	mkdir $u
-	chown $u.$EVAL_GROUP $u
+	chown $u.$TEST_GROUP $u
 	chmod 770 $u
-	cp $EVAL_USER/bin/box $EVAL_USER/bin/box-$u
-	chown $u.$EVAL_GROUP $EVAL_USER/bin/box-$u
-	chmod 4550 $EVAL_USER/bin/box-$u
-	done
+	cp eval/bin/box eval/bin/box-$u
+	chown $u.$EVAL_GROUP eval/bin/box-$u
+	chmod 4550 eval/bin/box-$u
+done

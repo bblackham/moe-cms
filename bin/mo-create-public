@@ -7,7 +7,7 @@ set -e
 echo "Populating $MO_ROOT/public"
 H=`pwd`
 cd $MO_ROOT/public
-rm -rf bin
+rm -rf bin submit
 
 sed 's/^TEST_USER=/#TEST_USER=/' <$H/config >config
 
@@ -16,6 +16,14 @@ cp -a $H/public/[a-z]* bin/
 for a in `cat $H/public/COPY` ; do
 	cp -a $H/$a bin/
 done
+
+if [ -n "$REMOTE_SUBMIT" ] ; then
+	mkdir -p submit
+	cp $H/submit/{contest,remote-submit,remote-status} submit/
+	mkdir -p submit/lib/perl5/{MO,Sherlock}
+	cp $H/submit/MO/*.pm submit/lib/perl5/MO/
+	cp $H/submit/lib/perl5/Sherlock/Object.pm submit/lib/perl5/Sherlock/
+fi
 
 mkdir -p problems
 

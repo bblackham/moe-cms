@@ -16,6 +16,16 @@ for a in `cd $H && bin/mo-get-users` ; do
 	chown root.$a $a
 	chmod 750 $a
 	cp -a `find $H/template -type f -name ".*"` $a/$a/
+
+	if [ -n "$REMOTE_SUBMIT" ] ; then
+		M=$a/$a/.mo
+		mkdir $M
+		cp $H/certs/$a-cert.pem $M/cert.pem
+		cp $H/certs/$a-key.pem $M/key.pem
+		chmod 600 $M/key.pem
+		cp $H/certs/ca-cert.pem $M/
+	fi
+
 	chown $a.$a $a/$a -R
 	chmod 700 $a/$a
 done

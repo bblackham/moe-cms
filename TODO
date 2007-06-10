@@ -9,6 +9,10 @@ Environment
 ~~~~~~~~~~~
 fpc: add switch -gl (runtime errors write line#)
 
+Installer:
+- mo-install: reduce what gets copied to mo-eval home
+- update group permissions
+
 New submitter:
 - Checking of contest time (and per-contestant exceptions)
 - Keeping history and pruning status files
