@@ -9,22 +9,11 @@ Environment
 ~~~~~~~~~~~
 fpc: add switch -gl (runtime errors write line#)
 
-Distribution:
-~~~~~~~~~~~~~
-- ssh keys
-- kernel sources
-- remove cups
-- /aux/mo/public/bin/submit -- missing x-bit
-- STL docs
-- ? distribuovatko testingu do home directories
-- pripsat do guide.tex, ze se rhide nema spoustet z mc
-- rhide: backslashe na konci radku v Pascalu -> strange compilation error
-- problemy s gpm po nastaveni fontu
-
 New submitter:
-- MO_ROOT vs. MO_PUBLIC
 - Checking of contest time (and per-contestant exceptions)
 - Keeping history and pruning status files
 - Remember hashes
 - create tmp directory
+- contest: override failed check
+- contest: local history
 - utilitka, kterou si po soutezi mohou vsichni pretestovat na souteznich datech
