@@ -5,7 +5,7 @@ GCRCF:=$(shell libgcrypt-config --cflags)
 CFLAGS=-O2 -Iinclude -g -Wall -W -Wno-parentheses -Wstrict-prototypes -Wmissing-prototypes -Wundef -Wredundant-decls -std=gnu99 $(TLSCF) $(GCRCF)
 LDFLAGS=$(TLSLF)
 
-CC=gcc-4.1.1
+#CC=gcc-4.1.1
 CFLAGS+=-Wno-pointer-sign -Wdisabled-optimization -Wno-missing-field-initializers
 LDFLAGS+=-lpthread	# FIXME: Use libucw without threads
 
