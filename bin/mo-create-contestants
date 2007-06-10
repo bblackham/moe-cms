@@ -15,7 +15,7 @@ for a in `cd $H && bin/mo-get-users` ; do
 	mkdir $a $a/$a
 	chown root.$a $a
 	chmod 750 $a
-	cp -a `find $H/template -type f -name ".*"` $a/$a/
+	cp -a `find $H/template -mindepth 1 -maxdepth 1` $a/$a/
 
 	if [ -n "$REMOTE_SUBMIT" ] ; then
 		M=$a/$a/.mo
