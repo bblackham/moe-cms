@@ -1,3 +1,4 @@
+#!/bin/bash
 # The Evaluator -- Public Checking Script
 # (c) 2001--2004 Martin Mares <mj@ucw.cz>
 
@@ -14,7 +15,11 @@ public-setup
 function test-verdict
 {
 	pend "$2"
-	exit 0
+	if [ $1 == 0 ] ; then
+		exit 1
+	else
+		exit 0
+	fi
 }
 
 if [ $TASK_TYPE == open-data ] ; then
@@ -29,12 +34,14 @@ else
 	[ -z "$2" ] || die "Test number should be given only for open data problems."
 	locate-source
 	compile
+	RC=0
 	for TEST in $SAMPLE_TESTS ; do
 		(
 		pstart "Checking on sample input $TEST: "
 		test-run
 		syntax-check
 		output-check
-		)
+		) || RC=1
 	done
+	exit $RC
 fi
