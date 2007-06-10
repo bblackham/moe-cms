@@ -19,7 +19,7 @@ done
 
 if [ -n "$REMOTE_SUBMIT" ] ; then
 	mkdir -p submit
-	cp $H/submit/{contest,remote-submit,remote-status} submit/
+	cp $H/submit/{contest,remote-submit,remote-status} bin/
 	mkdir -p submit/lib/perl5/{MO,Sherlock}
 	cp $H/submit/MO/*.pm submit/lib/perl5/MO/
 	cp $H/submit/lib/perl5/Sherlock/Object.pm submit/lib/perl5/Sherlock/

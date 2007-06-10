@@ -17,7 +17,8 @@ New submitter:
 - Checking of contest time (and per-contestant exceptions)
 - Keeping history and pruning status files
 - Remember hashes
-- create tmp directory
+- multiple IP ranges per Access rule
 - contest: override failed check
 - contest: local history
+- contest: task status cache
 - utilitka, kterou si po soutezi mohou vsichni pretestovat na souteznich datech

@@ -6,7 +6,7 @@ SubmitD {
 Port			8888
 
 # Maximum number of connections allowed
-MaxConn			4
+MaxConn			60
 
 # Time in seconds after which inactive connections are closed (0=none)
 SessionTimeout		300
@@ -39,6 +39,20 @@ Access {
 	PlainText	0
 
 	# Maximum number of connections per IP address allowed
+	MaxConn		16
+}
+
+Access {
+	IP		195.113.18.125
+	Admin		0
+	PlainText	0
+	MaxConn		2
+}
+
+Access {
+	IP		10.10.8.0/24
+	Admin		0
+	PlainText	0
 	MaxConn		2
 }
 
@@ -53,8 +67,12 @@ TraceCommands		1
 # Competition tasks
 
 Tasks {
-	Task plans
-	Task { Name world; OpenData 10; }
+#	Task plans
+#	Task { Name world; OpenData 10; }
+
+	Task		necklace
+	Task		nei
+	Task		town
 
 	Extension	c cpp pas
 	OpenDataExt	out

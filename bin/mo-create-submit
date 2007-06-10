@@ -24,6 +24,7 @@ for a in `cd $H && bin/mo-get-users` ; do
 	mkdir -p solutions/$a
 done
 
-mkdir tmp
+rm -rf tmp
+mkdir -p tmp
 
 chown -R $REMOTE_SUBMIT_USER.$REMOTE_SUBMIT_GROUP $MO_ROOT/eval/submit

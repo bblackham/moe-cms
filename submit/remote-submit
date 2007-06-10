@@ -7,7 +7,7 @@ BEGIN {
 	defined $ENV{"MO_ROOT"} or die "Please set MO_ROOT to the contest root directory first.\n";
 }
 use lib $ENV{"MO_ROOT"} . "/submit";
-use lib $ENV{"MO_ROOT"} . "/submit/lib/perl5";
+use lib $ENV{"MO_ROOT"} . "/lib/perl5";
 
 use MO::Submit;
 use Sherlock::Object;

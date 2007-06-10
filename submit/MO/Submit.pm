@@ -18,7 +18,7 @@ sub new($) {
 	my $root = $ENV{"MO_ROOT"} or die "Environment variable MO_ROOT not set\n";
 	my $self = {
 		"Contest" => "CPSPC 2007",
-		"Server" => "localhost:8888",
+		"Server" => "kamzice.ms.mff.cuni.cz:8888",
 		"Key" => "$mo/key.pem",		# Keys and certificates
 		"Cert" => "$mo/cert.pem",
 		"CACert" => "$mo/ca-cert.pem",
