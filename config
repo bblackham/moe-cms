@@ -1,5 +1,5 @@
 # Configuration file for the MO Evaluator
-# (c) 2001--2004 Martin Mares <mj@ucw.cz>
+# (c) 2001--2007 Martin Mares <mj@ucw.cz>
 
 # The root of the whole directory hierarchy
 MO_ROOT=/aux/mo
@@ -50,7 +50,7 @@ COMP_pas="$COMP_p"
 # Sandbox options used when compiling
 COMP_SANDBOX_OPTS='-m65536 -t60 -w -e -i/dev/null'
 
-# Sandbox initializaton commands for compilation
+# Sandbox initialization commands for compilation
 COMP_SANDBOX_INIT=
 
 # List of extra files needed for compilation. They are copied to the compiler
