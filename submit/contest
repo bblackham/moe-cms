@@ -312,7 +312,7 @@ sub run_submit() {
 	defined $part or $part = $task;
 
 	if (defined $conn->{"History"}) {
-		busy("Submitting locally");
+		busy("Submitting locally to " . $conn->{"History"});
 		my $err = $conn->local_submit($task, $part, $submit_extension, $submit_filename);
 		if (defined $err) {
 			submit_failed("Recording to local history failed\n($err)");
@@ -382,8 +382,15 @@ sub checks_failed($) {
 	$text_view->set_editable(0);
 	$text_view->set_cursor_visible(0);
 
+	my $text_scroll = Gtk2::ScrolledWindow->new;
+	$text_scroll->set_policy("automatic", "automatic");
+	$text_scroll->add($text_view);
+
+	my $text_frame = Gtk2::Frame->new("Checker log");
+	$text_frame->add($text_scroll);
+
 	$submitting_label->destroy;
-	$subwin_vbox->pack_start_defaults($text_view);
+	$subwin_vbox->pack_start_defaults($text_frame);
 
 	finish_submit();
 }
@@ -415,9 +422,19 @@ sub run_checks() {
 		checks_failed("The filename does not have a valid extension");
 		return;
 	}
-	sleep 1;
-	#checks_failed("One\nTwo\nThree...\n");
-	checks_ok();
+	if (!$conn->{"Checks"}) {
+		checks_ok();
+		return;
+	}
+	my $root = $conn->{"root"};
+	my ($task, $part) = split /\//, $selected_task;
+	defined $part or $part = "";
+	my $verdict = `$root/bin/check $task $part 2>&1`;
+	if ($?) {
+		checks_failed($verdict);
+	} else {
+		checks_ok();
+	}
 }
 
 sub do_submit() {

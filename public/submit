@@ -1,3 +1,4 @@
+#!/bin/bash
 # The Evaluator -- Public Submit Script
 # (c) 2001--2004 Martin Mares <mj@ucw.cz>
 
@@ -13,6 +14,7 @@ if [ "$1" = --force ] ; then
 fi
 [ -n "$1" -o "$1" = "--help" ] || die "Usage: submit [--force] <problem> [<test-number>]"
 PROBLEM=$1
+PART=$2
 public-setup
 . $PDIR/config
 
@@ -24,8 +26,8 @@ function test-verdict
 
 FAILED=0
 if [ $TASK_TYPE == open-data ] ; then
-	[ -n "$2" ] || die "You need to specify test number for open data problems."
-	TEST=$2
+	[ -n "$PART" ] || die "You need to specify test number for open data problems."
+	TEST=$PART
 	pstart "Test case $TEST: "
 	open-locate
 	(
@@ -34,7 +36,7 @@ if [ $TASK_TYPE == open-data ] ; then
 		test-result 1 OK
 	) || FAILED=1
 else
-	[ -z "$2" ] || die "Test number should be given only for open data problems."
+	[ -z "$PART" ] || die "Test number should be given only for open data problems."
 	locate-source
 	compile
 	for TEST in $SAMPLE_TESTS ; do
@@ -58,11 +60,18 @@ if [ $FAILED != 0 ] ; then
 	fi
 fi
 
+if [ -n "$REMOTE_SUBMIT" ] ; then
+	pstart "Submitting to the server... "
+	$MO_ROOT/bin/remote-submit $PROBLEM $PART $SRCN
+	pend "OK"
+	exit 0
+fi
+
 pstart "Submitting... "
 mkdir -p ~/.submit
 if [ $TASK_TYPE == open-data ] ; then
 	mkdir -p ~/.submit/$PROBLEM
-	cp $SRCN ~/.submit/$PROBLEM/$TEST.out
+	cp $SRCN ~/.submit/$PROBLEM/$PART.out
 else
 	rm -rf ~/.submit/$PROBLEM
 	mkdir -p ~/.submit/$PROBLEM

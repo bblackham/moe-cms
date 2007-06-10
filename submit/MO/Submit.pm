@@ -23,8 +23,10 @@ sub new($) {
 		"Cert" => "$mo/cert.pem",
 		"CACert" => "$mo/ca-cert.pem",
 		"Trace" => defined $ENV{"MO_SUBMIT_TRACE"},
-		"History" => "$home/.history",	# Keep submission history in this directory
-		"RefreshTimer" => 5000,		# How often GUI sends STATUS commands [ms]
+		"Checks" => 1,
+#		"History" => "$home/.history",	# Keep submission history in this directory
+		"RefreshTimer" => 60000,	# How often GUI sends STATUS commands [ms]
+		"root" => $root,
 		"user" => $user,
 		"sk" => undef,
 		"error" => undef,

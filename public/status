@@ -1,3 +1,4 @@
+#!/bin/bash
 # The Evaluator -- Public Status Script
 # (c) 2004 Martin Mares <mj@ucw.cz>
 
@@ -9,6 +10,10 @@ set -e
 [ -z "$1" ] || die "Usage: status"
 
 echo -e "Submitted tasks:\n"
+
+if [ -n "$REMOTE_SUBMIT" ] ; then
+	exec $MO_ROOT/bin/remote-status
+fi
 
 for PROBLEM in `cd $MO_ROOT/problems/ ; echo *` ; do
 	(

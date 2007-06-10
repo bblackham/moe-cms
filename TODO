@@ -5,6 +5,9 @@ score: better formatting of the score table
 interactive tasks: solve deadlocks?
 interactive tasks: logging of messages
 
+!!!!!!!!! copy all users
+!!!!!!!!! contest: call check with the right filename and don't let it guess
+
 Environment
 ~~~~~~~~~~~
 fpc: add switch -gl (runtime errors write line#)
