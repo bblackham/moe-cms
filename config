@@ -2,7 +2,9 @@
 # (c) 2001--2007 Martin Mares <mj@ucw.cz>
 
 # The root of the whole directory hierarchy
-MO_ROOT=/aux/mo
+if [ -z "$MO_ROOT" ] ; then
+	MO_ROOT=/aux/mo
+fi
 
 # User and group used by the evaluator itself
 EVAL_USER=mo-eval
