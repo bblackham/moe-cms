@@ -7,14 +7,36 @@ set -e
 . $MO_ROOT/bin/lib
 . $MO_ROOT/config
 
+function usage
+{
+	die "Usage: check [--force] [-s <source-file>] <problem> [<test-number>]"
+}
+
 FORCE=0
 if [ "$1" = --force ] ; then
 	FORCE=1
 	shift
 fi
-[ -n "$1" -o "$1" = "--help" ] || die "Usage: submit [--force] <problem> [<test-number>]"
+[ -n "$1" -a "$1" != "--help" ] || usage
+SRCFILE=
+while getopts "s:" opt ; do
+	case $opt in
+		s)	SRCFILE="$OPTARG"
+			;;
+		*)	usage
+			;;
+	esac
+done
+shift $(($OPTIND-1))
+[ -n "$1" ] || usage
 PROBLEM=$1
-PART=$2
+PART=
+shift
+if [ -n "$1" ] ; then
+	PART="$1"
+	shift
+fi
+[ -z "$1" ] || usage
 public-setup
 . $PDIR/config
 
@@ -29,7 +51,7 @@ if [ $TASK_TYPE == open-data ] ; then
 	[ -n "$PART" ] || die "You need to specify test number for open data problems."
 	TEST=$PART
 	pstart "Test case $TEST: "
-	open-locate
+	open-locate $SRCFILE
 	(
 		ln $SRCN $TDIR/$TEST.out
 		syntax-check
@@ -37,7 +59,7 @@ if [ $TASK_TYPE == open-data ] ; then
 	) || FAILED=1
 else
 	[ -z "$PART" ] || die "Test number should be given only for open data problems."
-	locate-source
+	locate-source $SRCFILE
 	compile
 	for TEST in $SAMPLE_TESTS ; do
 		(
@@ -62,7 +84,7 @@ fi
 
 if [ -n "$REMOTE_SUBMIT" ] ; then
 	pstart "Submitting to the server... "
-	$MO_ROOT/bin/remote-submit $PROBLEM $PART $SRCN
+	$MO_ROOT/bin/remote-submit $PROBLEM $PART $SDIR/$SRCN
 	pend "OK"
 	exit 0
 fi

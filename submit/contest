@@ -429,7 +429,7 @@ sub run_checks() {
 	my $root = $conn->{"root"};
 	my ($task, $part) = split /\//, $selected_task;
 	defined $part or $part = "";
-	my $verdict = `$root/bin/check $task $part 2>&1`;
+	my $verdict = `$root/bin/check -s "$submit_filename" $task $part 2>&1`;
 	if ($?) {
 		checks_failed($verdict);
 	} else {

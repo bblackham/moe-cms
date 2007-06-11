@@ -1,14 +1,37 @@
 #!/bin/bash
 # The Evaluator -- Public Checking Script
-# (c) 2001--2004 Martin Mares <mj@ucw.cz>
+# (c) 2001--2007 Martin Mares <mj@ucw.cz>
 
 set -e
 [ -n "$MO_ROOT" -a -d "$MO_ROOT" ] || { echo >&2 "MO_ROOT not set, giving up." ; exit 1 ; }
 . $MO_ROOT/bin/lib
 . $MO_ROOT/config
 
-[ -n "$1" ] || die "Usage: check <problem> [<test-number>]"
+function usage
+{
+	die "Usage: check [-s <source-file>] <problem> [<test-number>]"
+}
+
+SRCFILE=
+while getopts "s:" opt ; do
+	case $opt in
+		s)	SRCFILE="$OPTARG"
+			;;
+		*)	usage
+			;;
+	esac
+done
+shift $(($OPTIND-1))
+[ -n "$1" ] || usage
 PROBLEM=$1
+TEST=
+shift
+if [ -n "$1" ] ; then
+	TEST="$1"
+	shift
+fi
+[ -z "$1" ] || usage
+
 public-setup
 . $PDIR/config
 
@@ -23,16 +46,15 @@ function test-verdict
 }
 
 if [ $TASK_TYPE == open-data ] ; then
-	[ -n "$2" ] || die "You need to specify test number for open data problems."
-	TEST=$2
+	[ -n "$TEST" ] || die "You need to specify test number for open data problems."
 	pstart "Checking $TEST: "
-	open-locate
+	open-locate $SRCFILE
 	ln $SRCN $TDIR/$TEST.out
 	syntax-check
 	test-result 1 OK
 else
-	[ -z "$2" ] || die "Test number should be given only for open data problems."
-	locate-source
+	[ -z "$TEST" ] || die "Test number should be given only for open data problems."
+	locate-source $SRCFILE
 	compile
 	RC=0
 	for TEST in $SAMPLE_TESTS ; do

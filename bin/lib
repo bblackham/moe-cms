@@ -104,7 +104,30 @@ EOF
 function locate-source
 {
 	pstart "Finding source... "
-	SBASE=${1:-$PROBLEM}
+	if [ -n "$1" ] ; then
+		SRCBASE=$(echo $1 | sed 's/\.\([^.]\+\)//')
+		SRCEXT=$(echo $1 | sed 's/.*\.\([^.]\+\)/\1/')
+		if [ -n "$SRCEXT" ] ; then
+			# Full name given, so just check the extension and existence
+			SRCN=$1
+			if [ ${SRCN:0:1} == / ] ; then
+				SRCN=${SRCN:1}
+				SDIR=
+			fi
+			[ -f "$SDIR/$SRCN" ] || die "Cannot find source file $SDIR/$SRCN"
+			SRCEXT_OK=
+			for a in $EXTENSIONS ; do
+				if [ $a == $SRCEXT ] ; then
+					pend $SDIR/$SRCN
+					echo "Explicitly set source file: $SDIR/$SRCN"
+					return 0
+				fi
+			done
+			die "Unknown extension .$SRCEXT"
+		fi
+	else
+		SBASE=$PROBLEM
+	fi
 	for a in $EXTENSIONS ; do
 		if [ -f $SDIR/$SBASE.$a ] ; then
 			[ -z "$SRCN" ] || die "Multiple source files found: $SDIR/$PROBLEM.$a and $SDIR/$SRCN. Please fix."
@@ -122,14 +145,15 @@ function locate-source
 function compile
 {
 	pstart "Compiling... "
-	cp -a $SDIR/$SRCN $TDIR/$SRCN
+	# Beware, the original SRCN can be a strange user-supplied name
+	SRC=$PROBLEM.$SRCEXT
+	cp -a $SDIR/$SRCN $TDIR/$SRC
 	if [ -n "$COMP_EXTRAS" ] ; then
 		echo "Extras: $COMP_EXTRAS"
 		for a in $COMP_EXTRAS ; do cp $PDIR/$a $TDIR/ ; done
 	fi
 	box-clean
-	for a in $SRCN $COMP_EXTRAS ; do cp $TDIR/$a $BOXDIR/ ; done
-	SRC=$SRCN
+	for a in $SRC $COMP_EXTRAS ; do cp $TDIR/$a $BOXDIR/ ; done
 	EXE=$PROBLEM
 	CCMD=COMP_$SRCEXT
 	CCMD=`eval echo ${!CCMD}`
@@ -344,6 +368,10 @@ function public-setup
 function open-locate
 {
 	[ -f $PDIR/$TEST.in ] || die "Unknown test $TEST"
-	SRCN=$SDIR/$PROBLEM$TEST.out
+	if [ -n "$1" ] ; then
+		SRCN=$1
+	else
+		SRCN=$SDIR/$PROBLEM$TEST.out
+	fi
 	[ -f $SRCN ] || fatal "Output file $SRCN not found"
 }
