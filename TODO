@@ -6,6 +6,7 @@ interactive tasks: solve deadlocks?
 interactive tasks: logging of messages
 rename problem to task
 submit, check: unify command-line arguments
+clean up retest utility
 
 Environment
 ~~~~~~~~~~~

@@ -44,6 +44,11 @@ function fatal
 	exit 1
 }
 
+function try-ln
+{
+	ln $1 $2 2>/dev/null || cp $1 $2
+}
+
 # Sandbox subroutines
 
 function box-init
@@ -220,12 +225,12 @@ function test-prolog
 	OUT_TYPE=${OUT_TYPE:-$IO_TYPE}
 	case $IN_TYPE in
 		file)	echo "Input file: $PROBLEM.in (from $PDIR/$TEST.in)"
-			ln $PDIR/$TEST.in $TDIR/$TEST.in
+			try-ln $PDIR/$TEST.in $TDIR/$TEST.in
 			cp $PDIR/$TEST.in $BOXDIR/$PROBLEM.in
 			BOX_EXTRAS="$BOX_EXTRAS -i/dev/null"
 			;;
 		stdio)	echo "Input file: <stdin> (from $PDIR/$TEST.in)"
-			ln $PDIR/$TEST.in $TDIR/$TEST.in
+			try-ln $PDIR/$TEST.in $TDIR/$TEST.in
 			cp $PDIR/$TEST.in $BOXDIR/.stdin
 			BOX_EXTRAS="$BOX_EXTRAS -i.stdin"
 			;;
@@ -326,7 +331,7 @@ function output-check
 {
 	[ -n "$OUTPUT_CHECK" ] || return 0
 	pcont "<check> "
-	[ -f $PDIR/$TEST.out ] && ln $PDIR/$TEST.out $TDIR/$TEST.ok
+	[ -f $PDIR/$TEST.out ] && try-ln $PDIR/$TEST.out $TDIR/$TEST.ok
 	OCHECK=`eval echo $OUTPUT_CHECK`
 	echo "Output check command: $OCHECK"
 	if ! eval $OCHECK 2>$TMPDIR/exec.out ; then
