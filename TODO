@@ -10,6 +10,7 @@ clean up retest utility
 document IA_CHECK
 bin/lib changes from mo-eval user
 writing of verdicts to stdout (include timing and check on interactive tasks, including judge errors)
+scores dependent on time (like PL olympiad)
 
 Environment
 ~~~~~~~~~~~
