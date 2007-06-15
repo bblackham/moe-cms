@@ -55,7 +55,7 @@ COMP_p='/usr/bin/fpc -Ci -Cr -Ct -g -O2 -Sg -o$EXE $EXTRA_PFLAGS $SRC'
 COMP_pas="$COMP_p"
 
 # Sandbox options used when compiling
-COMP_SANDBOX_OPTS='-m65536 -t60 -w -e -i/dev/null'
+COMP_SANDBOX_OPTS='-m65536 -w60 -e -i/dev/null'
 
 # Sandbox initialization commands for compilation
 COMP_SANDBOX_INIT=
@@ -98,7 +98,7 @@ SAMPLE_TESTS="0"
 # Number of points per test
 POINTS_PER_TEST=1
 
-# Time limit in seconds
+# Time limit in seconds (can be fractional, but beware of noise)
 TIME_LIMIT=10
 
 # Memory limit in kilobytes
@@ -126,7 +126,6 @@ OUTPUT_CHECK='diff -bBu $TDIR/$TEST.ok $TDIR/$TEST.out'
 
 # Sandbox options used when testing
 TEST_SANDBOX_OPTS='-a2 -f -m$MEM_LIMIT -t$TIME_LIMIT'
-# -w for wall clock measuring
 
 # Sandbox initialization commands
 SANDBOX_INIT=
