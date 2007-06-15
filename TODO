@@ -1,16 +1,13 @@
 Evaluator
 ~~~~~~~~~
-box: konfigurovatelny pristup k timerum a /proc/self/stat (pripadne /proc/self/fd)
 score: better formatting of the score table
 interactive tasks: solve deadlocks?
 interactive tasks: logging of messages
 rename problem to task
 submit, check: unify command-line arguments
+do we need SDIR?
 clean up retest utility
-document IA_CHECK
-bin/lib changes from mo-eval user
 writing of verdicts to stdout (include timing and check on interactive tasks, including judge errors)
-scores dependent on time (like PL olympiad)
 
 Environment
 ~~~~~~~~~~~
@@ -31,3 +28,7 @@ New submitter:
 - contest: task status cache
 - utilitka, kterou si po soutezi mohou vsichni pretestovat na souteznich datech
 - per-task setting of maximum submission size
+
+Various ideas:
+scores dependent on time (like PL olympiad)
+box: konfigurovatelny pristup k timerum a /proc/self/stat (pripadne /proc/self/fd)
