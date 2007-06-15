@@ -78,7 +78,7 @@ die(char *msg, ...)
 }
 
 static void __attribute__((format(printf,1,2)))
-log(char *msg, ...)
+msg(char *msg, ...)
 {
   va_list args;
   va_start(args, msg);
@@ -132,7 +132,7 @@ valid_filename(unsigned long addr)
     }
   while (*p++);
 
-  log("[%s] ", namebuf);
+  msg("[%s] ", namebuf);
   if (file_access >= 3)
     return;
   if (!strchr(namebuf, '/') && strcmp(namebuf, ".."))
@@ -421,10 +421,10 @@ boxkeeper(void)
 		die("ptrace(PTRACE_GETREGS): %m");
 	      stop_count++;
 	      if (!stop_count)			/* Traceme request */
-		log(">> Traceme request caught\n");
+		msg(">> Traceme request caught\n");
 	      else if (stop_count & 1)		/* Syscall entry */
 		{
-		  log(">> Syscall %3ld (%08lx,%08lx,%08lx) ", u.regs.orig_eax, u.regs.ebx, u.regs.ecx, u.regs.edx);
+		  msg(">> Syscall %3ld (%08lx,%08lx,%08lx) ", u.regs.orig_eax, u.regs.ebx, u.regs.ecx, u.regs.edx);
 		  syscall_count++;
 		  if (!valid_syscall(&u))
 		    {
@@ -441,12 +441,12 @@ boxkeeper(void)
 		    }
 		}
 	      else					/* Syscall return */
-		log("= %ld\n", u.regs.eax);
+		msg("= %ld\n", u.regs.eax);
 	      ptrace(PTRACE_SYSCALL, box_pid, 0, 0);
 	    }
 	  else if (sig != SIGSTOP && sig != SIGXCPU && sig != SIGXFSZ)
 	    {
-	      log(">> Signal %d\n", sig);
+	      msg(">> Signal %d\n", sig);
 	      ptrace(PTRACE_SYSCALL, box_pid, 0, sig);
 	    }
 	  else
