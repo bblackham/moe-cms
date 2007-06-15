@@ -55,7 +55,7 @@ COMP_p='/usr/bin/fpc -Ci -Cr -Ct -g -O2 -Sg -o$EXE $EXTRA_PFLAGS $SRC'
 COMP_pas="$COMP_p"
 
 # Sandbox options used when compiling
-COMP_SANDBOX_OPTS='-m65536 -w60 -e -i/dev/null'
+COMP_SANDBOX_OPTS='-m262144 -w60 -e -i/dev/null'
 
 # Sandbox initialization commands for compilation
 COMP_SANDBOX_INIT=
