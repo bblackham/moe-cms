@@ -119,7 +119,7 @@ OUTPUT_CHECK='diff -bBu $TDIR/$TEST.ok $TDIR/$TEST.out'
 
 # Checker for interactive tasks
 # Returns exit code 1 if test failed, 0 if passed
-# fd1 is connect to evaluator log, feel free to log anything
+# fd0 and fd1 are connected to fd1 and fd0 of the program tested
 # fd2 is an optional one-line verdict
 # The checker can generate $TDIR/$TEST.pts to assign points irregularly
 #IC_CHECK='$PDIR/checker $PDIR/$TEST.in $PDIR/$TEST.chk'
