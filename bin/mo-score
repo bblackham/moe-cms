@@ -6,7 +6,8 @@ $html = 0;
 $tex = 0;
 $extras = 0;
 $alt = 0;
-$usage = "Usage: mo-score [--detail] [--alt] [--extras] [--html] [--tex] <task1> <task2> ...";
+$split = 0;
+$usage = "Usage: mo-score [--detail] [--alt] [--extras] [--html] [--tex] [--split] <task1> <task2> ...";
 while (($arg = $ARGV[0]) =~ /^--([a-z]+)$/) {
 	shift @ARGV;
 	$var = "\$$1";
@@ -62,12 +63,11 @@ foreach $u (keys %users) {
 			$ttest = $1;
 			$tpts = $2;
 			$trem = $3;
-			$ttest =~ s/[^0-9]//g;
+			$trem =~ s/\[.*//;
+			$ttest =~ s/[^0-9]//g unless $split;
 			$known_tests{$t}{$ttest} = 1;
-			$results{$u}{$t}{$ttest} = $tpts;
-			$remarks{$u}{$t}{$ttest} = $trem;
 			$cmt = $tpts;
-			if ($tpts == 0) {
+			if ($tpts == 0 && $trem ne "OK") {
 				if ($trem =~ /^Compile /) { $cmt = "CE"; }
 				elsif ($trem =~ /^Time limit exceeded/) { $cmt = "TO"; }
 				elsif ($trem =~ /^Exited with error /) { $cmt = "RE"; }
@@ -85,10 +85,16 @@ foreach $u (keys %users) {
 					}
 				}
 			}
-			$comment{$u}{$t}{$ttest} = $cmt;
-			$total{$u}{$t} += $tpts;
+			if (!defined($results{$u}{$t}{$ttest}) || $results{$u}{$t}{$ttest} > $tpts) {
+				$results{$u}{$t}{$ttest} = $tpts;
+				$comment{$u}{$t}{$ttest} = $cmt;
+			}
 		}
 		close X;
+	}
+	foreach my $t (keys %known_tasks) {
+		$total{$u}{$t} = 0;
+		foreach my $pts (values %{$results{$u}{$t}}) { $total{$u}{$t} += $pts; }
 	}
 	closedir D;
 }
