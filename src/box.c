@@ -1,7 +1,7 @@
 /*
  *	A Simple Testing Sandbox
  *
- *	(c) 2001--2004 Martin Mares <mj@ucw.cz>
+ *	(c) 2001--2007 Martin Mares <mj@ucw.cz>
  */
 
 #define _LARGEFILE64_SOURCE
@@ -29,9 +29,9 @@
 #define UNUSED __attribute__((unused))
 
 static int filter_syscalls;		/* 0=off, 1=liberal, 2=totalitarian */
-static int timeout;
+static int timeout;			/* milliseconds */
+static int wall_timeout;
 static int pass_environ;
-static int use_wall_clock;
 static int file_access;
 static int verbose;
 static int memory_limit;
@@ -42,7 +42,7 @@ static char *set_cwd;
 static pid_t box_pid;
 static int is_ptraced;
 static volatile int timer_tick;
-static time_t start_time;
+static struct timeval start_time;
 static int ticks_per_sec;
 
 #if defined(__GLIBC__) && __GLIBC__ == 2 && __GLIBC_MINOR__ > 0
@@ -293,14 +293,22 @@ signal_int(int unused UNUSED)
 static void
 check_timeout(void)
 {
-  int sec;
-
-  if (use_wall_clock)
-    sec = time(NULL) - start_time;
-  else
+  if (wall_timeout)
+    {
+      struct timeval now, wall;
+      int wall_ms;
+      gettimeofday(&now, NULL);
+      timersub(&now, &start_time, &wall);
+      wall_ms = wall.tv_sec*1000 + wall.tv_usec/1000;
+      if (wall_ms > wall_timeout)
+        die("Time limit exceeded (wall clock)");
+      if (verbose > 1)
+        fprintf(stderr, "[wall time check: %d msec]\n", wall_ms);
+    }
+  if (timeout)
     {
       char buf[4096], *x;
-      int c, utime, stime;
+      int c, utime, stime, ms;
       static int proc_status_fd;
       if (!proc_status_fd)
 	{
@@ -328,12 +336,12 @@ check_timeout(void)
 	x++;
       if (sscanf(x, "%*c %*d %*d %*d %*d %*d %*d %*d %*d %*d %*d %d %d", &utime, &stime) != 2)
 	die("proc syntax error 2");
-      sec = (utime + stime)/ticks_per_sec;
+      ms = (utime + stime) * 1000 / ticks_per_sec;
+      if (verbose > 1)
+	fprintf(stderr, "[time check: %d msec]\n", ms);
+      if (ms > timeout)
+	die("Time limit exceeded");
     }
-  if (verbose > 1)
-    fprintf(stderr, "[timecheck: %d seconds]\n", sec);
-  if (sec > timeout)
-    die("Time limit exceeded.");
 }
 
 static void
@@ -346,11 +354,11 @@ boxkeeper(void)
   bzero(&sa, sizeof(sa));
   sa.sa_handler = signal_int;
   sigaction(SIGINT, &sa, NULL);
-  start_time = time(NULL);
+  gettimeofday(&start_time, NULL);
   ticks_per_sec = sysconf(_SC_CLK_TCK);
   if (ticks_per_sec <= 0)
     die("Invalid ticks_per_sec!");
-  if (timeout)
+  if (timeout || wall_timeout)
     {
       sa.sa_handler = signal_alarm;
       sigaction(SIGALRM, &sa, NULL);
@@ -377,16 +385,24 @@ boxkeeper(void)
 	die("wait4: unknown pid %d exited!", p);
       if (WIFEXITED(stat))
 	{
-	  struct timeval total;
-	  int wall;
+	  struct timeval total, now, wall;
+	  int total_ms, wall_ms;
 	  box_pid = 0;
 	  if (WEXITSTATUS(stat))
 	    die("Exited with error status %d.", WEXITSTATUS(stat));
 	  timeradd(&rus.ru_utime, &rus.ru_stime, &total);
-	  wall = time(NULL) - start_time;
-	  if ((use_wall_clock ? wall : total.tv_sec) > timeout)
-	    die("Time limit exceeded (after exit).");
-	  fprintf(stderr, "OK (%d sec real, %d sec wall, %d syscalls)\n", (int) total.tv_sec, wall, syscall_count);
+	  total_ms = total.tv_sec*1000 + total.tv_usec/1000;
+	  gettimeofday(&now, NULL);
+	  timersub(&now, &start_time, &wall);
+	  wall_ms = wall.tv_sec*1000 + wall.tv_usec/1000;
+	  if (timeout && total_ms > timeout)
+	    die("Time limit exceeded.");
+	  if (wall_timeout && wall_ms > wall_timeout)
+	    die("Time limit exceeded (wall clock.");
+	  fprintf(stderr, "OK (%d.%03d sec real, %d.%03d sec wall, %d syscalls)\n",
+	      (int) total.tv_sec, (int) total.tv_usec/1000,
+	      (int) wall.tv_sec, (int) wall.tv_usec/1000,
+	      syscall_count);
 	  exit(0);
 	}
       if (WIFSIGNALED(stat))
@@ -496,10 +512,10 @@ Options:\n\
 -i <file>\tRedirect stdin from <file>\n\
 -m <size>\tLimit address space to <size> KB\n\
 -o <file>\tRedirect stdout to <file>\n\
--t <time>\tStop after <time> seconds\n\
+-t <time>\tSet run time limit (seconds, fractions allowed)\n\
 -T\t\tAllow syscalls for measuring run time\n\
 -v\t\tBe verbose\n\
--w\t\tMeasure wall clock time instead of run time\n\
+-w <time>\tSet wall clock time limit (seconds, fractions allowed)\n\
 ");
   exit(1);
 }
@@ -510,7 +526,7 @@ main(int argc, char **argv)
   int c;
   uid_t uid;
 
-  while ((c = getopt(argc, argv, "a:c:efi:m:o:t:Tvw")) >= 0)
+  while ((c = getopt(argc, argv, "a:c:efi:m:o:t:Tvw:")) >= 0)
     switch (c)
       {
       case 'a':
@@ -535,7 +551,7 @@ main(int argc, char **argv)
 	redir_stdout = optarg;
 	break;
       case 't':
-	timeout = atol(optarg);
+	timeout = 1000*atof(optarg);
 	break;
       case 'T':
 	allow_times++;
@@ -544,7 +560,7 @@ main(int argc, char **argv)
 	verbose++;
 	break;
       case 'w':
-	use_wall_clock = 1;
+        wall_timeout = 1000*atof(optarg);
 	break;
       default:
 	usage();
