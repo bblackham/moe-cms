@@ -97,7 +97,7 @@ valid_filename(unsigned long addr)
   static int mem_fd;
 
   if (!file_access)
-    die("File access forbidden.");
+    die("File access forbidden");
   if (file_access >= 9)
     return;
 
@@ -118,14 +118,14 @@ valid_filename(unsigned long addr)
 	  if (l > remains)
 	    l = remains;
 	  if (!l)
-	    die("Access to file with name too long.");
+	    die("Access to file with name too long");
 	  if (long_seek(mem_fd, addr, SEEK_SET) < 0)
 	    die("long_seek(mem): %m");
 	  remains = read(mem_fd, end, l);
 	  if (remains < 0)
 	    die("read(mem): %m");
 	  if (!remains)
-	    die("Access to file with name out of memory.");
+	    die("Access to file with name out of memory");
 	  end += l;
 	  addr += l;
 	}
@@ -153,7 +153,7 @@ valid_filename(unsigned long addr)
 	  !strncmp(namebuf, "/usr/share/zoneinfo/", 20))
 	return;
     }
-  die("Forbidden access to file `%s'.", namebuf);
+  die("Forbidden access to file `%s'", namebuf);
 }
 
 static int
@@ -264,11 +264,11 @@ valid_syscall(struct user *u)
       return allow_times;
     case __NR_kill:
       if (u->regs.ebx == box_pid)
-	die("Commited suicide by signal %d.", (int)u->regs.ecx);
+	die("Commited suicide by signal %d", (int)u->regs.ecx);
       return 0;
     case __NR_tgkill:
       if (u->regs.ebx == box_pid && u->regs.ecx == box_pid)
-	die("Commited suicide by signal %d.", (int)u->regs.edx);
+	die("Commited suicide by signal %d", (int)u->regs.edx);
       return 0;
     default:
       return 0;
@@ -287,7 +287,7 @@ static void
 signal_int(int unused UNUSED)
 {
   /* Interrupts are fatal, so no synchronization requirements. */
-  die("Interrupted.");
+  die("Interrupted");
 }
 
 static void
@@ -389,16 +389,16 @@ boxkeeper(void)
 	  int total_ms, wall_ms;
 	  box_pid = 0;
 	  if (WEXITSTATUS(stat))
-	    die("Exited with error status %d.", WEXITSTATUS(stat));
+	    die("Exited with error status %d", WEXITSTATUS(stat));
 	  timeradd(&rus.ru_utime, &rus.ru_stime, &total);
 	  total_ms = total.tv_sec*1000 + total.tv_usec/1000;
 	  gettimeofday(&now, NULL);
 	  timersub(&now, &start_time, &wall);
 	  wall_ms = wall.tv_sec*1000 + wall.tv_usec/1000;
 	  if (timeout && total_ms > timeout)
-	    die("Time limit exceeded.");
+	    die("Time limit exceeded");
 	  if (wall_timeout && wall_ms > wall_timeout)
-	    die("Time limit exceeded (wall clock.");
+	    die("Time limit exceeded (wall clock)");
 	  fprintf(stderr, "OK (%d.%03d sec real, %d.%03d sec wall, %d syscalls)\n",
 	      (int) total.tv_sec, (int) total.tv_usec/1000,
 	      (int) wall.tv_sec, (int) wall.tv_usec/1000,
@@ -408,7 +408,7 @@ boxkeeper(void)
       if (WIFSIGNALED(stat))
 	{
 	  box_pid = 0;
-	  die("Caught fatal signal %d.", WTERMSIG(stat));
+	  die("Caught fatal signal %d", WTERMSIG(stat));
 	}
       if (WIFSTOPPED(stat))
 	{
@@ -437,7 +437,7 @@ boxkeeper(void)
 		      u.regs.orig_eax = 0xffffffff;
 		      if (ptrace(PTRACE_SETREGS, box_pid, NULL, &u) < 0)
 			die("ptrace(PTRACE_SETREGS): %m");
-		      die("Forbidden syscall %d.", sys);
+		      die("Forbidden syscall %d", sys);
 		    }
 		}
 	      else					/* Syscall return */
@@ -450,7 +450,7 @@ boxkeeper(void)
 	      ptrace(PTRACE_SYSCALL, box_pid, 0, sig);
 	    }
 	  else
-	    die("Received signal %d.", sig);
+	    die("Received signal %d", sig);
 	}
       else
 	die("wait4: unknown status %x, giving up!", stat);
