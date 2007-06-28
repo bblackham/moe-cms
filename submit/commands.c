@@ -207,6 +207,13 @@ cmd_submit(struct conn *c)
   struct odes *tasko = task_status_find_task(c, task, 1);
   struct odes *parto = task_status_find_part(tasko, pname, 1);
   uns current_ver = obj_find_anum(parto, 'V', 0);
+  if (current_ver >= max_versions)
+    {
+      err(c, "Maximum number of submits of this task exceeded");
+      bclose(fb);
+      task_unlock_status(c, 0);
+      return;
+    }
   uns last_ver = 0;
   uns replaced_ver = 0;
   for (struct oattr *a = obj_find_attr(parto, 'V' + OBJ_ATTR_SON); a; a=a->same)

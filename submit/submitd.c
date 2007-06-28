@@ -30,6 +30,7 @@ static uns port = 8888;
 static uns dh_bits = 1024;
 static uns max_conn = 10;
 static uns session_timeout;
+uns max_versions;
 static byte *ca_cert_name = "?";
 static byte *server_cert_name = "?";
 static byte *server_key_name = "?";
@@ -68,6 +69,7 @@ static struct cf_section submitd_conf = {
     CF_UNS("SessionTimeout", &session_timeout),
     CF_UNS("MaxRequestSize", &max_request_size),
     CF_UNS("MaxAttachSize", &max_attachment_size),
+    CF_UNS("MaxVersions", &max_versions),
     CF_STRING("CACert", &ca_cert_name),
     CF_STRING("ServerCert", &server_cert_name),
     CF_STRING("ServerKey", &server_key_name),
@@ -167,7 +169,7 @@ tls_new_session(int sk)
   int err;
 
   err = gnutls_init(&s, GNUTLS_SERVER); TLS_CHECK(gnutls_init);
-  err = gnutls_set_default_priority(s); TLS_CHECK(gnutls_set_default_priority);			// FIXME
+  err = gnutls_set_default_priority(s); TLS_CHECK(gnutls_set_default_priority);
   gnutls_credentials_set(s, GNUTLS_CRD_CERTIFICATE, cert_cred);
   gnutls_certificate_server_set_request(s, GNUTLS_CERT_REQUEST);
   gnutls_dh_set_prime_bits(s, dh_bits);

@@ -18,7 +18,6 @@ Installer:
 
 New submitter:
 - Checking of contest time (and per-contestant exceptions)
-- Remember hashes
 - contest: override failed check
 - contest: local history
 - contest: task status cache

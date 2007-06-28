@@ -21,6 +21,10 @@ MaxRequestSize		4K
 # This is a default, which can be overriden in task definitions.
 MaxAttachSize		256K
 
+# Maximum number of versions of a single task part a contestant is allowed
+# to submit (0=unlimited)
+MaxVersions		50
+
 # Number of bits for the Diffie-Hellman key exchange
 DHBits			1024
 
