@@ -131,10 +131,10 @@ cmd_status(struct conn *c)
 /*** SUBMIT ***/
 
 static struct fastbuf *
-read_attachment(struct conn *c)
+read_attachment(struct conn *c, uns max_size)
 {
   uns size = obj_find_anum(c->request, 'S', 0);
-  if (size > max_attachment_size)
+  if (size > max_size)
     {
       err(c, "Submission too large");
       return NULL;
@@ -198,7 +198,8 @@ cmd_submit(struct conn *c)
       return;
     }
 
-  struct fastbuf *fb = read_attachment(c);
+  uns max_size = task->max_size ? : max_attachment_size;
+  struct fastbuf *fb = read_attachment(c, max_size);
   if (!fb)
     return;
 

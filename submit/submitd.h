@@ -61,6 +61,7 @@ struct task {
   cnode n;
   byte *name;
   uns open_data;	// Number of parts for open-data tasks
+  uns max_size;		// Maximum size (0=use global default)
   clist parts;		// List of parts of this task (simp_nodes)
   clist *extensions;	// List of allowed extensions for this task (simp_nodes)
 };

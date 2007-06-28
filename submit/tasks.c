@@ -50,6 +50,7 @@ static struct cf_section task_conf = {
   CF_ITEMS {
     CF_STRING("Name", PTR_TO(struct task, name)),
     CF_UNS("OpenData", PTR_TO(struct task, open_data)),
+    CF_UNS("MaxSize", PTR_TO(struct task, max_size)),
     CF_END
   }
 };

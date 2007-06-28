@@ -18,6 +18,7 @@ SessionTimeout		300
 MaxRequestSize		4K
 
 # Maximum size of an attachment (i.e., a submitted solution)
+# This is a default, which can be overriden in task definitions.
 MaxAttachSize		256K
 
 # Number of bits for the Diffie-Hellman key exchange
@@ -35,7 +36,7 @@ Access {
 	# IP address range matched by this rule
 	IP		127.0.0.1
 
-	# Administrator access allowed
+	# Administrator access allowed (does not do anything yet)
 	Admin		1
 
 	# Plain-text connections without any user authentication allowed
@@ -71,7 +72,7 @@ TraceCommands		1
 
 Tasks {
 #	Task plans
-#	Task { Name world; OpenData 10; }
+	Task { Name world; OpenData 10; MaxSize 1M; }
 
 	Task		necklace
 	Task		nei
