@@ -16,6 +16,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
+#include <time.h>
 
 #include "submitd.h"
 
@@ -193,7 +194,29 @@ task_status_find_part(struct odes *to, byte *part, uns create)
   return o;
 }
 
-void task_submit_part(byte *user, byte *task, byte *part, byte *ext, uns version UNUSED, struct fastbuf *fb)
+static void task_record_history(byte *user, byte *task, byte *part, byte *ext, uns version, byte *submitted_name)
+{
+  if (!history_format)
+    return;
+
+  time_t now = time(NULL);
+  struct tm *tm = localtime(&now);
+  byte prefix[256];
+  if (strftime(prefix, sizeof(prefix), history_format, tm) <= 0)
+    {
+      msg(L_ERROR, "Error formatting history prefix: too long");
+      return;
+    }
+
+  byte *name = stk_printf("%s%s:%s:%s:v%d.%s", prefix, user, task, (strcmp(task, part) ? part : (byte*)""), version, ext);
+  struct fastbuf *orig = bopen(submitted_name, O_RDONLY, 4096);
+  struct fastbuf *hist = bopen(name, O_WRONLY | O_CREAT | O_EXCL, 4096);
+  bbcopy_slow(orig, hist, ~0U);
+  bclose(hist);
+  bclose(orig);
+}
+
+void task_submit_part(byte *user, byte *task, byte *part, byte *ext, uns version, struct fastbuf *fb)
 {
   byte *dir = stk_printf("solutions/%s/%s", user, task);
   byte *name = stk_printf("%s/%s.%s", dir, part, ext);
@@ -205,6 +228,8 @@ void task_submit_part(byte *user, byte *task, byte *part, byte *ext, uns version
   bconfig(fb, BCONFIG_IS_TEMP_FILE, 0);
   if (rename(fb->name, name) < 0)
     die("Cannot rename %s to %s: %m", fb->name, name);
+
+  task_record_history(user, task, part, ext, version, name);
 }
 
 void task_delete_part(byte *user, byte *task, byte *part, byte *ext, uns version UNUSED)

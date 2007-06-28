@@ -29,6 +29,6 @@ cp -a $H/submit/lib lib
 rm -rf tmp
 mkdir -p tmp
 
-mkdir -p log
+mkdir -p log history
 
 chown -R $REMOTE_SUBMIT_USER.$REMOTE_SUBMIT_GROUP $MO_ROOT/eval/submit

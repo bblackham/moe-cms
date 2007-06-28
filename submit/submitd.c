@@ -33,6 +33,7 @@ static uns session_timeout;
 static byte *ca_cert_name = "?";
 static byte *server_cert_name = "?";
 static byte *server_key_name = "?";
+byte *history_format;
 static clist access_rules;
 static uns trace_tls;
 uns max_request_size;
@@ -70,6 +71,7 @@ static struct cf_section submitd_conf = {
     CF_STRING("CACert", &ca_cert_name),
     CF_STRING("ServerCert", &server_cert_name),
     CF_STRING("ServerKey", &server_key_name),
+    CF_STRING("History", &history_format),
     CF_LIST("Access", &access_rules, &access_conf),
     CF_UNS("TraceTLS", &trace_tls),
     CF_UNS("TraceCommands", &trace_commands),

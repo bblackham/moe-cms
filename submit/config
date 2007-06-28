@@ -31,6 +31,10 @@ CACert			certs/ca-cert.pem
 ServerCert		certs/server-cert.pem
 ServerKey		certs/server-key.pem
 
+# Keep history of all submitted files in files of a given name prefix
+# (formatted by strftime; default: no history kept)
+History			history/%H%M%S-
+
 # Rules for accepting connections (first matching rule is used)
 Access {
 	# IP address ranges matched by this rule
@@ -68,9 +72,9 @@ Tasks {
 #	Task plans
 	Task { Name world; OpenData 10; MaxSize 1M; }
 
-	Task		necklace
-	Task		nei
-	Task		town
+	Task		asteroids
+	Task		cards
+	Task		lines
 
 	Extension	c cpp pas
 	OpenDataExt	out

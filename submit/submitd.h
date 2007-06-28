@@ -50,6 +50,7 @@ struct conn {
 };
 
 extern uns max_request_size, max_attachment_size, trace_commands;
+extern byte *history_format;
 
 /* submitd.c */
 
