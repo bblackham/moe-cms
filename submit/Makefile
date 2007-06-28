@@ -1,8 +1,9 @@
 TLSCF:=$(shell libgnutls-config --cflags)
 TLSLF:=$(shell libgnutls-config --libs)
 GCRCF:=$(shell libgcrypt-config --cflags)
+LIBUCW=../../libucw
 
-CFLAGS=-O2 -Iinclude -g -Wall -W -Wno-parentheses -Wstrict-prototypes -Wmissing-prototypes -Wundef -Wredundant-decls -std=gnu99 $(TLSCF) $(GCRCF)
+CFLAGS=-O2 -I$(LIBUCW)/include -g -Wall -W -Wno-parentheses -Wstrict-prototypes -Wmissing-prototypes -Wundef -Wredundant-decls -std=gnu99 $(TLSCF) $(GCRCF)
 LDFLAGS=$(TLSLF)
 
 #CC=gcc-4.1.1
@@ -11,13 +12,13 @@ LDFLAGS+=-lpthread	# FIXME: Use libucw without threads
 
 all: submitd privkey
 
-submitd: submitd.o commands.o tasks.o lib/libsh.a lib/libucw.a
+submitd: submitd.o commands.o tasks.o $(LIBUCW)/lib/libsh.a $(LIBUCW)/lib/libucw.a
 submitd.o: submitd.c submitd.h
 commands.o: commands.c submitd.h
 tasks.o: tasks.c submitd.h
-connect: connect.o lib/libucw.a
+connect: connect.o $(LIBUCW)/lib/libucw.a
 connect.o: connect.c
-privkey: privkey.o lib/libucw.a
+privkey: privkey.o $(LIBUCW)/lib/libucw.a
 privkey.o: privkey.c
 
 certs:
