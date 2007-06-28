@@ -211,5 +211,5 @@ void task_delete_part(byte *user, byte *task, byte *part, byte *ext, uns version
   byte *dir = stk_printf("solutions/%s/%s", user, task);
   byte *name = stk_printf("%s/%s.%s", dir, part, ext);
   if (unlink(name) < 0)
-    log(L_ERROR, "Cannot delete %s: %m", name);
+    msg(L_ERROR, "Cannot delete %s: %m", name);
 }

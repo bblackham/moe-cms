@@ -203,7 +203,7 @@ tls_verify_cert(struct conn *c)
   if (err < 0)
     return "Cannot retrieve common name";
   if (trace_tls)
-    log(L_INFO, "Cert CN: %s", dn);
+    msg(L_INFO, "Cert CN: %s", dn);
   c->cert_name = xstrdup(dn);
 
   /* Check certificate purpose */
@@ -236,7 +236,7 @@ tls_log_params(struct conn *c)
   const char *comp = gnutls_compression_get_name(gnutls_compression_get(s));
   const char *cipher = gnutls_cipher_get_name(gnutls_cipher_get(s));
   const char *mac = gnutls_mac_get_name(gnutls_mac_get(s));
-  log(L_DEBUG, "TLS params: proto=%s kx=%s cert=%s comp=%s cipher=%s mac=%s",
+  msg(L_DEBUG, "TLS params: proto=%s kx=%s cert=%s comp=%s cipher=%s mac=%s",
     proto, kx, cert, comp, cipher, mac);
 }
 
@@ -247,7 +247,7 @@ client_error(char *msg, ...)
 {
   va_list args;
   va_start(args, msg);
-  vlog_msg(L_ERROR_R, msg, args);
+  vmsg(L_ERROR_R, msg, args);
   exit(0);
 }
 
@@ -377,7 +377,7 @@ client_loop(struct conn *c)
 
   alarm(session_timeout);
   if (!process_init(c))
-    log(L_ERROR, "Protocol handshake failed");
+    msg(L_ERROR, "Protocol handshake failed");
   else
     {
       setproctitle("submitd: client %s (%s)", c->ip_string, c->user);
@@ -407,18 +407,18 @@ sigchld_handler(int sig UNUSED)
 static void
 reap_child(pid_t pid, int status)
 {
-  byte msg[EXIT_STATUS_MSG_SIZE];
-  if (format_exit_status(msg, status))
-    log(L_ERROR, "Child %d %s", (int)pid, msg);
+  byte buf[EXIT_STATUS_MSG_SIZE];
+  if (format_exit_status(buf, status))
+    msg(L_ERROR, "Child %d %s", (int)pid, buf);
 
   CLIST_FOR_EACH(struct conn *, c, connections)
     if (c->pid == pid)
       {
-	log(L_INFO, "Connection %d closed", c->id);
+	msg(L_INFO, "Connection %d closed", c->id);
 	conn_free(c);
 	return;
       }
-  log(L_ERROR, "Cannot find connection for child process %d", (int)pid);
+  msg(L_ERROR, "Cannot find connection for child process %d", (int)pid);
 }
 
 static int listen_sk;
@@ -483,7 +483,7 @@ sk_accept(void)
     }
 
   struct conn *c = conn_new();
-  log(L_INFO, "Connection from %s:%d (id %d, %s, %s)",
+  msg(L_INFO, "Connection from %s:%d (id %d, %s, %s)",
 	ipbuf, port, c->id,
 	(rule->plain_text ? "plain-text" : "TLS"),
 	(rule->allow_admin ? "admin" : "user"));
@@ -497,7 +497,7 @@ sk_accept(void)
     {
       conn_free(c);
       err = "Server overloaded";
-      log(L_ERROR, "Fork failed: %m");
+      msg(L_ERROR, "Fork failed: %m");
       goto reject2;
     }
   if (!c->pid)
@@ -510,12 +510,12 @@ sk_accept(void)
   return;
 
 reject:
-  log(L_ERROR_R, "Connection from %s:%d rejected (%s)", ipbuf, port, err);
+  msg(L_ERROR_R, "Connection from %s:%d rejected (%s)", ipbuf, port, err);
 reject2: ;
   // Write an error message to the socket, but do not allow it to slow us down
   struct linger ling = { .l_onoff=0 };
   if (setsockopt(sk, SOL_SOCKET, SO_LINGER, &ling, sizeof(ling)) < 0)
-    log(L_ERROR, "Cannot set SO_LINGER: %m");
+    msg(L_ERROR, "Cannot set SO_LINGER: %m");
   write(sk, "-", 1);
   write(sk, err, strlen(err));
   write(sk, "\n", 1);
@@ -535,12 +535,12 @@ int main(int argc, char **argv)
 
   log_file(log_name);
 
-  log(L_INFO, "Initializing TLS");
+  msg(L_INFO, "Initializing TLS");
   tls_init();
 
   conn_init();
   sk_init();
-  log(L_INFO, "Listening on port %d", port);
+  msg(L_INFO, "Listening on port %d", port);
 
   struct sigaction sa = {
     .sa_handler = sigchld_handler

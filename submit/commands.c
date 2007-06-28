@@ -18,7 +18,7 @@
 /*** REQUESTS AND REPLIES ***/
 
 static void NONRET
-read_error_cb(struct obj_read_state *st UNUSED, byte *msg)
+read_error_cb(struct obj_read_state *st UNUSED, char *msg)
 {
   client_error("Request parse error: %s", msg);
 }
@@ -68,13 +68,13 @@ write_reply(struct conn *c)
     obj_set_attr(c->reply, '+', "OK");
   if (trace_commands)
     {
-      byte *msg;
-      if (msg = obj_find_aval(c->reply, '-'))
-	log(L_DEBUG, ">> -%s", msg);
-      else if (msg = obj_find_aval(c->reply, '+'))
-	log(L_DEBUG, ">> +%s", msg);
+      byte *m;
+      if (m = obj_find_aval(c->reply, '-'))
+	msg(L_DEBUG, ">> -%s", m);
+      else if (m = obj_find_aval(c->reply, '+'))
+	msg(L_DEBUG, ">> +%s", m);
       else
-	log(L_DEBUG, ">> ???");
+	msg(L_DEBUG, ">> ???");
     }
   obj_write(&c->tx_fb, c->reply, BUCKET_TYPE_PLAIN);
   bputc(&c->tx_fb, '\n');
@@ -231,7 +231,7 @@ cmd_submit(struct conn *c)
   obj_set_attr_num(parto, 'V', last_ver);
   task_unlock_status(c, 1);
 
-  log(L_INFO, "User %s submitted task %s%s (version %d%s)",
+  msg(L_INFO, "User %s submitted task %s%s (version %d%s)",
 	c->user, tname,
 	(strcmp(tname, pname) ? stk_printf("/%s", pname) : ""),
 	last_ver,
@@ -250,7 +250,7 @@ execute_command(struct conn *c)
       return;
     }
   if (trace_commands)
-    log(L_DEBUG, "<< %s", cmd);
+    msg(L_DEBUG, "<< %s", cmd);
   if (!strcasecmp(cmd, "SUBMIT"))
     cmd_submit(c);
   else if (!strcasecmp(cmd, "STATUS"))
@@ -289,12 +289,12 @@ execute_init(struct conn *c)
 	  err(c, "Unknown user");
 	  return;
 	}
-      log(L_INFO, "Logged in %s", user);
+      msg(L_INFO, "Logged in %s", user);
     }
   else
     {
       err(c, "Permission denied");
-      log(L_ERROR, "Unauthorized attempt to log in as %s", user);
+      msg(L_ERROR, "Unauthorized attempt to log in as %s", user);
       return;
     }
   c->user = xstrdup(user);
