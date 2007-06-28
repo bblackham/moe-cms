@@ -14,9 +14,14 @@
 #include <gnutls/gnutls.h>
 #include <gnutls/x509.h>
 
-struct access_rule {
+struct ip_node {
   cnode n;
   struct ip_addrmask addrmask;
+};
+
+struct access_rule {
+  cnode n;
+  clist ip_list;
   uns allow_admin;
   uns plain_text;
   uns max_conn;

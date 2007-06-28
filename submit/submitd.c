@@ -39,10 +39,18 @@ uns max_request_size;
 uns max_attachment_size;
 uns trace_commands;
 
+static struct cf_section ip_node_conf = {
+  CF_TYPE(struct ip_node),
+  CF_ITEMS {
+    CF_USER("IP", PTR_TO(struct ip_node, addrmask), &ip_addrmask_type),
+    CF_END
+  }
+};
+
 static struct cf_section access_conf = {
   CF_TYPE(struct access_rule),
   CF_ITEMS {
-    CF_USER("IP", PTR_TO(struct access_rule, addrmask), &ip_addrmask_type),
+    CF_LIST("IP", PTR_TO(struct access_rule, ip_list), &ip_node_conf),
     CF_UNS("Admin", PTR_TO(struct access_rule, allow_admin)),
     CF_UNS("PlainText", PTR_TO(struct access_rule, plain_text)),
     CF_UNS("MaxConn", PTR_TO(struct access_rule, max_conn)),
@@ -105,8 +113,9 @@ static struct access_rule *
 lookup_rule(u32 ip)
 {
   CLIST_FOR_EACH(struct access_rule *, r, access_rules)
-    if (ip_addrmask_match(&r->addrmask, ip))
-      return r;
+    CLIST_FOR_EACH(struct ip_node *, n, r->ip_list)
+      if (ip_addrmask_match(&n->addrmask, ip))
+	return r;
   return NULL;
 }
 

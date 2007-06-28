@@ -20,7 +20,6 @@ New submitter:
 - Checking of contest time (and per-contestant exceptions)
 - Keeping history and pruning status files
 - Remember hashes
-- multiple IP ranges per Access rule
 - contest: override failed check
 - contest: local history
 - contest: task status cache

@@ -33,7 +33,7 @@ ServerKey		certs/server-key.pem
 
 # Rules for accepting connections (first matching rule is used)
 Access {
-	# IP address range matched by this rule
+	# IP address ranges matched by this rule
 	IP		127.0.0.1
 
 	# Administrator access allowed (does not do anything yet)
@@ -48,12 +48,6 @@ Access {
 
 Access {
 	IP		195.113.18.125
-	Admin		0
-	PlainText	0
-	MaxConn		2
-}
-
-Access {
 	IP		10.10.8.0/24
 	Admin		0
 	PlainText	0
