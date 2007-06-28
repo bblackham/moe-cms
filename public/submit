@@ -1,6 +1,6 @@
 #!/bin/bash
 # The Evaluator -- Public Submit Script
-# (c) 2001--2004 Martin Mares <mj@ucw.cz>
+# (c) 2001--2007 Martin Mares <mj@ucw.cz>
 
 set -e
 [ -n "$MO_ROOT" -a -d "$MO_ROOT" ] || { echo >&2 "MO_ROOT not set, giving up." ; exit 1 ; }
