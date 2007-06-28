@@ -9,6 +9,7 @@ do we need SDIR?
 clean up retest utility
 writing of verdicts to stdout (include timing and check on interactive tasks, including judge errors)
 box: memory usage statistics (need to search for VMPeak in /proc/$PID/status, but it disappears too early)
+check: rename `log' ?
 
 Environment
 ~~~~~~~~~~~
@@ -18,6 +19,7 @@ Installer:
 - mo-install: reduce what gets copied to mo-eval home
 - update group permissions
 - fix makefiles, so that submit/Makefile gets called
+- quotas
 
 New submitter:
 - Checking of contest time (and per-contestant exceptions)
