@@ -9,7 +9,7 @@ set -e
 
 function usage
 {
-	die "Usage: check [--force] [-s <source-file>] <problem> [<test-number>]"
+	die "Usage: submit [--force] [-s <source-file>] <problem> [<test-number>]"
 }
 
 FORCE=0
@@ -74,6 +74,7 @@ fi
 
 if [ $FAILED != 0 ] ; then
 	if [ $FORCE != 0 ] ; then
+		echo "Submit forced."
 		pend "TESTS FAILED, but --force given, so submitting anyway."
 	else
 		pend "TESTS FAILED. Nothing has been submitted!"
