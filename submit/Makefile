@@ -1,16 +1,12 @@
 TLSCF:=$(shell libgnutls-config --cflags)
 TLSLF:=$(shell libgnutls-config --libs)
 GCRCF:=$(shell libgcrypt-config --cflags)
-LIBUCW=../../libucw
 
-CFLAGS=-O2 -I$(LIBUCW)/include -g -Wall -W -Wno-parentheses -Wstrict-prototypes -Wmissing-prototypes -Wundef -Wredundant-decls -std=gnu99 $(TLSCF) $(GCRCF)
-LDFLAGS=$(TLSLF)
-
-#CC=gcc-4.1.1
-CFLAGS+=-Wno-pointer-sign -Wdisabled-optimization -Wno-missing-field-initializers
+CFLAGS+=-I$(LIBUCW)/include $(TLSCF) $(GCRCF)
+LDFLAGS+=$(TLSLF)
 LDFLAGS+=-lpthread	# FIXME: Use libucw without threads
 
-all: submitd privkey
+all: submitd privkey lib
 
 submitd: submitd.o commands.o tasks.o $(LIBUCW)/lib/libsh.a $(LIBUCW)/lib/libucw.a
 submitd.o: submitd.c submitd.h
@@ -32,6 +28,21 @@ certs:
 	certtool --generate-certificate --load-request client-req.pem --outfile client-cert.pem --load-ca-certificate ca-cert.pem --load-ca-privkey ca-key.pem --template client-cert.tpl
 	# Beware of serial numbers
 
+lib: .lib-stamp lib/perl5/MO/Submit.pm lib/perl5/Sherlock/Object.pm
+
+.lib-stamp:
+	mkdir -p lib/perl5/{MO,Sherlock}
+	touch .lib-stamp
+
+lib/perl5/MO/Submit.pm: MO/Submit.pm
+	cp $^ $@
+
+lib/perl5/Sherlock/Object.pm: $(LIBUCW)/lib/perl5/Sherlock/Object.pm
+	cp $^ $@
+
 clean:
 	rm -f `find . -name "*~" -or -name "*.[oa]" -or -name "\#*\#" -or -name TAGS -or -name core -or -name .depend -or -name .#*`
 	rm -f submitd connect privkey
+	rm -rf lib .lib-stamp
+
+.PHONY: lib
