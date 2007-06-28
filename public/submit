@@ -51,15 +51,15 @@ if [ $TASK_TYPE == open-data ] ; then
 	[ -n "$PART" ] || die "You need to specify test number for open data problems."
 	TEST=$PART
 	pstart "Test case $TEST: "
-	open-locate $SRCFILE
+	open-locate "$SRCFILE"
 	(
-		ln $SRCN $TDIR/$TEST.out
+		ln "$SDIR/$SRCN" $TDIR/$TEST.out
 		syntax-check
 		test-result 1 OK
 	) || FAILED=1
 else
 	[ -z "$PART" ] || die "Test number should be given only for open data problems."
-	locate-source $SRCFILE
+	locate-source "$SRCFILE"
 	compile
 	for TEST in $SAMPLE_TESTS ; do
 		(
@@ -85,7 +85,7 @@ fi
 
 if [ -n "$REMOTE_SUBMIT" ] ; then
 	pstart "Submitting to the server... "
-	$MO_ROOT/bin/remote-submit $PROBLEM $PART $SDIR/$SRCN
+	$MO_ROOT/bin/remote-submit $PROBLEM $PART "$SDIR/$SRCN"
 	pend "OK"
 	exit 0
 fi
@@ -94,10 +94,10 @@ pstart "Submitting... "
 mkdir -p ~/.submit
 if [ $TASK_TYPE == open-data ] ; then
 	mkdir -p ~/.submit/$PROBLEM
-	cp $SRCN ~/.submit/$PROBLEM/$PART.out
+	cp "$SDIR/$SRCN" ~/.submit/$PROBLEM/$PART.out
 else
 	rm -rf ~/.submit/$PROBLEM
 	mkdir -p ~/.submit/$PROBLEM
-	cp $SRCN ~/.submit/$PROBLEM/
+	cp "$SDIR/$SRCN" ~/.submit/$PROBLEM/
 fi
 pend "OK"

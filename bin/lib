@@ -107,20 +107,20 @@ EOF
 # Locate source file.
 # If no parameter is given, locate it in SDIR and return name as SRCN and extension as SRCEXT
 # Or a file name can be given and then SDIR, SRCN and SRCEXT are set.
+# Beware, SDIR and SRCN can contain spaces and other strange user-supplied characters.
 
 function locate-source
 {
 	pstart "Finding source... "
+	local SBASE
 	if [ -n "$1" ] ; then
-		SRCBASE=$(echo $1 | sed 's/\.\([^.]\+\)//')
-		SRCEXT=$(echo $1 | sed 's/.*\.\([^.]\+\)/\1/')
+		SDIR=`dirname "$1"`
+		local S=`basename "$1"`
+		SBASE=$(echo "$S" | sed 's/\.\([^.]\+\)//')
+		SRCEXT=$(echo "$S" | sed '/\./!d; s/.*\.\([^.]\+\)/\1/')
 		if [ -n "$SRCEXT" ] ; then
 			# Full name given, so just check the extension and existence
-			SRCN=$1
-			if [ ${SRCN:0:1} == / ] ; then
-				SRCN=${SRCN:1}
-				SDIR=
-			fi
+			SRCN="$S"
 			[ -f "$SDIR/$SRCN" ] || die "Cannot find source file $SDIR/$SRCN"
 			SRCEXT_OK=
 			for a in $EXTENSIONS ; do
@@ -136,9 +136,9 @@ function locate-source
 		SBASE=$PROBLEM
 	fi
 	for a in $EXTENSIONS ; do
-		if [ -f $SDIR/$SBASE.$a ] ; then
+		if [ -f "$SDIR/$SBASE.$a" ] ; then
 			[ -z "$SRCN" ] || die "Multiple source files found: $SDIR/$PROBLEM.$a and $SDIR/$SRCN. Please fix."
-			SRCN=$SBASE.$a
+			SRCN="$SBASE.$a"
 			SRCEXT=$a
 		fi
 	done
@@ -154,7 +154,7 @@ function compile
 	pstart "Compiling... "
 	# Beware, the original SRCN can be a strange user-supplied name
 	SRC=$PROBLEM.$SRCEXT
-	cp -a $SDIR/$SRCN $TDIR/$SRC
+	cp "$SDIR/$SRCN" $TDIR/$SRC
 	if [ -n "$COMP_EXTRAS" ] ; then
 		echo "Extras: $COMP_EXTRAS"
 		for a in $COMP_EXTRAS ; do cp $PDIR/$a $TDIR/ ; done
@@ -373,12 +373,14 @@ function public-setup
 }
 
 # Locate output of open data problem, test case TEST
+# Beware, SDIR and SRCN can contain spaces and other strange user-supplied characters.
 
 function open-locate
 {
 	[ -f $PDIR/$TEST.in ] || die "Unknown test $TEST"
 	if [ -n "$1" ] ; then
-		SRCN=$1
+		SDIR=`dirname "$1"`
+		SRCN=`basename "$1"`
 	else
 		SRCN=$SDIR/$PROBLEM$TEST.out
 	fi
