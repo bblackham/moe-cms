@@ -3,11 +3,12 @@ Evaluator
 score: better formatting of the score table
 interactive tasks: solve deadlocks?
 interactive tasks: logging of messages
-rename problem to task
+terminology: problem -> task ?
 submit, check: unify command-line arguments
 do we need SDIR?
 clean up retest utility
 writing of verdicts to stdout (include timing and check on interactive tasks, including judge errors)
+box: memory usage statistics (need to search for VMPeak in /proc/$PID/status, but it disappears too early)
 
 Environment
 ~~~~~~~~~~~

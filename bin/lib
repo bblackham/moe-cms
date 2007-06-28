@@ -1,5 +1,5 @@
 # The Evaluator -- Shell Function Library
-# (c) 2001--2004 Martin Mares <mj@ucw.cz>
+# (c) 2001--2007 Martin Mares <mj@ucw.cz>
 
 # General settings
 shopt -s dotglob
@@ -104,7 +104,9 @@ EOF
 	pend "OK"
 }
 
-# Locating source file in SDIR, pass name in SRCN (without path) and extension in SRCEXT
+# Locate source file.
+# If no parameter is given, locate it in SDIR and return name as SRCN and extension as SRCEXT
+# Or a file name can be given and then SDIR, SRCN and SRCEXT are set.
 
 function locate-source
 {
