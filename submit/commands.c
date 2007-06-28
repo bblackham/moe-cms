@@ -8,9 +8,11 @@
 #include "lib/mempool.h"
 #include "lib/simple-lists.h"
 #include "lib/stkstring.h"
+#include "lib/fastbuf.h"
 #include "sherlock/object.h"
 #include "sherlock/objread.h"
 
+#include <fcntl.h>
 #include <time.h>
 
 #include "submitd.h"
@@ -128,6 +130,43 @@ cmd_status(struct conn *c)
     }
 }
 
+/*** Contest timeout checks ***/
+
+static int
+load_time_limit(char *name)
+{
+  struct fastbuf *f = bopen_try(name, O_RDONLY, 1024);
+  if (!f)
+    return -1;
+  char buf[256];
+  int h, m;
+  if (bgets_nodie(f, buf, sizeof(buf)) < 0 ||
+      sscanf(buf, "%d:%d", &h, &m) != 2 ||
+      h < 0 || h > 23 || m < 0 || m > 59)
+    {
+      msg(L_ERROR, "Invalid timeout in %s", name);
+      bclose(f);
+      return -1;
+    }
+  bclose(f);
+  return 100*h + m;
+}
+
+static int
+contest_over(struct conn *c)
+{
+  time_t now = time(NULL);
+  struct tm *tm = localtime(&now);
+  int tstamp = tm->tm_hour*100 + tm->tm_min;
+  int local_limit = load_time_limit(stk_printf("solutions/%s/TIMEOUT", c->user));
+  int global_limit = load_time_limit("solutions/TIMEOUT");
+  if (trace_commands > 1)
+    msg(L_DEBUG, "Time check: current %d, global limit %d, user limit %d", tstamp, global_limit, local_limit);
+  if (local_limit >= 0)
+    return (tstamp >= local_limit);
+  return (global_limit >= 0 && tstamp >= global_limit);
+}
+
 /*** SUBMIT ***/
 
 static struct fastbuf *
@@ -165,6 +204,12 @@ read_attachment(struct conn *c, uns max_size)
 static void
 cmd_submit(struct conn *c)
 {
+  if (contest_over(c))
+    {
+      err(c, "The contest is over, no more submits allowed");
+      return;
+    }
+
   byte *tname = obj_find_aval(c->request, 'T');
   if (!tname)
     {

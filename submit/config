@@ -66,7 +66,7 @@ Access {
 TraceTLS		1
 
 # Trace command and their results
-TraceCommands		1
+TraceCommands		2
 
 }
 

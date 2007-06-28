@@ -194,7 +194,8 @@ task_status_find_part(struct odes *to, byte *part, uns create)
   return o;
 }
 
-static void task_record_history(byte *user, byte *task, byte *part, byte *ext, uns version, byte *submitted_name)
+static void
+task_record_history(byte *user, byte *task, byte *part, byte *ext, uns version, byte *submitted_name)
 {
   if (!history_format)
     return;
@@ -216,7 +217,8 @@ static void task_record_history(byte *user, byte *task, byte *part, byte *ext, u
   bclose(orig);
 }
 
-void task_submit_part(byte *user, byte *task, byte *part, byte *ext, uns version, struct fastbuf *fb)
+void
+task_submit_part(byte *user, byte *task, byte *part, byte *ext, uns version, struct fastbuf *fb)
 {
   byte *dir = stk_printf("solutions/%s/%s", user, task);
   byte *name = stk_printf("%s/%s.%s", dir, part, ext);
@@ -232,7 +234,8 @@ void task_submit_part(byte *user, byte *task, byte *part, byte *ext, uns version
   task_record_history(user, task, part, ext, version, name);
 }
 
-void task_delete_part(byte *user, byte *task, byte *part, byte *ext, uns version UNUSED)
+void
+task_delete_part(byte *user, byte *task, byte *part, byte *ext, uns version UNUSED)
 {
   byte *dir = stk_printf("solutions/%s/%s", user, task);
   byte *name = stk_printf("%s/%s.%s", dir, part, ext);

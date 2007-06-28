@@ -17,7 +17,6 @@ Installer:
 - quotas
 
 New submitter:
-- Checking of contest time (and per-contestant exceptions)
 - contest: override failed check
 - contest: local history
 - contest: task status cache
