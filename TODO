@@ -6,7 +6,6 @@ interactive tasks: logging of messages
 terminology: problem -> task ?
 writing of verdicts to stdout (include timing and check on interactive tasks, including judge errors)
 box: memory usage statistics (need to search for VMPeak in /proc/$PID/status, but it disappears too early)
-check: rename `log' ?
 
 Environment
 ~~~~~~~~~~~

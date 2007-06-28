@@ -368,8 +368,8 @@ function public-setup
 	mkdir -p $BOXDIR
 	rm -rf $BOXDIR/*
 	BOXCMD="$MO_ROOT/bin/box -c$BOXDIR"
-	exec >log
-	pend "OK  (see 'log' for details)"
+	exec >check-log
+	pend "OK  (see 'check-log' for details)"
 }
 
 # Locate output of open data problem, test case TEST
