@@ -1,0 +1,19 @@
+[Desktop Entry]
+Comment=
+Comment[en_US]=
+Encoding=UTF-8
+Exec='/mo/kdevelop/templates/templater.pl'
+GenericName=
+GenericName[en_US]=
+Icon=kdevelop
+MimeType=
+Name=CPSPC project IDE
+Name[en_US]=CPSPC project IDE
+Path=
+StartupNotify=true
+Terminal=false
+TerminalOptions=
+Type=Application
+X-DCOP-ServiceType=
+X-KDE-SubstituteUID=false
+X-KDE-Username=
