@@ -10,8 +10,7 @@ to broken connections to loop forever if SIGPIPE was blocked.
  	}
  	$vm = $trace>2 && $linux_debug ?
  	    (split ' ', `cat /proc/$$/stat`)[22] : 'vm_unknown';
--	warn "  written so far $wrote:$written bytes (VM=$vm)\n" if $trace>2;
-+	warn "  written so far $wrote:$written bytes (VM=$vm) brum\n" if $trace>2;
+ 	warn "  written so far $wrote:$written bytes (VM=$vm)\n" if $trace>2;
  	
  	$errs .= print_errs('SSL_write');
 +	$errs .= "SSL_write $$: 1 - $!\n" if $wrote < 0 && !$errs;
@@ -24,8 +23,7 @@ to broken connections to loop forever if SIGPIPE was blocked.
  	}
  	$vm = $trace>2 && $linux_debug ?
  	    (split ' ', `cat /proc/$$/stat`)[22] : 'vm_unknown';
--	warn "  written so far $wrote:$written bytes (VM=$vm)\n" if $trace>2;
-+	warn "  written so far $wrote:$written bytes (VM=$vm) brum\n" if $trace>2;
+	warn "  written so far $wrote:$written bytes (VM=$vm)\n" if $trace>2;
  	
  	$errs .= print_errs('SSL_write');
 +	$errs .= "SSL_write $$: 1 - $!\n" if $wrote < 0 && !$errs;
