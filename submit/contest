@@ -316,7 +316,7 @@ sub run_submit() {
 
 	if (defined $conn->{"History"}) {
 		busy("Submitting locally to " . $conn->{"History"});
-		my $err = $conn->local_submit($task, $part, $submit_extension, $submit_filename);
+		my $err = $conn->write_history($task, $part, $submit_extension, $submit_filename);
 		if (defined $err) {
 			submit_failed("Recording to local history failed\n($err)");
 			return;
@@ -380,8 +380,6 @@ sub checks_ok() {
 		finish_submit();
 		return;
 	}
-
-	### FIXME: Record to local history here
 
 	$status_label->set_markup("<span size='large'>Submitting</span>");
 	$subwin->show_all;
