@@ -18,7 +18,6 @@ Installer:
 
 New submitter:
 - contest: task status cache
-- contest: problems with SIGPIPE
 
 Various ideas:
 scores dependent on time (like PL olympiad)
