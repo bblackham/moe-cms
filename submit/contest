@@ -45,14 +45,17 @@ $title_lab->set_markup("<span size='x-large'>" . $conn->{"Contest"} . "</span>")
 
 # The row of buttons
 my $b_submit = Gtk2::Button->new('Submit');
+$b_submit->set_image(Gtk2::Image->new_from_stock('gtk-apply', 'button'));
 $b_submit->signal_connect(clicked => sub { submit(0) });
 $b_submit->set_sensitive(0);
 
 my $b_check = Gtk2::Button->new('Check');
+$b_check->set_image(Gtk2::Image->new_from_stock('gtk-find', 'button'));
 $b_check->signal_connect(clicked => sub { submit(1) });
 $b_check->set_sensitive(0);
 
 my $b_refresh = Gtk2::Button->new('Refresh');
+$b_refresh->set_image(Gtk2::Image->new_from_stock('gtk-refresh', 'button'));
 $b_refresh->signal_connect(clicked => sub { start_refresh_timer(1) });
 
 my $button_box = Gtk2::HBox->new;
@@ -281,7 +284,7 @@ sub end_submit($) {
 }
 
 sub finish_submit() {
-	my $button = Gtk2::Button->new('Return');
+	my $button = Gtk2::Button->new_from_stock('gtk-close');
 	$button->signal_connect(clicked => sub { end_submit(1) });
 
 	$bbutton_box = Gtk2::HButtonBox->new;
@@ -477,10 +480,10 @@ sub submit($) {
 	$subwin->signal_connect("delete-event" => sub { end_submit(0); return 0; });
 
 	my $bb_submit = Gtk2::Button->new($check_only ? 'Check' : 'Submit');
+	$bb_submit->set_image(Gtk2::Image->new_from_stock('gtk-apply', 'button'));
 	$bb_submit->signal_connect(clicked => \&do_submit);
-	#$bb_submit->set_sensitive(0);
 
-	my $bb_cancel = Gtk2::Button->new('Cancel');
+	my $bb_cancel = Gtk2::Button->new_from_stock('gtk-cancel');
 	$bb_cancel->signal_connect(clicked => sub { end_submit(1) });
 
 	$bbutton_box = Gtk2::HButtonBox->new;
