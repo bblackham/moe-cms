@@ -68,6 +68,7 @@ sub disconnect($) {
 sub connect($) {
 	my $self = shift @_;
 	$self->disconnect;
+
 	$self->log("Connecting to submit server");
 	my $sk = new IO::Socket::INET(
 		PeerAddr => $self->{"Server"},
@@ -106,6 +107,7 @@ sub connect($) {
 		}
 	}
 	$self->{"sk"} = $sk;
+	$sk->autoflush(0);
 
 	$self->log("Logging in");
 	my $req = new Sherlock::Object("U" => $self->{"user"});
@@ -123,12 +125,14 @@ sub connect($) {
 sub request($$) {
 	my ($self, $obj) = @_;
 	my $sk = $self->{"sk"};
-	$obj->write($sk);	### FIXME: Flushing
+	## $SIG{'PIPE'} = 'ignore';
+	$obj->write($sk);
+	print $sk "\n";
+	$sk->flush();
 	if ($sk->error) {
 		$self->err("Connection broken");
 		return undef;
 	}
-	print $sk "\n";
 	return $self->reply;
 }
 
