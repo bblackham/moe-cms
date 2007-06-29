@@ -28,6 +28,10 @@ my $s = stat(*F) or die;
 my $size = $s->size;
 
 my $conn = new MO::Submit;
+
+my $he = $conn->write_history($task, $part, $ext, $file);
+if (defined $he) { die "$he\n"; }
+
 $conn->connect or die $conn->{"error"} . "\n";
 
 sub or_die($) {
