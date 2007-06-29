@@ -18,14 +18,6 @@ to broken connections to loop forever if SIGPIPE was blocked.
  	return (wantarray ? (undef, $errs) : undef) if $errs;
      }
      return wantarray ? ($written, $errs) : $written;
-@@ -1690,7 +1691,6 @@
- 	}
- 	$vm = $trace>2 && $linux_debug ?
- 	    (split ' ', `cat /proc/$$/stat`)[22] : 'vm_unknown';
--	warn "  written so far $wrote:$written bytes (VM=$vm)\n" if $trace>2;
-     }
-     return wantarray ? ($written, '') : $written;
- }
 --- /usr/lib/perl5/auto/Net/SSLeay/ssl_write_all.al.mj	2007-06-29 22:17:19.000000000 +0200
 +++ /usr/lib/perl5/auto/Net/SSLeay/ssl_write_all.al	2007-06-29 22:17:35.000000000 +0200
 @@ -26,9 +26,10 @@
