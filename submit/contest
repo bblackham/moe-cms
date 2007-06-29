@@ -154,7 +154,7 @@ my $refresh_timer_id;
 
 sub timed_refresh()
 {
-	refresh();	# FIXME: If-modified-since version?
+	refresh();
 	return 1;	# We wish to re-run the timer
 }
 
@@ -279,8 +279,7 @@ my %submit_fn_cache = ();
 sub end_submit($) {
 	my ($close) = @_;
 	$subwin->destroy if $close;
-	start_refresh_timer(0);
-	### FIXME: ... and refresh status
+	start_refresh_timer(1);
 }
 
 sub finish_submit() {
@@ -325,14 +324,14 @@ sub run_submit() {
 
 	if ($conn->is_connected) {
 		busy("Checking server status...");
-		my $r = new Sherlock::Object("!" => "STATUS");	### FIXME: use a NOP command
+		my $r = new Sherlock::Object("!" => "NOP");
 		$r = $conn->request($r);
 	}
 	if (!$conn->is_connected) {
 		busy("Reconnecting to server...");
 		if (!$conn->connect) {
 			ready($conn->{"error"});
-			submit_failed("Unable to connect to the server");	### FIXME: Mention local submit
+			submit_failed("Unable to connect to the server");
 			return;
 		}
 	}
