@@ -24,6 +24,7 @@ sub new($) {
 		"CACert" => "$mo/ca-cert.pem",
 		"Trace" => defined $ENV{"MO_SUBMIT_TRACE"},
 		"Checks" => 1,
+		"AllowOverride" => 1,
 #		"History" => "$home/.history",	# Keep submission history in this directory
 		"RefreshTimer" => 60000,	# How often GUI sends STATUS commands [ms]
 		"root" => $root,

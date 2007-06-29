@@ -270,6 +270,7 @@ my $subwin_vbox;
 my $subwin_label;
 my $bbutton_box;
 my $submitting_label;
+my $text_frame;
 my $status_label;
 my $check_only;
 my $submit_filename;
@@ -372,31 +373,6 @@ sub run_submit() {
 	submit_ok();
 }
 
-sub checks_failed($) {
-	my ($msg) = @_;
-
-	$status_label->set_markup("<span size='large'>Check failed</span>");
-
-	my $text_buffer = Gtk2::TextBuffer->new;
-	$text_buffer->set_text($msg);
-
-	my $text_view = Gtk2::TextView->new_with_buffer($text_buffer);
-	$text_view->set_editable(0);
-	$text_view->set_cursor_visible(0);
-
-	my $text_scroll = Gtk2::ScrolledWindow->new;
-	$text_scroll->set_policy("automatic", "automatic");
-	$text_scroll->add($text_view);
-
-	my $text_frame = Gtk2::Frame->new("Checker log");
-	$text_frame->add($text_scroll);
-
-	$submitting_label->destroy;
-	$subwin_vbox->pack_start_defaults($text_frame);
-
-	finish_submit();
-}
-
 sub checks_ok() {
 	if ($check_only) {
 		$status_label->set_markup("<span size='large'>Checked successfully</span>");
@@ -416,6 +392,60 @@ sub checks_ok() {
 		run_submit();
 		return 0;
 	});
+}
+
+sub checks_override() {
+	$submitting_label = Gtk2::Label->new("Please wait...");
+	$subwin_vbox->pack_start_defaults($submitting_label);
+
+	$subwin->window->set_cursor($busy_cursor);
+	$bbutton_box->destroy;
+	$text_frame->destroy;
+	checks_ok();
+}
+
+sub checks_failed($) {
+	my ($msg) = @_;
+
+	$status_label->set_markup("<span size='large'>Check failed</span>");
+	$submitting_label->destroy;
+
+	my $text_buffer = Gtk2::TextBuffer->new;
+	$text_buffer->set_text($msg);
+
+	my $text_view = Gtk2::TextView->new_with_buffer($text_buffer);
+	$text_view->set_editable(0);
+	$text_view->set_cursor_visible(0);
+
+	my $text_scroll = Gtk2::ScrolledWindow->new;
+	$text_scroll->set_policy("automatic", "automatic");
+	$text_scroll->add($text_view);
+
+	$text_frame = Gtk2::Frame->new("Checker log");
+	$text_frame->add($text_scroll);
+
+	$subwin_vbox->pack_start_defaults($text_frame);
+
+	if ($check_only || !$conn->{"AllowOverride"}) {
+		finish_submit();
+		return;
+	}
+
+	my $close_button = Gtk2::Button->new_from_stock('gtk-close');
+	$close_button->signal_connect(clicked => sub { end_submit(1) });
+
+	my $anyway_button = Gtk2::Button->new('Submit anyway');
+	$anyway_button->signal_connect(clicked => \&checks_override);
+
+	$bbutton_box = Gtk2::HButtonBox->new;
+	$bbutton_box->pack_start_defaults($anyway_button);
+	$bbutton_box->pack_start_defaults($close_button);
+	$bbutton_box->set_border_width(5);
+	$subwin_vbox->pack_start($bbutton_box, 0, 0, 10);
+
+	ready("Ready");
+	$subwin->show_all;
+	$subwin->window->set_cursor(undef);
 }
 
 sub run_checks() {
