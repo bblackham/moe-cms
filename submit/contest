@@ -258,6 +258,7 @@ sub refresh()
 	if (!$conn->is_connected && !$force_refresh) {
 		# Retry
 		$conn->log("Retrying");
+		$force_refresh = 1;
 		refresh();
 	}
 }

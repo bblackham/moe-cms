@@ -126,7 +126,7 @@ sub connect($) {
 sub request($$) {
 	my ($self, $obj) = @_;
 	my $sk = $self->{"sk"};
-	## $SIG{'PIPE'} = 'ignore';
+	local $SIG{'PIPE'} = 'ignore';
 	$obj->write($sk);
 	print $sk "\n";
 	$sk->flush();
@@ -152,6 +152,7 @@ sub reply($) {
 sub send_file($$$) {
 	my ($self, $fh, $size) = @_;
 	my $sk = $self->{"sk"};
+	local $SIG{'PIPE'} = 'ignore';
 	while ($size) {
 		my $l = ($size < 4096 ? $size : 4096);
 		my $buf = "";
