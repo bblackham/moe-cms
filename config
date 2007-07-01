@@ -129,3 +129,12 @@ TEST_SANDBOX_OPTS='-a2 -f -m$MEM_LIMIT -t$TIME_LIMIT'
 
 # Sandbox initialization commands
 SANDBOX_INIT=
+
+# DEBUG: Let `ev' run sample tests, too.
+#EV_SAMPLE=1
+
+# DEBUG: Run `pedant' on all input data
+#EV_PEDANT=1
+
+# DEBUG: Skip checks (useful when generating output files by running model solution)
+#EV_NOCHECK=1

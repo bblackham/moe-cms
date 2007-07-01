@@ -38,6 +38,7 @@ function test-verdict
 }
 
 # Perform the tests
+[ -z "$EV_SAMPLE" ] || TESTS="$SAMPLE_TESTS $TESTS"
 for TEST in $TESTS ; do
 	(
 	[ -f $PDIR/$TEST.config ] && . $PDIR/$TEST.config

@@ -241,6 +241,10 @@ function test-prolog
 		*)	die "Unknown IN_TYPE $IN_TYPE"
 			;;
 	esac
+	if [ -n "$EV_PEDANT" -a $IN_TYPE != none ] ; then
+		pcont "<pedant> "
+		bin/pedant <$TDIR/$TEST.in | tr '\n' ' ' >&2
+	fi
 	case $OUT_TYPE in
 		file)	echo "Output file: $PROBLEM.out"
 			[ $TASK_TYPE == interactive ] || BOX_EXTRAS="$BOX_EXTRAS -o/dev/null"
@@ -315,6 +319,7 @@ function test-run-interactive
 function syntax-check
 {
 	[ -n "$SYNTAX_CHECK" ] || return 0
+	[ -z "$EV_NOCHECK" ] || return 0
 	pcont "<syntax> "
 	SCHECK=`eval echo $SYNTAX_CHECK`
 	echo "Syntax check command: $SCHECK"
@@ -332,7 +337,7 @@ function syntax-check
 function output-check
 {
 	MSG=
-	if [ -n "$OUTPUT_CHECK" -a "$OUT_TYPE" != none ] ; then
+	if [ -n "$OUTPUT_CHECK" -a "$OUT_TYPE" != none -a -z "$EV_NOCHECK" ] ; then
 		pcont "<check> "
 		[ -f $PDIR/$TEST.out ] && ln $PDIR/$TEST.out $TDIR/$TEST.ok
 		OCHECK=`eval echo $OUTPUT_CHECK`
