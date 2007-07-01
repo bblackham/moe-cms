@@ -16,15 +16,7 @@ chmod 755 eval
 cd eval
 
 # mo-eval home
-echo "Creating $EVAL_USER"
-mkdir eval
-cd eval
-cp -a $H/* .
-chmod +x bin/*
-if [ -d ~/.ssh ] ; then echo "Copying SSH configuration from ~/.ssh" ; cp -a ~/.ssh . ; fi
-cd ..
-chown -R $EVAL_USER.$EVAL_GROUP eval
-chmod 750 eval
+bin/mo-create-eval
 
 # testusers
 ( cd eval && bin/mo-create-testusers )
