@@ -308,6 +308,8 @@ execute_command(struct conn *c)
     cmd_submit(c);
   else if (!strcasecmp(cmd, "STATUS"))
     cmd_status(c);
+  else if (!strcasecmp(cmd, "NOP"))
+    ;
   else
     err(c, "Unknown command");
 }

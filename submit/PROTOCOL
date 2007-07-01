@@ -54,6 +54,14 @@ Status reply:
 		Aallowed_extension
 	)
 
+NOP request:
+
+	!NOP
+
+NOP reply:
+
+	(only status)
+
 
 Task status objects
 ~~~~~~~~~~~~~~~~~~~

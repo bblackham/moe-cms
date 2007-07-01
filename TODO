@@ -17,8 +17,6 @@ Installer:
 - quotas
 
 New submitter:
-- contest: override failed check
-- contest: local history
 - contest: task status cache
 
 Various ideas:

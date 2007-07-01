@@ -23,8 +23,9 @@ sub new($) {
 		"Cert" => "$mo/cert.pem",
 		"CACert" => "$mo/ca-cert.pem",
 		"Trace" => defined $ENV{"MO_SUBMIT_TRACE"},
-		"Checks" => 1,
-#		"History" => "$home/.history",	# Keep submission history in this directory
+		"Checks" => 1,			# Run `check' before submitting
+		"AllowOverride" => 1,		# Allow overriding a failed check
+		"History" => "$home/.history",	# Keep submission history in this directory
 		"RefreshTimer" => 60000,	# How often GUI sends STATUS commands [ms]
 		"root" => $root,
 		"user" => $user,
@@ -68,6 +69,7 @@ sub disconnect($) {
 sub connect($) {
 	my $self = shift @_;
 	$self->disconnect;
+
 	$self->log("Connecting to submit server");
 	my $sk = new IO::Socket::INET(
 		PeerAddr => $self->{"Server"},
@@ -106,6 +108,7 @@ sub connect($) {
 		}
 	}
 	$self->{"sk"} = $sk;
+	$sk->autoflush(0);
 
 	$self->log("Logging in");
 	my $req = new Sherlock::Object("U" => $self->{"user"});
@@ -123,12 +126,14 @@ sub connect($) {
 sub request($$) {
 	my ($self, $obj) = @_;
 	my $sk = $self->{"sk"};
-	$obj->write($sk);	### FIXME: Flushing
+	local $SIG{'PIPE'} = 'ignore';
+	$obj->write($sk);
+	print $sk "\n";
+	$sk->flush();
 	if ($sk->error) {
 		$self->err("Connection broken");
 		return undef;
 	}
-	print $sk "\n";
 	return $self->reply;
 }
 
@@ -147,6 +152,7 @@ sub reply($) {
 sub send_file($$$) {
 	my ($self, $fh, $size) = @_;
 	my $sk = $self->{"sk"};
+	local $SIG{'PIPE'} = 'ignore';
 	while ($size) {
 		my $l = ($size < 4096 ? $size : 4096);
 		my $buf = "";
@@ -164,11 +170,17 @@ sub send_file($$$) {
 	return $self->reply;
 }
 
-sub local_submit($$$$$) {
+sub write_history($$$$$) {
 	my ($self, $task, $part, $ext, $filename) = @_;
 	my $hist = $self->{"History"};
 	-d $hist or mkdir $hist or return "Unable to create $hist: $!";
-	### FIXME: Unfinished
+	my $now = POSIX::strftime("%H:%M:%S", localtime(time));
+	my $maybe_part = ($part eq $task) ? "" : ":$part";
+	my $name = "$hist/$now-$task$maybe_part.$ext";
+	$self->log("Backing up to $name");
+	`cp "$filename" "$name"`;
+	return "Unable to back up $filename as $name" if $?;
+	return undef;
 }
 
 1;

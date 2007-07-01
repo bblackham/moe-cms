@@ -45,14 +45,17 @@ $title_lab->set_markup("<span size='x-large'>" . $conn->{"Contest"} . "</span>")
 
 # The row of buttons
 my $b_submit = Gtk2::Button->new('Submit');
+$b_submit->set_image(Gtk2::Image->new_from_stock('gtk-apply', 'button'));
 $b_submit->signal_connect(clicked => sub { submit(0) });
 $b_submit->set_sensitive(0);
 
 my $b_check = Gtk2::Button->new('Check');
+$b_check->set_image(Gtk2::Image->new_from_stock('gtk-find', 'button'));
 $b_check->signal_connect(clicked => sub { submit(1) });
 $b_check->set_sensitive(0);
 
 my $b_refresh = Gtk2::Button->new('Refresh');
+$b_refresh->set_image(Gtk2::Image->new_from_stock('gtk-refresh', 'button'));
 $b_refresh->signal_connect(clicked => sub { start_refresh_timer(1) });
 
 my $button_box = Gtk2::HBox->new;
@@ -151,7 +154,7 @@ my $refresh_timer_id;
 
 sub timed_refresh()
 {
-	refresh();	# FIXME: If-modified-since version?
+	refresh();
 	return 1;	# We wish to re-run the timer
 }
 
@@ -255,6 +258,7 @@ sub refresh()
 	if (!$conn->is_connected && !$force_refresh) {
 		# Retry
 		$conn->log("Retrying");
+		$force_refresh = 1;
 		refresh();
 	}
 }
@@ -267,6 +271,7 @@ my $subwin_vbox;
 my $subwin_label;
 my $bbutton_box;
 my $submitting_label;
+my $text_frame;
 my $status_label;
 my $check_only;
 my $submit_filename;
@@ -276,12 +281,11 @@ my %submit_fn_cache = ();
 sub end_submit($) {
 	my ($close) = @_;
 	$subwin->destroy if $close;
-	start_refresh_timer(0);
-	### FIXME: ... and refresh status
+	start_refresh_timer(1);
 }
 
 sub finish_submit() {
-	my $button = Gtk2::Button->new('Return');
+	my $button = Gtk2::Button->new_from_stock('gtk-close');
 	$button->signal_connect(clicked => sub { end_submit(1) });
 
 	$bbutton_box = Gtk2::HButtonBox->new;
@@ -313,7 +317,7 @@ sub run_submit() {
 
 	if (defined $conn->{"History"}) {
 		busy("Submitting locally to " . $conn->{"History"});
-		my $err = $conn->local_submit($task, $part, $submit_extension, $submit_filename);
+		my $err = $conn->write_history($task, $part, $submit_extension, $submit_filename);
 		if (defined $err) {
 			submit_failed("Recording to local history failed\n($err)");
 			return;
@@ -322,14 +326,14 @@ sub run_submit() {
 
 	if ($conn->is_connected) {
 		busy("Checking server status...");
-		my $r = new Sherlock::Object("!" => "STATUS");	### FIXME: use a NOP command
+		my $r = new Sherlock::Object("!" => "NOP");
 		$r = $conn->request($r);
 	}
 	if (!$conn->is_connected) {
 		busy("Reconnecting to server...");
 		if (!$conn->connect) {
 			ready($conn->{"error"});
-			submit_failed("Unable to connect to the server");	### FIXME: Mention local submit
+			submit_failed("Unable to connect to the server");
 			return;
 		}
 	}
@@ -370,10 +374,40 @@ sub run_submit() {
 	submit_ok();
 }
 
+sub checks_ok() {
+	if ($check_only) {
+		$status_label->set_markup("<span size='large'>Checked successfully</span>");
+		$submitting_label->set_markup("<span size='large'>The task has passed the checks.</span>");
+		finish_submit();
+		return;
+	}
+
+	$status_label->set_markup("<span size='large'>Submitting</span>");
+	$subwin->show_all;
+
+	# Continue when everything is displayed
+	Glib::Idle->add(sub {
+		$window->Gtk2::Gdk::flush;
+		run_submit();
+		return 0;
+	});
+}
+
+sub checks_override() {
+	$submitting_label = Gtk2::Label->new("Please wait...");
+	$subwin_vbox->pack_start_defaults($submitting_label);
+
+	$subwin->window->set_cursor($busy_cursor);
+	$bbutton_box->destroy;
+	$text_frame->destroy;
+	checks_ok();
+}
+
 sub checks_failed($) {
 	my ($msg) = @_;
 
 	$status_label->set_markup("<span size='large'>Check failed</span>");
+	$submitting_label->destroy;
 
 	my $text_buffer = Gtk2::TextBuffer->new;
 	$text_buffer->set_text($msg);
@@ -386,34 +420,31 @@ sub checks_failed($) {
 	$text_scroll->set_policy("automatic", "automatic");
 	$text_scroll->add($text_view);
 
-	my $text_frame = Gtk2::Frame->new("Checker log");
+	$text_frame = Gtk2::Frame->new("Checker log");
 	$text_frame->add($text_scroll);
 
-	$submitting_label->destroy;
 	$subwin_vbox->pack_start_defaults($text_frame);
 
-	finish_submit();
-}
-
-sub checks_ok() {
-	if ($check_only) {
-		$status_label->set_markup("<span size='large'>Checked successfully</span>");
-		$submitting_label->set_markup("<span size='large'>The task has passed the checks.</span>");
+	if ($check_only || !$conn->{"AllowOverride"}) {
 		finish_submit();
 		return;
 	}
 
-	### FIXME: Record to local history here
+	my $close_button = Gtk2::Button->new_from_stock('gtk-close');
+	$close_button->signal_connect(clicked => sub { end_submit(1) });
 
-	$status_label->set_markup("<span size='large'>Submitting</span>");
+	my $anyway_button = Gtk2::Button->new('Submit anyway');
+	$anyway_button->signal_connect(clicked => \&checks_override);
+
+	$bbutton_box = Gtk2::HButtonBox->new;
+	$bbutton_box->pack_start_defaults($anyway_button);
+	$bbutton_box->pack_start_defaults($close_button);
+	$bbutton_box->set_border_width(5);
+	$subwin_vbox->pack_start($bbutton_box, 0, 0, 10);
+
+	ready("Ready");
 	$subwin->show_all;
-
-	# Continue when everything is displayed
-	Glib::Idle->add(sub {
-		$window->Gtk2::Gdk::flush;
-		run_submit();
-		return 0;
-	});
+	$subwin->window->set_cursor(undef);
 }
 
 sub run_checks() {
@@ -477,10 +508,10 @@ sub submit($) {
 	$subwin->signal_connect("delete-event" => sub { end_submit(0); return 0; });
 
 	my $bb_submit = Gtk2::Button->new($check_only ? 'Check' : 'Submit');
+	$bb_submit->set_image(Gtk2::Image->new_from_stock('gtk-apply', 'button'));
 	$bb_submit->signal_connect(clicked => \&do_submit);
-	#$bb_submit->set_sensitive(0);
 
-	my $bb_cancel = Gtk2::Button->new('Cancel');
+	my $bb_cancel = Gtk2::Button->new_from_stock('gtk-cancel');
 	$bb_cancel->signal_connect(clicked => sub { end_submit(1) });
 
 	$bbutton_box = Gtk2::HButtonBox->new;
