@@ -1,0 +1,137 @@
+[IconPosition::CPSPC contest project.desktop]
+Xabs=372
+Xabs_1280x1024=372
+Yabs=15
+Yabs_1280x1024=15
+
+[IconPosition::CPSPC project IDE.desktop]
+Xabs=375
+Xabs_1280x1024=375
+Yabs=8
+Yabs_1280x1024=8
+
+[IconPosition::CPSPC project.desktop]
+Xabs=386
+Xabs_1280x1024=386
+Yabs=15
+Yabs_1280x1024=15
+
+[IconPosition::CPSPC submit.desktop]
+Xabs=372
+Xabs_1280x1024=372
+Yabs=105
+Yabs_1280x1024=105
+
+[IconPosition::FPC doc]
+Xabs=1203
+Xabs_1280x1024=1203
+Yabs=299
+Yabs_1280x1024=299
+
+[IconPosition::FPC func index]
+Xabs=1108
+Xabs_1280x1024=1108
+Yabs=299
+Yabs_1280x1024=299
+
+[IconPosition::Home.desktop]
+Xabs=23
+Xabs_1280x1024=23
+Yabs=8
+Yabs_1280x1024=8
+
+[IconPosition::KDevelop project.desktop]
+Xabs=559
+Xabs_1280x1024=559
+Yabs=15
+Yabs_1280x1024=15
+
+[IconPosition::Libc doc]
+Xabs=1203
+Xabs_1280x1024=1203
+Yabs=8
+Yabs_1280x1024=8
+
+[IconPosition::Libc func index]
+Xabs=1108
+Xabs_1280x1024=1108
+Yabs=8
+Yabs_1280x1024=8
+
+[IconPosition::Libc++ doc]
+Xabs=1193
+Xabs_1280x1024=1193
+Yabs=105
+Yabs_1280x1024=105
+
+[IconPosition::Mc.desktop]
+Xabs=23
+Xabs_1280x1024=23
+Yabs=202
+Yabs_1280x1024=202
+
+[IconPosition::STL doc]
+Xabs=1204
+Xabs_1280x1024=1204
+Yabs=202
+Yabs_1280x1024=202
+
+[IconPosition::Submit CPSPC solution.desktop]
+Xabs=463
+Xabs_1280x1024=463
+Yabs=123
+Yabs_1280x1024=123
+
+[IconPosition::Submit.desktop]
+Xabs=477
+Xabs_1280x1024=477
+Yabs=123
+Yabs_1280x1024=123
+
+[IconPosition::X-Debian-Apps-Tools-mc.desktop]
+Xabs=23
+Xabs_1280x1024=23
+Yabs=123
+Yabs_1280x1024=123
+
+[IconPosition::X-Debian-XShells-konsole.desktop]
+Xabs=20
+Xabs_1280x1024=20
+Yabs=15
+Yabs_1280x1024=15
+
+[IconPosition::emacs21.desktop]
+Xabs=741
+Xabs_1280x1024=741
+Yabs=8
+Yabs_1280x1024=8
+
+[IconPosition::gvim.desktop]
+Xabs=741
+Xabs_1280x1024=741
+Yabs=105
+Yabs_1280x1024=105
+
+[IconPosition::kate.desktop]
+Xabs=842
+Xabs_1280x1024=842
+Yabs=105
+Yabs_1280x1024=105
+
+[IconPosition::konsole.desktop]
+Xabs=21
+Xabs_1280x1024=21
+Yabs=105
+Yabs_1280x1024=105
+
+[IconPosition::kwrite.desktop]
+Xabs=842
+Xabs_1280x1024=842
+Yabs=8
+Yabs_1280x1024=8
+
+[IconPosition::trash.desktop]
+Xabs=1206
+Xabs_1280x1024=1206
+Yabs=881
+Yabs_1280x1024=881

@@ -1,0 +1,12 @@
+[General]
+PassiveResourceKeys=
+ResourceKeys=G13cApOThf
+Standard=G13cApOThf
+
+[Resource_G13cApOThf]
+FileFormat=vcard
+ResourceIdentifier=G13cApOThf
+ResourceIsActive=true
+ResourceIsReadOnly=false
+ResourceName=resource
+ResourceType=file
