@@ -19,7 +19,7 @@ log-init
 box-init
 
 # Compile the program
-locate-source $SDIR/$3
+locate-source `if [ -n "$3" ] ; then echo $SDIR/$3 ; fi`
 compile || true
 
 # Initialize the points file
