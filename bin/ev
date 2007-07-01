@@ -19,7 +19,7 @@ log-init
 box-init
 
 # Compile the program
-locate-source $3
+locate-source $SDIR/$3
 compile || true
 
 # Initialize the points file
