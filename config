@@ -47,8 +47,8 @@ EXTRA_CFLAGS=
 EXTRA_PFLAGS=
 
 # For each source extension, we must give compiler command
-COMP_c='/usr/bin/gcc -std=gnu99 -O2 -g -o $EXE $EXTRA_CFLAGS $SRC'
-COMP_C='/usr/bin/g++ -O2 -g -o $EXE $EXTRA_CFLAGS $SRC'
+COMP_c='/usr/bin/gcc -std=gnu99 -O2 -g -o $EXE $EXTRA_CFLAGS $SRC -lm'
+COMP_C='/usr/bin/g++ -O2 -g -o $EXE $EXTRA_CFLAGS $SRC -lm'
 COMP_cpp="$COMP_C"
 COMP_cc="$COMP_C"
 COMP_p='/usr/bin/fpc -Ci -Cr -Ct -g -O2 -Sg -o$EXE $EXTRA_PFLAGS $SRC'
