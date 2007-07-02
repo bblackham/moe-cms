@@ -34,7 +34,7 @@ tasks_conf_commit(void *p UNUSED)
       if (t->open_data)
 	{
 	  for (uns i=1; i<=t->open_data; i++)
-	    simp_append(cf_pool, &t->parts)->s = mp_printf(cf_pool, "%d", i);
+	    simp_append(cf_pool, &t->parts)->s = mp_printf(cf_pool, "%02d", i);
 	  t->extensions = &open_data_extensions;
 	}
       else
