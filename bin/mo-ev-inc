@@ -1,6 +1,6 @@
 #!/bin/bash
 
-[ -n "$1" ] || { echo "Usage: mo-ev-inc [--force] --<tasks>" ; exit 1 ; }
+[ -n "$1" ] || { echo "Usage: mo-ev-inc [--force] <tasks>" ; exit 1 ; }
 
 force=0
 if [ "$1" == --force ] ; then
