@@ -389,5 +389,5 @@ function open-locate
 	else
 		SRCN=$SDIR/$PROBLEM$TEST.out
 	fi
-	[ -f $SRCN ] || fatal "Output file $SRCN not found"
+	[ -f "$SDIR/$SRCN" ] || fatal "Output file $SRCN not found"
 }

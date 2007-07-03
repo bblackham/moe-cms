@@ -49,7 +49,7 @@ if [ $TASK_TYPE == open-data ] ; then
 	[ -n "$TEST" ] || die "You need to specify test number for open data problems."
 	pstart "Checking $TEST: "
 	open-locate "$SRCFILE"
-	ln "$SRCN" $TDIR/$TEST.out
+	try-ln "$SDIR/$SRCN" $TDIR/$TEST.out
 	syntax-check
 	test-result 1 OK
 else
