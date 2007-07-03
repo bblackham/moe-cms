@@ -19,8 +19,10 @@ log-init
 box-init
 
 # Compile the program
-locate-source `if [ -n "$3" ] ; then echo $SDIR/$3 ; fi`
-compile || true
+if [ $TASK_TYPE != open-data ] ; then
+	locate-source `if [ -n "$3" ] ; then echo $SDIR/$3 ; fi`
+	compile || true
+fi
 
 # Initialize the points file
 PTSFILE=$TDIR/points

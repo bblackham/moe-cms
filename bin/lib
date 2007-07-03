@@ -314,6 +314,14 @@ function test-run-interactive
 	test-epilog
 }
 
+# "Running" of open-data problems
+
+function test-run-open-data
+{
+	[ -f $SDIR/$TEST.out ] || test-result 0 "No solution."
+	ln $SDIR/$TEST.out $TDIR/$TEST.out
+}
+
 # Syntax checks
 
 function syntax-check
