@@ -24,6 +24,7 @@ bin/mo-create-eval
 # mo-submit home
 if [ -n "$REMOTE_SUBMIT" ] ; then
 	mkdir submit
+	chmod 750 submit
 	if [ -d ~/.ssh ] ; then echo "Copying SSH configuration from ~/.ssh" ; cp -a ~/.ssh submit/ ; fi
 	( cd $H && bin/mo-create-submit )
 fi
