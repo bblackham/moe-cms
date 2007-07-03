@@ -462,7 +462,7 @@ box_inside(int argc, char **argv)
 {
   struct rlimit rl;
   char *args[argc+1];
-  char *env[1] = { NULL };
+  char *env[] = { "LIBC_FATAL_STDERR_=1", NULL };
 
   memcpy(args, argv, argc * sizeof(char *));
   args[argc] = NULL;
