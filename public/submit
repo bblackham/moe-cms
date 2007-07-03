@@ -53,9 +53,10 @@ if [ $TASK_TYPE == open-data ] ; then
 	pstart "Test case $TEST: "
 	open-locate "$SRCFILE"
 	(
+		[ -f $PDIR/$TEST.config ] && . $PDIR/$TEST.config
 		try-ln "$SDIR/$SRCN" $TDIR/$TEST.out
 		syntax-check
-		test-result 1 OK
+		test-result $POINTS_PER_TEST OK
 	) || FAILED=1
 else
 	[ -z "$PART" ] || die "Test number should be given only for open data problems."
@@ -64,6 +65,7 @@ else
 	for TEST in $SAMPLE_TESTS ; do
 		(
 		pstart "Checking on sample input $TEST: "
+		[ -f $PDIR/$TEST.config ] && . $PDIR/$TEST.config
 		test-run
 		syntax-check
 		output-check

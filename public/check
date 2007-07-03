@@ -48,10 +48,11 @@ function test-verdict
 if [ $TASK_TYPE == open-data ] ; then
 	[ -n "$TEST" ] || die "You need to specify test number for open data problems."
 	pstart "Checking $TEST: "
+	[ -f $PDIR/$TEST.config ] && . $PDIR/$TEST.config
 	open-locate "$SRCFILE"
 	try-ln "$SDIR/$SRCN" $TDIR/$TEST.out
 	syntax-check
-	test-result 1 OK
+	test-result $POINTS_PER_TEST OK
 else
 	[ -z "$TEST" ] || die "Test number should be given only for open data problems."
 	locate-source "$SRCFILE"
@@ -60,6 +61,7 @@ else
 	for TEST in $SAMPLE_TESTS ; do
 		(
 		pstart "Checking on sample input $TEST: "
+		[ -f $PDIR/$TEST.config ] && . $PDIR/$TEST.config
 		test-run
 		syntax-check
 		output-check
