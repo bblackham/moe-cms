@@ -53,7 +53,7 @@ if [ $TASK_TYPE == open-data ] ; then
 	pstart "Test case $TEST: "
 	open-locate "$SRCFILE"
 	(
-		ln "$SDIR/$SRCN" $TDIR/$TEST.out
+		try-ln "$SDIR/$SRCN" $TDIR/$TEST.out
 		syntax-check
 		test-result 1 OK
 	) || FAILED=1
