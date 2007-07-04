@@ -47,10 +47,10 @@ case $mode in
 #   if [ -f logins.tex ]; then echo "File logins.tex exists! Bailing out!"; exit 1; fi
     cat > logins.tex <<- EOF
 	\\nopagenumbers
-	\\font\\next=cstt17\\next
-	\\raggedright
-	\\parindent=0pt
-	\\def\\user#1#2{\\vbox to 3cm{\\hsize=5cm \\vss#1\\vss#2\\vss}}
+	\\voffset=-1.5cm\\vsize=280mm\\hoffset=-0.75cm\\advance\\hsize by 3cm
+	\\raggedright\\parindent=0pt
+	\\font\next=cstt17\next
+	\\def\\user#1#2{\\vbox to 4.5cm{\\hsize=6cm\\vss\\vss{\\font\\next=csti17\\next Contest, day 1}\\vss\\vss#1\\vss#2\\vss\\vss}}
 	\\leavevmode
 	EOF
     
