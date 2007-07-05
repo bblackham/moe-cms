@@ -209,6 +209,13 @@ function test-result
 		rm $TDIR/$TEST.pts
 	fi
 
+	# Translate signal numbers to readable strings
+	SG=${M#Caught fatal signal }
+	if [ "$SG" != "$M" ] ; then
+		SG=`perl -MConfig -e '@s=split / /,$Config{sig_name}; print $s[$ARGV[0]]' $SG`
+		[ -z "$SG" ] || M="$M (SIG$SG)"
+	fi
+
 	# Translate Free Pascal runtime errors to readable strings
 	RE=${M#Exited with error status }
 	if [ "$FREE_PASCAL_RTE" == 1 -a "$RE" != "$M" ] ; then
