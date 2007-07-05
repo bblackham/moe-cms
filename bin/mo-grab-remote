@@ -1,6 +1,6 @@
 #!/bin/bash
 
-[ -n "$1" ] || { echo "Usage: mo-grab-submits <tasks>" ; exit 1 ; }
+[ -n "$1" ] || { echo "Usage: mo-grab-remote <tasks>" ; exit 1 ; }
 [ -f config ] || { echo "Missing config file, check cwd." ; exit 1 ; }
 set -e
 . config
