@@ -17,7 +17,7 @@ if [ "${1%%.*}" == "$1" ] ; then
 		mv $TDIR/$PROBLEM .
 	else
 		echo >&2
-		sed <log >&2 '1,/^Compiler output:/d;/^Compiler output files:/,$d;/^Exited /d'
+		sed <check-log >&2 '1,/^Compiler output:/d;/^Compiler output files:/,$d;/^Exited /d'
 	fi
 else
 	SRC=$1
