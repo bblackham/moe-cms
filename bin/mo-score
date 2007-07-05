@@ -243,6 +243,7 @@ sub printHtmlHeader {
 
    if ($detail) {
      $hdr1 = "<th rowspan=2>Rank<th rowspan=2>User<th rowspan=2>Name";
+     $extras and $p++ and push @$perm, 3 and $hdr1.="<th rowspan=2>Extra" and $colspec.="<colgroup span=1>";
      for my $task (@tasks) {
 
 	my $nSub = scalar(keys %{$known_tests{$task}});
@@ -263,6 +264,7 @@ sub printHtmlHeader {
    } else {  ## no detail
    
      $hdr1 = "<th>Rank<th>User<th>Name";
+     $extras and $p++ and push @$perm, 3 and $hdr1.="<th>Extra" and $colspec.="<colgroup span=1>";
 
      for my $task (@tasks) {
         push @$perm, $p++;
