@@ -264,11 +264,11 @@ valid_syscall(struct user *u)
       return allow_times;
     case __NR_kill:
       if (u->regs.ebx == box_pid)
-	die("Commited suicide by signal %d", (int)u->regs.ecx);
+	die("Committed suicide by signal %d", (int)u->regs.ecx);
       return 0;
     case __NR_tgkill:
       if (u->regs.ebx == box_pid && u->regs.ecx == box_pid)
-	die("Commited suicide by signal %d", (int)u->regs.edx);
+	die("Committed suicide by signal %d", (int)u->regs.edx);
       return 0;
     default:
       return 0;
