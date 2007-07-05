@@ -243,7 +243,7 @@ function test-prolog
 	box-clean
 	echo "Executable file: $TDIR/$PROBLEM"
 	if [ ! -x $TDIR/$PROBLEM ] ; then
-		test-result 0 "Compile error."
+		test-result 0 "Compile error"
 	fi
 	cp $TDIR/$PROBLEM $BOXDIR/
 	BOX_EXTRAS=
@@ -293,10 +293,10 @@ function test-epilog
 	echo "Sandbox contents after exit:"
 	ls -Al $BOXDIR
 	case ${OUT_TYPE:-$IO_TYPE} in
-		file)	[ -f $BOXDIR/$PROBLEM.out ] || test-result 0 "No output file."
+		file)	[ -f $BOXDIR/$PROBLEM.out ] || test-result 0 "No output file"
 			cp $BOXDIR/$PROBLEM.out $TDIR/$TEST.out
 			;;
-		stdio)	[ -f $BOXDIR/.stdout ] || test-result 0 "No output file."
+		stdio)	[ -f $BOXDIR/.stdout ] || test-result 0 "No output file"
 			cp $BOXDIR/.stdout $TDIR/$TEST.out
 			;;
 	esac
@@ -342,7 +342,7 @@ function test-run-interactive
 
 function test-run-open-data
 {
-	[ -f $SDIR/$TEST.out ] || test-result 0 "No solution."
+	[ -f $SDIR/$TEST.out ] || test-result 0 "No solution"
 	ln $SDIR/$TEST.out $TDIR/$TEST.out
 }
 
@@ -358,7 +358,7 @@ function syntax-check
 	if ! eval $SCHECK 2>$TMPDIR/exec.out ; then
 		cat $TMPDIR/exec.out
 		MSG=`tail -1 $TMPDIR/exec.out`
-		if [ -z "$MSG" ] ; then MSG="Wrong syntax." ; fi
+		if [ -z "$MSG" ] ; then MSG="Wrong syntax" ; fi
 		test-result 0 "$MSG"
 	fi
 	cat $TMPDIR/exec.out
@@ -377,7 +377,7 @@ function output-check
 		if ! eval $OCHECK 2>$TMPDIR/exec.out ; then
 			cat $TMPDIR/exec.out
 			MSG=`tail -1 $TMPDIR/exec.out`
-			if [ -z "$MSG" ] ; then MSG="Wrong answer." ; fi
+			if [ -z "$MSG" ] ; then MSG="Wrong answer" ; fi
 			test-result 0 "$MSG"
 		fi
 		cat $TMPDIR/exec.out
