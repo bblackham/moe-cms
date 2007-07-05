@@ -7,7 +7,7 @@ $tex = 0;
 $extras = 0;
 $alt = 0;
 $merged = 0;
-$usage = "Usage: mo-score [--detail] [--alt] [--extras] [--html] [--tex] [--merged] <task1> <task2> ...";
+$usage = "Usage: mo-score [--detail] [--alt] [--extras] [--html] [--tex] [--merged] [<directory>/]<task> ...";
 while (($arg = $ARGV[0]) =~ /^--([a-z]+)$/) {
 	shift @ARGV;
 	$var = "\$$1";
@@ -15,8 +15,6 @@ while (($arg = $ARGV[0]) =~ /^--([a-z]+)$/) {
 	eval "$var = 1;";
 }
 @ARGV || die $usage;
-
-@tasks = @ARGV;
 
 print STDERR "Scanning contestants... ";
 open (CT, "bin/mo-get-users --full |") || die "Cannot get list of contestants";
@@ -44,16 +42,17 @@ if ($extras && open (EX, "exceptions")) {
 } else { print STDERR "none\n"; }
 
 print STDERR "Scanning task results... ";
-$need_tasks = join("|", @ARGV);
 %messages = ();
 %error_codes = ();
 foreach $u (keys %users) {
-	opendir (D, "testing/$u") or next;
-	foreach $t (readdir(D)) {
-		$t =~ /^\./ && next;
-		$t =~ /$need_tasks/ || next;
+	foreach $task (@ARGV) {
+		my ($dir, $t) = ("testing", $task);
+		if ($task =~ m@^(.*)/([^/]*)$@) {
+			$dir = $1;
+			$t = $2;
+		}
 		$known_tasks{$t} = 1;
-		$tt = "testing/$u/$t/points" . ($alt ? ".alt" : "");
+		$tt = "$dir/$u/$t/points" . ($alt ? ".alt" : "");
 		-f $tt || next;
 		print STDERR "$u/$t ";
 		open (X, $tt) || die "Unable to open $tt";
@@ -99,7 +98,6 @@ foreach $u (keys %users) {
 		$total{$u}{$t} = 0;
 		foreach my $pts (values %{$results_merged{$u}{$t}}) { $total{$u}{$t} += $pts; }
 	}
-	closedir D;
 }
 print STDERR "OK\n";
 
@@ -115,8 +113,11 @@ if (keys %extra) {
 	push @bodysums, $col;
 	push @footer, "sum($col)";
 }
-foreach $t (@ARGV) {
+@tasks = ();
+foreach $task (@ARGV) {
+	my $t = ($task =~ m@/([^/]*)$@) ? $1 : $task;
 	defined $known_tasks{$t} || die "Unknown task $t";
+	push @tasks, $t;
 	push @header, substr($t, 0, 4);
 	push @body, "(\$xx = \$total{\$u}{'$t'}) > 0 ? \$xx : 0";
 	$col = 0+@footer;
@@ -243,7 +244,7 @@ sub printHtmlHeader {
 
    if ($detail) {
      $hdr1 = "<th rowspan=2>Rank<th rowspan=2>User<th rowspan=2>Name";
-     $extras and $p++ and push @$perm, 3 and $hdr1.="<th rowspan=2>Extra" and $colspec.="<colgroup span=1>";
+     $extras and $p++ and push @$perm, 3 and $hdr1.="<th rowspan=2>Extra" and $colspec.="<colgroup span=1>";         ##Extra hack
      for my $task (@tasks) {
 
 	my $nSub = scalar(keys %{$known_tests{$task}});
@@ -264,7 +265,7 @@ sub printHtmlHeader {
    } else {  ## no detail
    
      $hdr1 = "<th>Rank<th>User<th>Name";
-     $extras and $p++ and push @$perm, 3 and $hdr1.="<th>Extra" and $colspec.="<colgroup span=1>";
+     $extras and $p++ and push @$perm, 3 and $hdr1.="<th>Extra" and $colspec.="<colgroup span=1>";                  ##Extra hack
 
      for my $task (@tasks) {
         push @$perm, $p++;
