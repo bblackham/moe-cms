@@ -211,6 +211,7 @@ function test-result
 
 	# Translate signal numbers to readable strings
 	SG=${M#Caught fatal signal }
+	SG=${SG#Committed suicide by signal }
 	if [ "$SG" != "$M" ] ; then
 		SG=`perl -MConfig -e '@s=split / /,$Config{sig_name}; print $s[$ARGV[0]]' $SG`
 		[ -z "$SG" ] || M="$M (SIG$SG)"
