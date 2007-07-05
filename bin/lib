@@ -208,6 +208,23 @@ function test-result
 		P=`cat $TDIR/$TEST.pts`
 		rm $TDIR/$TEST.pts
 	fi
+
+	# Translate Free Pascal runtime errors to readable strings
+	RE=${M#Exited with error status }
+	if [ "$FREE_PASCAL_RTE" == 1 -a "$RE" != "$M" ] ; then
+		N="Runtime error $RE"
+		case "$RE" in
+			200)	M="$N: Division by zero" ;;
+			201)	M="$N: Range check error" ;;
+			202)	M="$N: Stack overflow" ;;
+			203)	M="$N: Heap overflow" ;;
+			205)	M="$N: Floating point overflow" ;;
+			215)	M="$N: Arithmetic overflow" ;;
+			216)	M="$N: Segmentation fault" ;;
+			???)	M="$N" ;;
+		esac
+	fi
+
 	echo "Verdict: $M"
 	echo "Points: $P"
 	test-verdict $P "$M"

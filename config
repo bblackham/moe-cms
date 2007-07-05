@@ -130,6 +130,9 @@ TEST_SANDBOX_OPTS='-a2 -f -m$MEM_LIMIT -t$TIME_LIMIT'
 # Sandbox initialization commands
 SANDBOX_INIT=
 
+# Translate FreePascal exit codes to names of well-known runtime errors
+FREE_PASCAL_RTE=1
+
 # DEBUG: Let `ev' run sample tests, too.
 #EV_SAMPLE=1
 
