@@ -75,7 +75,6 @@ foreach $u (keys %users) {
 				elsif ($trem =~ /^([A-Za-z])\S*\s+([A-Za-z])/) {
 					($cmt = "$1$2") =~ tr/a-z/A-Z/;
 				}
-				elsif ($trem =~ /^Wrong answer/) { $cmt = "WA"; }
 				if (!defined $messages{$trem}) {
 					$messages{$trem} = $cmt;
 					if (!defined $error_codes{$cmt}) {
