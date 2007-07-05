@@ -6,8 +6,8 @@ $html = 0;
 $tex = 0;
 $extras = 0;
 $alt = 0;
-$split = 0;
-$usage = "Usage: mo-score [--detail] [--alt] [--extras] [--html] [--tex] [--split] <task1> <task2> ...";
+$merged = 0;
+$usage = "Usage: mo-score [--detail] [--alt] [--extras] [--html] [--tex] [--merged] <task1> <task2> ...";
 while (($arg = $ARGV[0]) =~ /^--([a-z]+)$/) {
 	shift @ARGV;
 	$var = "\$$1";
@@ -64,7 +64,8 @@ foreach $u (keys %users) {
 			$tpts = $2;
 			$trem = $3;
 			$trem =~ s/\[.*//;
-			$ttest =~ s/[^0-9]//g unless $split;
+			($ttest_merged = $ttest) =~ s/[^0-9]//g;
+			$ttest = $ttest_merged if $merged;
 			$known_tests{$t}{$ttest} = 1;
 			$cmt = $tpts;
 			if ($tpts == 0 && $trem ne "OK") {
@@ -88,12 +89,15 @@ foreach $u (keys %users) {
 				$results{$u}{$t}{$ttest} = $tpts;
 				$comment{$u}{$t}{$ttest} = $cmt;
 			}
+			if (!defined($results_merged{$u}{$t}{$ttest_merged}) || $results_merged{$u}{$t}{$ttest_merged} > $tpts) {
+				$results_merged{$u}{$t}{$ttest_merged} = $tpts;
+			}
 		}
 		close X;
 	}
 	foreach my $t (keys %known_tasks) {
 		$total{$u}{$t} = 0;
-		foreach my $pts (values %{$results{$u}{$t}}) { $total{$u}{$t} += $pts; }
+		foreach my $pts (values %{$results_merged{$u}{$t}}) { $total{$u}{$t} += $pts; }
 	}
 	closedir D;
 }
