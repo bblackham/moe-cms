@@ -1,5 +1,9 @@
 #!/usr/bin/perl
 
+# This script recalculates points according to grouping of testcases.
+# This is no longer necessary, because the score table and report generators
+# already know how to handle merging of groups, but we still keep it as an example.
+
 @ARGV == 1 or die "Usage: mo-merge <task>\n";
 my $task = $ARGV[0];
 foreach my $s (`ls -d testing/*/$task`) {
