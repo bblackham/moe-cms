@@ -1,20 +1,21 @@
+UCWCF:=$(shell PKG_CONFIG_PATH=$(LIBUCW)/lib/pkgconfig pkg-config --cflags libucw libsh)
+UCWLF:=$(shell PKG_CONFIG_PATH=$(LIBUCW)/lib/pkgconfig pkg-config --libs libucw libsh)
 TLSCF:=$(shell libgnutls-config --cflags)
 TLSLF:=$(shell libgnutls-config --libs)
 GCRCF:=$(shell libgcrypt-config --cflags)
 
-CFLAGS+=-I$(LIBUCW)/include $(TLSCF) $(GCRCF)
-LDFLAGS+=$(TLSLF)
-LDFLAGS+=-lpthread	# FIXME: Use libucw without threads
+CFLAGS+=$(UCWCF) $(TLSCF) $(GCRCF)
+LDFLAGS+=$(UCWLF) $(TLSLF)
 
 all: submitd privkey lib
 
-submitd: submitd.o commands.o tasks.o $(LIBUCW)/lib/libsh.a $(LIBUCW)/lib/libucw.a
+submitd: submitd.o commands.o tasks.o
 submitd.o: submitd.c submitd.h
 commands.o: commands.c submitd.h
 tasks.o: tasks.c submitd.h
-connect: connect.o $(LIBUCW)/lib/libucw.a
+connect: connect.o
 connect.o: connect.c
-privkey: privkey.o $(LIBUCW)/lib/libucw.a
+privkey: privkey.o
 privkey.o: privkey.c
 
 certs:

@@ -10,7 +10,7 @@ CFLAGS+=-Wno-pointer-sign -Wdisabled-optimization -Wno-missing-field-initializer
 
 # Comment out if you do not wish to build remote submit utilities
 SUBMIT=submit
-LIBUCW:=$(shell cd ../libucw && pwd)
+LIBUCW:=$(shell cd ../holmes-libs-3.12/run && pwd)
 
 export LIBUCW CFLAGS LDFLAGS DEBUG
 
