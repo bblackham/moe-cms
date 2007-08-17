@@ -31,12 +31,12 @@ struct conn {
   // Set up by the master process
   cnode n;
   u32 ip;
-  byte *ip_string;			// (xmalloced)
+  char *ip_string;			// (xmalloced)
   pid_t pid;
   uns id;
   struct access_rule *rule;		// Rule matched by this connection
   int sk;				// Client socket
-  byte *cert_name;			// Client name from the certificate (NULL if no TLS) (xmalloced)
+  char *cert_name;			// Client name from the certificate (NULL if no TLS) (xmalloced)
 
   // Used by the child process
   gnutls_session_t tls;			// TLS session
@@ -46,12 +46,12 @@ struct conn {
   struct odes *reply;
   struct odes *task_status;
   int task_lock_fd;
-  byte *user;
+  char *user;
 };
 
 extern uns max_request_size, max_attachment_size, trace_commands;
 extern uns max_versions;
-extern byte *history_format;
+extern char *history_format;
 
 /* submitd.c */
 
@@ -66,7 +66,7 @@ int process_command(struct conn *c);
 
 struct task {
   cnode n;
-  byte *name;
+  char *name;
   uns open_data;	// Number of parts for open-data tasks
   uns max_size;		// Maximum size (0=use global default)
   clist parts;		// List of parts of this task (simp_nodes)

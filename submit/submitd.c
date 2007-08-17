@@ -25,16 +25,16 @@
 
 /*** CONFIGURATION ***/
 
-static byte *log_name;
+static char *log_name;
 static uns port = 8888;
 static uns dh_bits = 1024;
 static uns max_conn = 10;
 static uns session_timeout;
 uns max_versions;
-static byte *ca_cert_name = "?";
-static byte *server_cert_name = "?";
-static byte *server_key_name = "?";
-byte *history_format;
+static char *ca_cert_name = "?";
+static char *server_cert_name = "?";
+static char *server_key_name = "?";
+char *history_format;
 static clist access_rules;
 static uns trace_tls;
 uns max_request_size;
