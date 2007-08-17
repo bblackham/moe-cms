@@ -38,7 +38,7 @@ read_request(struct conn *c)
   struct obj_read_state st;
   obj_read_start(&st, c->request);
   st.error_callback = read_error_cb;
-  byte line[1024];
+  char line[1024];
   uns size = 0;
   for (;;)
     {
@@ -70,7 +70,7 @@ write_reply(struct conn *c)
     obj_set_attr(c->reply, '+', "OK");
   if (trace_commands)
     {
-      byte *m;
+      char *m;
       if (m = obj_find_aval(c->reply, '-'))
 	msg(L_DEBUG, ">> -%s", m);
       else if (m = obj_find_aval(c->reply, '+'))
@@ -84,7 +84,7 @@ write_reply(struct conn *c)
 }
 
 static void
-err(struct conn *c, byte *msg)
+err(struct conn *c, char *msg)
 {
   obj_set_attr(c->reply, '-', msg);
 }
@@ -184,7 +184,7 @@ read_attachment(struct conn *c, uns max_size)
 
   // This is less efficient than bbcopy(), but we want our own error handling.
   struct fastbuf *fb = bopen_tmp(4096);
-  byte buf[4096];
+  char buf[4096];
   uns remains = size;
   while (remains)
     {
@@ -210,7 +210,7 @@ cmd_submit(struct conn *c)
       return;
     }
 
-  byte *tname = obj_find_aval(c->request, 'T');
+  char *tname = obj_find_aval(c->request, 'T');
   if (!tname)
     {
       err(c, "No task specified");
@@ -223,7 +223,7 @@ cmd_submit(struct conn *c)
       return;
     }
 
-  byte *pname = obj_find_aval(c->request, 'P');
+  char *pname = obj_find_aval(c->request, 'P');
   if (!pname)
     {
       simp_node *s = clist_head(&task->parts);
@@ -236,7 +236,7 @@ cmd_submit(struct conn *c)
       return;
     }
 
-  byte *ext = obj_find_aval(c->request, 'X');
+  char *ext = obj_find_aval(c->request, 'X');
   if (!ext || !ext_exists_p(task, ext))
     {
       err(c, "Missing or invalid extension");
@@ -264,7 +264,7 @@ cmd_submit(struct conn *c)
   for (struct oattr *a = obj_find_attr(parto, 'V' + OBJ_ATTR_SON); a; a=a->same)
     {
       uns ver = obj_find_anum(a->son, 'V', 0);
-      byte *ext = obj_find_aval(a->son, 'X');
+      char *ext = obj_find_aval(a->son, 'X');
       ASSERT(ver && ext);
       last_ver = MAX(last_ver, ver);
       if (ver == current_ver)
@@ -296,7 +296,7 @@ cmd_submit(struct conn *c)
 static void
 execute_command(struct conn *c)
 {
-  byte *cmd = obj_find_aval(c->request, '!');
+  char *cmd = obj_find_aval(c->request, '!');
   if (!cmd)
     {
       err(c, "Missing command");
@@ -329,7 +329,7 @@ process_command(struct conn *c)
 static void
 execute_init(struct conn *c)
 {
-  byte *user = obj_find_aval(c->request, 'U');
+  char *user = obj_find_aval(c->request, 'U');
   if (!user)
     {
       err(c, "Missing user");

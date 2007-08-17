@@ -76,19 +76,19 @@ struct task {
 extern clist task_list;
 extern struct cf_section tasks_conf;
 
-struct task *task_find(byte *name);
-int part_exists_p(struct task *t, byte *name);
-int user_exists_p(byte *user);
-int ext_exists_p(struct task *t, byte *ext);
+struct task *task_find(char *name);
+int part_exists_p(struct task *t, char *name);
+int user_exists_p(char *user);
+int ext_exists_p(struct task *t, char *ext);
 
 void task_lock_status(struct conn *c);
 void task_unlock_status(struct conn *c, uns write_back);
 void task_load_status(struct conn *c);
 
 struct odes *task_status_find_task(struct conn *c, struct task *t, uns create);
-struct odes *task_status_find_part(struct odes *t, byte *part, uns create);
+struct odes *task_status_find_part(struct odes *t, char *part, uns create);
 
-void task_submit_part(byte *user, byte *task, byte *part, byte *ext, uns version, struct fastbuf *fb);
-void task_delete_part(byte *user, byte *task, byte *part, byte *ext, uns version);
+void task_submit_part(char *user, char *task, char *part, char *ext, uns version, struct fastbuf *fb);
+void task_delete_part(char *user, char *task, char *part, char *ext, uns version);
 
 #endif

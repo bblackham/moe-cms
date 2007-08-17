@@ -210,7 +210,7 @@ tls_verify_cert(struct conn *c)
     return "Cannot import certificate";
   /* XXX: We do not check expiration and activation since the keys are generated for a single contest only anyway. */
 
-  byte dn[256];
+  char dn[256];
   size_t dn_len = sizeof(dn);
   err = gnutls_x509_crt_get_dn_by_oid(cert, GNUTLS_OID_X520_COMMON_NAME, 0, 0, dn, &dn_len);
   if (err < 0)
@@ -220,7 +220,7 @@ tls_verify_cert(struct conn *c)
   c->cert_name = xstrdup(dn);
 
   /* Check certificate purpose */
-  byte purp[256];
+  char purp[256];
   int purpi = 0;
   do
     {
@@ -420,7 +420,7 @@ sigchld_handler(int sig UNUSED)
 static void
 reap_child(pid_t pid, int status)
 {
-  byte buf[EXIT_STATUS_MSG_SIZE];
+  char buf[EXIT_STATUS_MSG_SIZE];
   if (format_exit_status(buf, status))
     msg(L_ERROR, "Child %d %s", (int)pid, buf);
 
@@ -470,7 +470,7 @@ sk_accept(void)
       die("accept: %m");
     }
 
-  byte ipbuf[INET_ADDRSTRLEN];
+  char ipbuf[INET_ADDRSTRLEN];
   inet_ntop(AF_INET, &sa.sin_addr, ipbuf, sizeof(ipbuf));
   u32 addr = ntohl(sa.sin_addr.s_addr);
   uns port = ntohs(sa.sin_port);

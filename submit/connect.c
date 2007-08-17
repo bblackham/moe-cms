@@ -74,7 +74,7 @@ tls_verify_cert(gnutls_session_t s)
   /* XXX: Neither we check host name */
 
   /* Check certificate purpose */
-  byte purp[256];
+  char purp[256];
   int purpi = 0;
   do
     {
@@ -122,7 +122,7 @@ int main(int argc UNUSED, char **argv UNUSED)
     die("Cannot connect: %m");
 
   log(L_INFO, "Waiting for initial message");
-  byte msg[256];
+  char msg[256];
   int i = 0;
   do
     {
@@ -155,7 +155,7 @@ int main(int argc UNUSED, char **argv UNUSED)
   log(L_INFO, "Session established");
   for (;;)
     {
-      byte buf[1024];
+      char buf[1024];
       do
 	{
 	  if (!fgets(buf, sizeof(buf), stdin))

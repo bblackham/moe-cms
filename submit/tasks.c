@@ -24,7 +24,7 @@ clist task_list;
 static clist extensions;
 static clist open_data_extensions;
 
-static byte *
+static char *
 tasks_conf_commit(void *p UNUSED)
 {
   // We do not do any journaling here as we do not switch config files on the fly
@@ -67,7 +67,7 @@ struct cf_section tasks_conf = {
 };
 
 struct task *
-task_find(byte *name)
+task_find(char *name)
 {
   CLIST_FOR_EACH(struct task *, t, task_list)
     if (!strcasecmp(t->name, name))
@@ -76,7 +76,7 @@ task_find(byte *name)
 }
 
 int
-part_exists_p(struct task *t, byte *name)
+part_exists_p(struct task *t, char *name)
 {
   CLIST_FOR_EACH(simp_node *, p, t->parts)
     if (!strcmp(p->s, name))
@@ -85,7 +85,7 @@ part_exists_p(struct task *t, byte *name)
 }
 
 int
-ext_exists_p(struct task *t, byte *ext)
+ext_exists_p(struct task *t, char *ext)
 {
   CLIST_FOR_EACH(simp_node *, x, *t->extensions)
     if (!strcmp(x->s, ext))
@@ -94,9 +94,9 @@ ext_exists_p(struct task *t, byte *ext)
 }
 
 int
-user_exists_p(byte *user)
+user_exists_p(char *user)
 {
-  byte *fn = stk_printf("solutions/%s", user);
+  char *fn = stk_printf("solutions/%s", user);
   struct stat st;
   return !stat(fn, &st) && S_ISDIR(st.st_mode);
 }
@@ -141,7 +141,7 @@ task_unlock_status(struct conn *c, uns write_back)
       obj_write(fb, c->task_status, BUCKET_TYPE_PLAIN);
       brewind(fb);
       bconfig(fb, BCONFIG_IS_TEMP_FILE, 0);
-      byte *name = stk_printf("solutions/%s/status", c->user);
+      char *name = stk_printf("solutions/%s/status", c->user);
       if (rename(fb->name, name) < 0)
 	die("Unable to rename %s to %s: %m", fb->name, name);
       bclose(fb);
@@ -164,7 +164,7 @@ task_status_find_task(struct conn *c, struct task *t, uns create)
   for (struct oattr *a = obj_find_attr(c->task_status, 'T' + OBJ_ATTR_SON); a; a=a->same)
     {
       struct odes *o = a->son;
-      byte *name = obj_find_aval(o, 'T');
+      char *name = obj_find_aval(o, 'T');
       ASSERT(name);
       if (!strcmp(name, t->name))
 	return o;
@@ -177,12 +177,12 @@ task_status_find_task(struct conn *c, struct task *t, uns create)
 }
 
 struct odes *
-task_status_find_part(struct odes *to, byte *part, uns create)
+task_status_find_part(struct odes *to, char *part, uns create)
 {
   for (struct oattr *a = obj_find_attr(to, 'P' + OBJ_ATTR_SON); a; a=a->same)
     {
       struct odes *o = a->son;
-      byte *name = obj_find_aval(o, 'P');
+      char *name = obj_find_aval(o, 'P');
       ASSERT(name);
       if (!strcmp(name, part))
 	return o;
@@ -195,21 +195,21 @@ task_status_find_part(struct odes *to, byte *part, uns create)
 }
 
 static void
-task_record_history(byte *user, byte *task, byte *part, byte *ext, uns version, byte *submitted_name)
+task_record_history(char *user, char *task, char *part, char *ext, uns version, char *submitted_name)
 {
   if (!history_format)
     return;
 
   time_t now = time(NULL);
   struct tm *tm = localtime(&now);
-  byte prefix[256];
+  char prefix[256];
   if (strftime(prefix, sizeof(prefix), history_format, tm) <= 0)
     {
       msg(L_ERROR, "Error formatting history prefix: too long");
       return;
     }
 
-  byte *name = stk_printf("%s%s:%s:%s:v%d.%s", prefix, user, task, (strcmp(task, part) ? part : (byte*)""), version, ext);
+  char *name = stk_printf("%s%s:%s:%s:v%d.%s", prefix, user, task, (strcmp(task, part) ? part : (char*)""), version, ext);
   struct fastbuf *orig = bopen(submitted_name, O_RDONLY, 4096);
   struct fastbuf *hist = bopen(name, O_WRONLY | O_CREAT | O_EXCL, 4096);
   bbcopy_slow(orig, hist, ~0U);
@@ -218,10 +218,10 @@ task_record_history(byte *user, byte *task, byte *part, byte *ext, uns version, 
 }
 
 void
-task_submit_part(byte *user, byte *task, byte *part, byte *ext, uns version, struct fastbuf *fb)
+task_submit_part(char *user, char *task, char *part, char *ext, uns version, struct fastbuf *fb)
 {
-  byte *dir = stk_printf("solutions/%s/%s", user, task);
-  byte *name = stk_printf("%s/%s.%s", dir, part, ext);
+  char *dir = stk_printf("solutions/%s/%s", user, task);
+  char *name = stk_printf("%s/%s.%s", dir, part, ext);
 
   struct stat st;
   if (stat(dir, &st) < 0 && errno == ENOENT && mkdir(dir, 0777) < 0)
@@ -235,10 +235,10 @@ task_submit_part(byte *user, byte *task, byte *part, byte *ext, uns version, str
 }
 
 void
-task_delete_part(byte *user, byte *task, byte *part, byte *ext, uns version UNUSED)
+task_delete_part(char *user, char *task, char *part, char *ext, uns version UNUSED)
 {
-  byte *dir = stk_printf("solutions/%s/%s", user, task);
-  byte *name = stk_printf("%s/%s.%s", dir, part, ext);
+  char *dir = stk_printf("solutions/%s/%s", user, task);
+  char *name = stk_printf("%s/%s.%s", dir, part, ext);
   if (unlink(name) < 0)
     msg(L_ERROR, "Cannot delete %s: %m", name);
 }
