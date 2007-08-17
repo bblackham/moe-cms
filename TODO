@@ -9,7 +9,7 @@ box: memory usage statistics (need to search for VMPeak in /proc/$PID/status, bu
 
 Environment
 ~~~~~~~~~~~
-fpc: add switch -gl (runtime errors write line#)
+fpc: add switch -gl (runtime errors write line#), but avoid that when inside the sandbox
 
 Installer:
 - mo-install: reduce what gets copied to mo-eval home
@@ -21,4 +21,5 @@ New submitter:
 
 Various ideas:
 scores dependent on time (like PL olympiad)
-box: konfigurovatelny pristup k timerum a /proc/self/stat (pripadne /proc/self/fd)
+box: configurable access to timers and /proc/self/{stat,fd}
+box: limit the total amount of data written to files, so that quotas don't have to be set up
