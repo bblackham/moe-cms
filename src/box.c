@@ -44,6 +44,7 @@ static int is_ptraced;
 static volatile int timer_tick;
 static struct timeval start_time;
 static int ticks_per_sec;
+static int exec_seen;
 
 #if defined(__GLIBC__) && __GLIBC__ == 2 && __GLIBC_MINOR__ > 0
 /* glibc 2.1 or newer -> has lseek64 */
@@ -161,11 +162,6 @@ valid_syscall(struct user *u)
 {
   switch (u->regs.orig_eax)
     {
-    case __NR_execve:
-      {
-	static int exec_counter;
-	return !exec_counter++;
-      }
     case __NR_open:
     case __NR_creat:
     case __NR_unlink:
@@ -408,7 +404,7 @@ boxkeeper(void)
       if (WIFSIGNALED(stat))
 	{
 	  box_pid = 0;
-	  die("Caught fatal signal %d", WTERMSIG(stat));
+	  die("Caught fatal signal %d%s", WTERMSIG(stat), (syscall_count ? "" : " during startup"));
 	}
       if (WIFSTOPPED(stat))
 	{
@@ -425,8 +421,15 @@ boxkeeper(void)
 	      else if (stop_count & 1)		/* Syscall entry */
 		{
 		  msg(">> Syscall %3ld (%08lx,%08lx,%08lx) ", u.regs.orig_eax, u.regs.ebx, u.regs.ecx, u.regs.edx);
-		  syscall_count++;
-		  if (!valid_syscall(&u))
+		  if (!exec_seen)
+		    {
+		      msg("[master] ");
+		      if (u.regs.orig_eax == __NR_execve)
+			exec_seen = 1;
+		    }
+		  else if (valid_syscall(&u))
+		    syscall_count++;
+		  else
 		    {
 		      /*
 		       * Unfortunately, PTRACE_KILL kills _after_ the syscall completes,
@@ -491,8 +494,14 @@ box_inside(int argc, char **argv)
   rl.rlim_cur = rl.rlim_max = 64;
   if (setrlimit(RLIMIT_NOFILE, &rl) < 0)
     die("setrlimit: %m");
-  if (filter_syscalls && ptrace(PTRACE_TRACEME) < 0)
-    die("ptrace(PTRACE_TRACEME): %m");
+  if (filter_syscalls)
+    {
+      if (ptrace(PTRACE_TRACEME) < 0)
+	die("ptrace(PTRACE_TRACEME): %m");
+      /* Trick: Make sure that we are stopped until the boxkeeper wakes up. */
+      signal(SIGCHLD, SIG_IGN);
+      raise(SIGCHLD);
+    }
   execve(args[0], args, (pass_environ ? environ : env));
   die("execve(\"%s\"): %m", args[0]);
 }
