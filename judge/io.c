@@ -21,7 +21,6 @@ struct stream *sopen_fd(char *name, int fd)
   s->end = s->buf + BUFSIZE;
   s->name = s->end;
   strcpy(s->name, name);
-  s->flags = 0;
   return s;
 }
 
