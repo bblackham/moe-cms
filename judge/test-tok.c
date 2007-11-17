@@ -8,6 +8,7 @@ int main(void)
 
   struct tokenizer t;
   tok_init(&t, i);
+  // t.maxtoken = 1000;
   t.flags = TF_REPORT_LINES;
   char *tok;
   while (tok = get_token(&t))

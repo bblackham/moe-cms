@@ -78,7 +78,7 @@ enum tokenizer_flags {
 
 void tok_init(struct tokenizer *t, struct stream *s);
 void tok_cleanup(struct tokenizer *t);
-void tok_err(struct tokenizer *t, char *msg) NONRET;
+void tok_err(struct tokenizer *t, char *msg, ...) NONRET;
 char *get_token(struct tokenizer *t);
 
 // Parsing functions

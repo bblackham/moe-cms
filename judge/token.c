@@ -4,7 +4,9 @@
  *	(c) 2007 Martin Mares <mj@ucw.cz>
  */
 
+#include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <string.h>
 #include <limits.h>
 #include <errno.h>
@@ -28,9 +30,15 @@ void tok_cleanup(struct tokenizer *t)
   free(t->token);
 }
 
-void tok_err(struct tokenizer *t, char *msg)
+void tok_err(struct tokenizer *t, char *msg, ...)
 {
-  die("%s:%d: %s", t->stream->name, t->line, msg);
+  va_list args;
+  va_start(args, msg);
+  printf("%s:%d: ", t->stream->name, t->line);
+  vprintf(msg, args);
+  putchar('\n');
+  va_end(args);
+  exit(1);
 }
 
 static inline int is_white(int c)
