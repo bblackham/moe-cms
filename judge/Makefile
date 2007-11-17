@@ -12,6 +12,6 @@ judge-tok: judge-tok.o $(JLIB)
 
 clean::
 	rm -f `find . -name "*~" -or -name "*.[oa]" -or -name "\#*\#" -or -name TAGS -or -name core`
-	rm -f test-io test-tok
+	rm -f test-io test-tok judge-tok
 
 .PHONY: all clean distclean
