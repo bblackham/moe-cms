@@ -13,8 +13,16 @@ judge-tok: LDLIBS+=-lm
 judge-shuff: judge-shuff.o $(JLIB)
 filter-cmt: filter-cmt.o $(JLIB)
 
+tests: $(addsuffix .test,io token)
+io.test: test-io
+token.test: test-tok
+
+%.test: %.t tester
+	./tester $<
+
 clean::
 	rm -f `find . -name "*~" -or -name "*.[oa]" -or -name "\#*\#" -or -name TAGS -or -name core`
 	rm -f test-io test-tok judge-tok filter-cmt
+	rm -rf tmp
 
 .PHONY: all clean distclean
