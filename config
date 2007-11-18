@@ -142,7 +142,7 @@ FREE_PASCAL_RTE=1
 # DEBUG: Let `ev' run sample tests, too.
 #EV_SAMPLE=1
 
-# DEBUG: Run `pedant' on all input data
+# DEBUG: Run `pedant' on all input data. Set either to `1' or to pedant's options.
 #EV_PEDANT=1
 
 # DEBUG: Skip checks (useful when generating output files by running model solution)

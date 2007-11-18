@@ -268,7 +268,15 @@ function test-prolog
 	esac
 	if [ -n "$EV_PEDANT" -a $IN_TYPE != none ] ; then
 		pcont "<pedant> "
-		bin/pedant <$TDIR/$TEST.in | tr '\n' ' ' >&2
+		if [ "$EV_PEDANT" = 1 ] ; then
+			EV_PEDANT=" "
+		fi
+		bin/pedant <$TDIR/$TEST.in >$TDIR/$TEST.pedant $EV_PEDANT
+		if [ -s $TDIR/$TEST.pedant ] ; then
+			pend
+			sed 's/^/\t/' <$TDIR/$TEST.pedant >&2
+			pstart -e '\t'
+		fi
 	fi
 	case $OUT_TYPE in
 		file)	echo "Output file: $PROBLEM.out"
