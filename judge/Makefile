@@ -9,6 +9,7 @@ JLIB=utils.o io.o token.o
 test-io: test-io.o $(JLIB)
 test-tok: test-tok.o $(JLIB)
 judge-tok: judge-tok.o $(JLIB)
+judge-tok: LDLIBS+=-lm
 filter-cmt: filter-cmt.o $(JLIB)
 
 clean::
