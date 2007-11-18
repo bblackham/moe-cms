@@ -1,14 +1,50 @@
 /*
  *	A Pedantic Check of Text Input/Output File Syntax
  *
- *	(c) 2005 Martin Mares <mj@ucw.cz>
+ *	(c) 2005--2007 Martin Mares <mj@ucw.cz>
  */
 
 #include <stdio.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <getopt.h>
 
-int main(void)
+static int max = -1;
+static int no_stats;
+static int line = 1;
+static int warn_total, warn_shown;
+
+static void warn(char *msg, ...)
 {
-  int line = 1;
+#define NUM_TYPES 16
+  static char *seen[NUM_TYPES];
+  static int cnt[NUM_TYPES];
+  int type = 0;
+
+  va_list args;
+  va_start(args, msg);
+
+  warn_total++;
+  if (max >= 0)
+    {
+      for (type=0; type < NUM_TYPES && seen[type] && seen[type] != msg; type++)
+	;
+      if (type >= NUM_TYPES)
+	goto done;
+      seen[type] = msg;
+      if (cnt[type]++ >= max)
+	goto done;
+    }
+  warn_shown++;
+  printf("Line %d: ", line);
+  vprintf(msg, args);
+  putchar('\n');
+done:
+  va_end(args);
+}
+
+static void check(void)
+{
   int pos = 0;
   int maxlen = 0;
   int lastlen = -1;
@@ -19,13 +55,13 @@ int main(void)
       if (c == '\n')
 	{
 	  if (space)
-	    printf("Line %d: Trailing spaces\n", line);
+	    warn("Trailing spaces");
 	  if (line == 1 && !pos)
-	    printf("Line %d: Leading empty line\n", line);
+	    warn("Leading empty line");
 	  if (maxlen < pos)
 	    maxlen = pos;
 	  if (!lastlen && !pos)
-	    printf("Line %d: Consecutive empty lines\n", line);
+	    warn("Consecutive empty lines");
 	  lastlen = pos;
 	  line++;
 	  pos = space = 0;
@@ -35,24 +71,58 @@ int main(void)
 	  if (c == ' ')
 	    {
 	      if (!pos)
-		printf("Line %d: Leading spaces\n", line);
-	      if (space)
-		printf("Line %d: Consecutive spaces\n", line);
-	      space = 1;
+		warn("Leading spaces");
+	      if (space == 1)
+		warn("Consecutive spaces");
+	      space++;
 	    }
 	  else
 	    {
 	      space = 0;
 	      if (c < ' ' || c >= 0x7f)
-		printf("Line %d: Invalid character 0x%02x\n", line, c);
+		warn("Invalid character 0x%02x", c);
 	    }
 	  pos++;
 	}
     }
   if (pos)
-    printf("Line %d: Incomplete line at the end of file\n", line);
+    warn("Incomplete line at the end of file");
   else if (!lastlen)
-    printf("Line %d: Trailing empty line\n", line-1);
-  printf("Found %d lines, the longest has %d chars\n", line-1, maxlen);
+    {
+      line--;
+      warn("Trailing empty line");
+      line++;
+    }
+  if (warn_shown < warn_total)
+    printf("(and %d more warnings)\n", warn_total - warn_shown);
+  if (!no_stats)
+    printf("Found %d lines, the longest has %d chars\n", line-1, maxlen);
+}
+
+static void usage(void)
+{
+  fprintf(stderr, "Usage: pedant [-m <max>] [-s]\n");
+  exit(1);
+}
+
+int main(int argc, char **argv)
+{
+  int opt;
+  while ((opt = getopt(argc, argv, "m:s")) >= 0)
+    switch (opt)
+      {
+      case 'm':
+	max = atoi(optarg);
+	break;
+      case 's':
+	no_stats++;
+	break;
+      default:
+	usage();
+      }
+  if (optind < argc)
+    usage();
+
+  check();
   return 0;
 }
