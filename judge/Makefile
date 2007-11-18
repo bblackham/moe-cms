@@ -24,7 +24,7 @@ judge-tok.test: judge-tok
 
 clean::
 	rm -f `find . -name "*~" -or -name "*.[oa]" -or -name "\#*\#" -or -name TAGS -or -name core`
-	rm -f test-io test-tok judge-tok filter-cmt
+	rm -f test-io test-tok judge-tok judge-shuff filter-cmt
 	rm -rf tmp
 
 .PHONY: all clean distclean
