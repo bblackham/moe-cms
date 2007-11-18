@@ -101,6 +101,8 @@ char *get_token(struct tokenizer *t)
 #define PARSE(f, ...)						\
 	char *end;						\
 	errno = 0;						\
+	if (!t->toksize)					\
+	  return 0;						\
 	*x = f(t->token, &end, ##__VA_ARGS__);			\
 	return !(errno || (unsigned char *) end != t->token + t->toksize)
 
