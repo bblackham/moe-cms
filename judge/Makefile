@@ -13,9 +13,10 @@ judge-tok: LDLIBS+=-lm
 judge-shuff: judge-shuff.o $(JLIB)
 filter-cmt: filter-cmt.o $(JLIB)
 
-tests: $(addsuffix .test,io token)
+tests: $(addsuffix .test,io token filter-cmt)
 io.test: test-io
 token.test: test-tok
+filter-cmt.test: filter-cmt
 
 %.test: %.t tester
 	./tester $<

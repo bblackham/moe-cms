@@ -23,7 +23,10 @@ int main(void)
 	      while ((c = sgetc(i)) >= 0 && c != '\n')
 		;
 	      if (nl)
-		continue;
+		{
+		  c = sgetc(i);
+		  continue;
+		}
 	    }
 	  else
 	    {
