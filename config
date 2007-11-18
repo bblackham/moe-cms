@@ -104,6 +104,12 @@ TIME_LIMIT=10
 # Memory limit in kilobytes
 MEM_LIMIT=16384
 
+# Command used for filtering of program output (optional)
+# If turned on, program output (*.raw) is ran through this filter and the
+# checkers are applied to the output of the filter (*.out).
+# Can exit with code 1 if there is a syntax error in the output.
+#OUTPUT_FILTER='tr -d '\''\r'\'' <$TDIR/$TEST.raw >$TDIR/$TEST.out'
+
 # Command used to check output syntax (optional)
 # Returns exit code 1 if syntax is wrong, 0 if correct
 # fd1 is connect to evaluator log, feel free to log anything
@@ -141,3 +147,6 @@ FREE_PASCAL_RTE=1
 
 # DEBUG: Skip checks (useful when generating output files by running model solution)
 #EV_NOCHECK=1
+
+# DEBUG: Skip output filters (if you suspect they are buggy)
+#EV_NOFILTER=1

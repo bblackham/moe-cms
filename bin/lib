@@ -301,6 +301,20 @@ function test-epilog
 			cp $BOXDIR/.stdout $TDIR/$TEST.out
 			;;
 	esac
+
+	if [ -n "$OUTPUT_FILTER" -a "$OUT_TYPE" != none -a -z "$EV_NOFILTER" ] ; then
+		pcont "<filter> "
+		FILTER=`eval echo \"$OUTPUT_FILTER\"`
+		echo "Output filter command: $FILTER"
+		mv $TDIR/$TEST.out $TDIR/$TEST.raw
+		if ! eval $FILTER 2>$TMPDIR/exec.out ; then
+			cat $TMPDIR/exec.out
+			MSG=`tail -1 $TMPDIR/exec.out`
+			if [ -z "$MSG" ] ; then MSG="Filter failed" ; fi
+			test-result 0 "$MSG"
+		fi
+		cat $TMPDIR/exec.out
+	fi
 }
 
 # Running of test program with file input/output
@@ -354,7 +368,7 @@ function syntax-check
 	[ -n "$SYNTAX_CHECK" ] || return 0
 	[ -z "$EV_NOCHECK" ] || return 0
 	pcont "<syntax> "
-	SCHECK=`eval echo $SYNTAX_CHECK`
+	SCHECK=`eval echo \"$SYNTAX_CHECK\"`
 	echo "Syntax check command: $SCHECK"
 	if ! eval $SCHECK 2>$TMPDIR/exec.out ; then
 		cat $TMPDIR/exec.out
@@ -373,7 +387,7 @@ function output-check
 	if [ -n "$OUTPUT_CHECK" -a "$OUT_TYPE" != none -a -z "$EV_NOCHECK" ] ; then
 		pcont "<check> "
 		[ -f $PDIR/$TEST.out ] && ln $PDIR/$TEST.out $TDIR/$TEST.ok
-		OCHECK=`eval echo $OUTPUT_CHECK`
+		OCHECK=`eval echo \"$OUTPUT_CHECK\"`
 		echo "Output check command: $OCHECK"
 		if ! eval $OCHECK 2>$TMPDIR/exec.out ; then
 			cat $TMPDIR/exec.out
