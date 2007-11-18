@@ -19,7 +19,7 @@ void tok_init(struct tokenizer *t, struct stream *s)
 {
   memset(t, 0, sizeof(*t));
   t->stream = s;
-  t->bufsize = 256;
+  t->bufsize = 1;
   t->token = xmalloc(t->bufsize);
   t->maxsize = DEFAULT_MAX_TOKEN;
   t->line = 1;
@@ -76,11 +76,11 @@ char *get_token(struct tokenizer *t)
       t->token[len++] = c;
       if (len >= t->bufsize)
 	{
-	  if (len >= t->maxsize)
+	  if (len > t->maxsize)
 	    tok_err(t, "Token too long");
 	  t->bufsize *= 2;
 	  if (t->bufsize > t->maxsize)
-	    t->bufsize = t->maxsize;
+	    t->bufsize = t->maxsize+1;
 	  t->token = xrealloc(t->token, t->bufsize);
 	}
       c = sgetc(t->stream);
