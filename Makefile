@@ -5,12 +5,14 @@ VERSION=1.0.1
 #DEBUG=-ggdb
 CFLAGS=-O2 -Wall -W -Wno-parentheses -Wstrict-prototypes -Wmissing-prototypes -Wundef -Wredundant-decls -Winline $(DEBUG) -std=gnu99
 
+CC=gcc-4.1.1
+
 # Comment out if you are using a recent gcc
 CFLAGS+=-Wno-pointer-sign -Wdisabled-optimization -Wno-missing-field-initializers
 
 # Comment out if you do not wish to build remote submit utilities
-SUBMIT=submit
-LIBUCW:=$(shell cd ../holmes-libs-3.12/run && pwd)
+#SUBMIT=submit
+#LIBUCW:=$(shell cd ../holmes-libs-3.12/run && pwd)
 
 export LIBUCW CFLAGS LDFLAGS DEBUG
 
