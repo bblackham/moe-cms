@@ -2,7 +2,8 @@ CC=gcc-4.1.1
 CFLAGS=-O2 -Wall -W -Wno-parentheses -Wstrict-prototypes -Wmissing-prototypes -Wundef -Wredundant-decls -Winline $(DEBUG) -std=gnu99
 CFLAGS+=-Wno-pointer-sign -Wdisabled-optimization -Wno-missing-field-initializers
 
-all: test-io test-tok judge-tok judge-shuff filter-cmt
+all: test-io test-tok judge-tok filter-cmt
+# judge-shuff
 
 JLIB=utils.o io.o token.o
 
