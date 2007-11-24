@@ -11,6 +11,7 @@ Judges
 ~~~~~~
 integrate to the top-level makefile
 clean up exit codes
+test cases for judge-shuff
 
 Environment
 ~~~~~~~~~~~
