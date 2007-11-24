@@ -1,10 +1,7 @@
 /*
  *	A judge comparing shuffled sequences of tokens
  *
- *	(c) 2007 Martin Krulis <bobrik@matfyz.cz>
  *	(c) 2007 Martin Mares <mj@ucw.cz>
- *
- *	FIXME: INCOMPLETE!
  */
 
 #include <stdio.h>
@@ -18,6 +15,8 @@
 static int ignore_nl, ignore_empty, ignore_case;
 static int shuffle_lines, shuffle_words;
 
+typedef unsigned int uns;
+
 /*** Token buffer ***/
 
 struct tokpage {
@@ -29,7 +28,7 @@ struct tokpage {
 struct tokbuf {
   // For writing:
   struct tokpage *first_page, *last_page;
-  unsigned int num_tokens;
+  uns num_tokens, num_lines;
   // For reading:
   struct tokpage *this_page;
   char *read_pos;
@@ -64,6 +63,14 @@ static void add_token(struct tokbuf *tb, char *token, int l)
   memcpy(pg->pos, token, l);
   pg->pos += l;
   tb->num_tokens++;
+  if (l == 1)
+    tb->num_lines++;
+}
+
+static void close_tokens(struct tokbuf *tb)
+{
+  if (tb->last_page)
+    tb->last_page->end = tb->last_page->pos;
 }
 
 static char *get_next(struct tokbuf *tb)
@@ -90,24 +97,25 @@ static char *get_first(struct tokbuf *tb)
   return pg->buf;
 }
 
-/*** Reading of input ***/
+/*** Reading and shuffling ***/
 
 struct tok {
   char *token;
-  unsigned int hash;
+  uns hash;
 };
 
 struct line {
   struct tok *toks;
-  unsigned int num_toks;
-  unsigned int hash;
+  uns len;
+  uns hash;
+  uns orig_line;
 };
 
 struct shouffle {
   struct tokbuf tb;
   struct tok *tok_array;
   struct line *line_array;
-  unsigned int num_lines;
+  uns num_lines;
 };
 
 static void read_input(struct tokenizer *t, struct tokbuf *tb)
@@ -119,7 +127,13 @@ static void read_input(struct tokenizer *t, struct tokbuf *tb)
   while (tok = get_token(t))
     {
       if (tok[0])
-	nl = 0;
+	{
+	  nl = 0;
+	  if (ignore_case)
+	    for (char *c=tok; *c; c++)
+	      if (*c >= 'a' && *c <= 'z')
+		*c = *c - 'a' + 'A';
+	}
       else
 	{
 	  if (nl && ignore_nl)
@@ -130,10 +144,117 @@ static void read_input(struct tokenizer *t, struct tokbuf *tb)
     }
   if (!nl)
     add_token(tb, "", 0);
+  close_tokens(tb);
+}
+
+static inline uns string_hash(unsigned char *x)
+{
+  uns h = 1;
+  while (*x)
+    h = (h * 0x6011) + *x++;
+  return h;
+}
+
+static inline uns line_hash(struct tok *t, uns cnt)
+{
+  uns h = 1;
+  while (cnt--)
+    h = (h * 0x6011) + (t++)->hash;
+  return h;
+}
+
+static int compare_toks(struct tok *x, struct tok *y)
+{
+  if (x->hash < y->hash)
+    return -1;
+  if (x->hash > y->hash)
+    return 1;
+  return strcmp(x->token, y->token);
+}
+
+static int compare_lines(struct line *x, struct line *y)
+{
+  if (x->hash < y->hash)
+    return -1;
+  if (x->hash > y->hash)
+    return 1;
+
+  if (x->len < y->len)
+    return -1;
+  if (x->len > y->len)
+    return 1;
+
+  for (uns i=0; i < x->len; i++)
+    {
+      int c = compare_toks(&x->toks[i], &y->toks[i]);
+      if (c)
+	return c;
+    }
+  return 0;
 }
 
 static void slurp(struct tokenizer *t, struct shouffle *s)
 {
+  read_input(t, &s->tb);
+  s->tok_array = xmalloc(sizeof(struct tok) * s->tb.num_tokens);
+  s->line_array = xmalloc(sizeof(struct line) * (s->tb.num_lines+1));
+  s->num_lines = 0;
+
+  struct tok *tok = s->tok_array;
+  struct line *line = s->line_array;
+  line->toks = tok;
+  for (char *x = get_first(&s->tb); x; x = get_next(&s->tb))
+    if (*x)
+      {
+	tok->token = x;
+	tok->hash = string_hash(x);
+	tok++;
+      }
+    else
+      {
+	line->len = tok - line->toks;
+	if (shuffle_words)
+	  qsort(line->toks, line->len, sizeof(struct tok), (int(*)(const void *, const void *)) compare_toks);
+	line->hash = line_hash(line->toks, line->len);
+	line->orig_line = ++s->num_lines;
+#if 0
+	for (struct tok *t=line->toks; t<tok; t++)
+	  printf("<%08x|%s>", t->hash, t->token);
+	printf(" -> %08x (%d)\n", line->hash, line->orig_line);
+#endif
+	line++;
+	line->toks = tok;
+      }
+  if (line->toks != tok)
+    die("Bug #41: unterminated line");
+  if (s->num_lines != s->tb.num_lines)
+    die("Bug #42: got %d lines, expected %d", s->num_lines, s->tb.num_lines);
+
+  if (shuffle_lines)
+    qsort(s->line_array, s->num_lines, sizeof(struct line), (int(*)(const void *, const void *)) compare_lines);
+}
+
+static void compare(struct shouffle *s1, struct shouffle *s2)
+{
+  if (s1->num_lines != s2->num_lines)
+    {
+      printf("Output has %d lines, expecting %d\n", s1->num_lines, s2->num_lines);
+      exit(1);
+    }
+
+  uns errs = 0;
+  for (uns i=0; i<s1->num_lines; i++)
+    {
+      struct line *l1 = &s1->line_array[i], *l2 = &s2->line_array[i];
+      if (compare_lines(l1, l2))
+	{
+	  printf("Line %d does not match\n", l1->orig_line);
+	  printf("  %08x(%d) vs. %08x(%d)\n", l1->hash, l1->orig_line, l2->hash, l2->orig_line);
+	  errs++;
+	}
+    }
+  if (errs)
+    exit(1);
 }
 
 /*** Main ***/
@@ -186,8 +307,10 @@ int main(int argc, char **argv)
   if (!ignore_nl)
     t1.flags = t2.flags = TF_REPORT_LINES;
 
-  struct tokbuf b1;
-  read_input(&t1, &b1);
+  struct shouffle s1, s2;
+  slurp(&t1, &s1);
+  slurp(&t2, &s2);
 
+  compare(&s1, &s2);
   return 0;
 }
