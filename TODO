@@ -7,6 +7,11 @@ terminology: problem -> task ?
 writing of verdicts to stdout (include timing and check on interactive tasks, including judge errors)
 box: memory usage statistics (need to search for VMPeak in /proc/$PID/status, but it disappears too early)
 
+Judges
+~~~~~~
+integrate to the top-level makefile
+clean up exit codes
+
 Environment
 ~~~~~~~~~~~
 fpc: add switch -gl (runtime errors write line#), but avoid that when inside the sandbox
