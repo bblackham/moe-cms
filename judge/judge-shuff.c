@@ -34,7 +34,7 @@ struct tokbuf {
   char *read_pos;
 };
 
-#define TOKBUF_PAGE 256
+#define TOKBUF_PAGE 65536
 
 static void init_tokbuf(struct tokbuf *tb)
 {
@@ -47,6 +47,8 @@ static void add_token(struct tokbuf *tb, char *token, int l)
   struct tokpage *pg = tb->last_page;
   if (!pg || pg->end - pg->pos < l)
     {
+      if (pg)
+	pg->end = pg->pos;
       int size = TOKBUF_PAGE - sizeof(struct tokbuf);
       if (l > size/5)
 	size = l;
