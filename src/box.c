@@ -91,6 +91,39 @@ msg(char *msg, ...)
   va_end(args);
 }
 
+struct syscall {
+  const char *name;
+  int override;
+};
+
+static struct syscall syscall_tab[] = {
+#include "syscall-table.h"
+};
+#define NUM_SYSCALLS (sizeof(syscall_tab)/sizeof(syscall_tab[0]))
+
+static const char *
+syscall_name(unsigned int id, char *buf)
+{
+  if (id < NUM_SYSCALLS && syscall_tab[id].name)
+    return syscall_tab[id].name;
+  else
+    {
+      sprintf(buf, "#%d", id);
+      return buf;
+    }
+}
+
+#if 0
+static struct syscall *
+syscall_by_name(char *name)
+{
+  for (unsigned int i=0; i<sizeof(syscall_tab)/sizeof(syscall_tab[0]); i++)
+    if (!strcmp(syscall_tab[i].name, name))
+      return &syscall_tab[i];
+  return NULL;
+}
+#endif
+
 static void
 valid_filename(unsigned long addr)
 {
@@ -420,7 +453,8 @@ boxkeeper(void)
 		msg(">> Traceme request caught\n");
 	      else if (stop_count & 1)		/* Syscall entry */
 		{
-		  msg(">> Syscall %3ld (%08lx,%08lx,%08lx) ", u.regs.orig_eax, u.regs.ebx, u.regs.ecx, u.regs.edx);
+		  char namebuf[32];
+		  msg(">> Syscall %-12s (%08lx,%08lx,%08lx) ", syscall_name(u.regs.orig_eax, namebuf), u.regs.ebx, u.regs.ecx, u.regs.edx);
 		  if (!exec_seen)
 		    {
 		      msg("[master] ");
@@ -440,7 +474,7 @@ boxkeeper(void)
 		      u.regs.orig_eax = 0xffffffff;
 		      if (ptrace(PTRACE_SETREGS, box_pid, NULL, &u) < 0)
 			die("ptrace(PTRACE_SETREGS): %m");
-		      die("Forbidden syscall %d", sys);
+		      die("Forbidden syscall %s", syscall_name(sys, namebuf));
 		    }
 		}
 	      else					/* Syscall return */

@@ -5,7 +5,7 @@ VERSION=1.0.1
 #DEBUG=-ggdb
 CFLAGS=-O2 -Wall -W -Wno-parentheses -Wstrict-prototypes -Wmissing-prototypes -Wundef -Wredundant-decls -Winline $(DEBUG) -std=gnu99
 
-CC=gcc-4.1.1
+#CC=gcc-4.1.1
 
 # Comment out if you are using a recent gcc
 CFLAGS+=-Wno-pointer-sign -Wdisabled-optimization -Wno-missing-field-initializers
@@ -26,10 +26,16 @@ bin/iwrapper: src/iwrapper.o
 bin/md5crypt: src/md5crypt.o src/md5.o
 bin/pedant: src/pedant.o
 
+src/box.o: src/box.c src/syscall-table.h
+
+src/syscall-table.h:
+	src/mk-syscall-table
+
 submit:
 
 clean::
 	rm -f `find . -name "*~" -or -name "*.[oa]" -or -name "\#*\#" -or -name TAGS -or -name core`
+	rm -f src/syscall-table.h
 	rm -f bin/box bin/iwrapper bin/md5crypt bin/pedant
 
 distclean: clean
