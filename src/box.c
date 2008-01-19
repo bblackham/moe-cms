@@ -27,6 +27,7 @@
 
 #define NONRET __attribute__((noreturn))
 #define UNUSED __attribute__((unused))
+#define ARRAY_SIZE(a) (int)(sizeof(a)/sizeof(a[0]))
 
 static int filter_syscalls;		/* 0=off, 1=liberal, 2=totalitarian */
 static int timeout;			/* milliseconds */
@@ -96,7 +97,7 @@ static const char * const syscall_tab[] = {
 #define NUM_SYSCALLS (sizeof(syscall_tab)/sizeof(syscall_tab[0]))
 #define NUM_ACTIONS (NUM_SYSCALLS+64)
 
-enum syscall_action {
+enum action {
   SC_DEFAULT,		// Use the default action
   SC_NO,		// Always forbid
   SC_YES,		// Always permit
@@ -241,7 +242,7 @@ static int
 set_action(char *a)
 {
   char *sep = strchr(a, '=');
-  enum syscall_action act = SC_YES;
+  enum action act = SC_YES;
   if (sep)
     {
       *sep++ = 0;
@@ -262,6 +263,41 @@ set_action(char *a)
     die("Syscall `%s' out of range", a);
   syscall_action[sys] = act;
   return 1;
+}
+
+struct path_rule {
+  char *path;
+  enum action action;
+  struct path_rule *next;
+};
+
+static struct path_rule default_path_rules[] = {
+  { "/etc/", SC_YES },
+  { "/lib/", SC_YES },
+  { "/usr/lib/", SC_YES },
+  { "/opt/lib/", SC_YES },
+  { "/usr/share/zoneinfo/", SC_YES },
+  { "/dev/null", SC_YES },
+  { "/dev/zero", SC_YES },
+  { "/proc/meminfo", SC_YES },
+  { "/proc/self/stat", SC_YES },
+  { "/proc/self/exe", SC_YES },			// Needed by FPC 2.0.x runtime
+};
+
+static enum action
+match_path_rule(struct path_rule *r, char *path)
+{
+  char *rr = r->path;
+  while (*rr)
+    if (*rr++ != *path++)
+      {
+	if (rr[-1] == '/' && !path[-1])
+	  break;
+	return SC_DEFAULT;
+      }
+  if (rr > r->path && rr[-1] != '/' && *path)
+    return SC_DEFAULT;
+  return r->action;
 }
 
 static void
@@ -309,32 +345,30 @@ valid_filename(unsigned long addr)
   msg("[%s] ", namebuf);
   if (file_access >= 3)
     return;
+
+  // Everything in current directory is permitted
   if (!strchr(namebuf, '/') && strcmp(namebuf, ".."))
     return;
+
+  // ".." anywhere in the path is forbidden
+  enum action act = SC_DEFAULT;
+  if (strstr(namebuf, ".."))
+    act = SC_NO;
+
+  // Scan built-in rules
   if (file_access >= 2)
-    {
-      if ((!strncmp(namebuf, "/etc/", 5) ||
-	   !strncmp(namebuf, "/lib/", 5) ||
-	   !strncmp(namebuf, "/usr/lib/", 9) ||
-	   !strncmp(namebuf, "/opt/lib/", 9))
-	  && !strstr(namebuf, ".."))
-	return;
-      if (!strcmp(namebuf, "/dev/null") ||
-	  !strcmp(namebuf, "/dev/zero") ||
-	  !strcmp(namebuf, "/proc/meminfo") ||
-	  !strcmp(namebuf, "/proc/self/stat") ||
-	  !strcmp(namebuf, "/proc/self/exe") ||			/* Needed by FPC 2.0.x runtime */
-	  !strncmp(namebuf, "/usr/share/zoneinfo/", 20))
-	return;
-    }
-  die("Forbidden access to file `%s'", namebuf);
+    for (int i=0; i<ARRAY_SIZE(default_path_rules) && !act; i++)
+      act = match_path_rule(&default_path_rules[i], namebuf);
+
+  if (act != SC_YES)
+    die("Forbidden access to file `%s'", namebuf);
 }
 
 static int
 valid_syscall(struct user *u)
 {
   unsigned int sys = u->regs.orig_eax;
-  enum syscall_action act = (sys < NUM_ACTIONS) ? syscall_action[sys] : SC_DEFAULT;
+  enum action act = (sys < NUM_ACTIONS) ? syscall_action[sys] : SC_DEFAULT;
 
   if (act & SC_LIBERAL)
     {
