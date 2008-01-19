@@ -177,6 +177,7 @@ static unsigned char syscall_action[NUM_ACTIONS] = {
     S(sigpending) = SC_YES | SC_LIBERAL,
     S(getrlimit) = SC_YES | SC_LIBERAL,
     S(getrusage) = SC_YES | SC_LIBERAL,
+    S(ugetrlimit) = SC_YES | SC_LIBERAL,
     S(gettimeofday) = SC_YES | SC_LIBERAL,
     S(select) = SC_YES | SC_LIBERAL,
     S(readdir) = SC_YES | SC_LIBERAL,
