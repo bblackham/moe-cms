@@ -91,10 +91,10 @@ msg(char *msg, ...)
   va_end(args);
 }
 
-static const char * const syscall_tab[] = {
+static const char * const syscall_names[] = {
 #include "syscall-table.h"
 };
-#define NUM_SYSCALLS (sizeof(syscall_tab)/sizeof(syscall_tab[0]))
+#define NUM_SYSCALLS ARRAY_SIZE(syscall_names)
 #define NUM_ACTIONS (NUM_SYSCALLS+64)
 
 enum action {
@@ -210,8 +210,8 @@ static unsigned char syscall_action[NUM_ACTIONS] = {
 static const char *
 syscall_name(unsigned int id, char *buf)
 {
-  if (id < NUM_SYSCALLS && syscall_tab[id])
-    return syscall_tab[id];
+  if (id < NUM_SYSCALLS && syscall_names[id])
+    return syscall_names[id];
   else
     {
       sprintf(buf, "#%d", id);
@@ -222,8 +222,8 @@ syscall_name(unsigned int id, char *buf)
 static int
 syscall_by_name(char *name)
 {
-  for (unsigned int i=0; i<sizeof(syscall_tab)/sizeof(syscall_tab[0]); i++)
-    if (syscall_tab[i] && !strcmp(syscall_tab[i], name))
+  for (unsigned int i=0; i<NUM_SYSCALLS; i++)
+    if (syscall_names[i] && !strcmp(syscall_names[i], name))
       return i;
   if (name[0] == '#')
     name++;
@@ -259,7 +259,7 @@ set_action(char *a)
   int sys = syscall_by_name(a);
   if (sys < 0)
     die("Unknown syscall `%s'", a);
-  if (sys >= (int)NUM_ACTIONS)
+  if (sys >= NUM_ACTIONS)
     die("Syscall `%s' out of range", a);
   syscall_action[sys] = act;
   return 1;
