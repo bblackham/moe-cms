@@ -1,4 +1,4 @@
-CC=gcc-4.1.1
+#CC=gcc-4.1.1
 CFLAGS=-O2 -Wall -W -Wno-parentheses -Wstrict-prototypes -Wmissing-prototypes -Wundef -Wredundant-decls -Winline $(DEBUG) -std=gnu99
 CFLAGS+=-Wno-pointer-sign -Wdisabled-optimization -Wno-missing-field-initializers
 
