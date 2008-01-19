@@ -91,6 +91,15 @@ msg(char *msg, ...)
   va_end(args);
 }
 
+static void *
+xmalloc(size_t size)
+{
+  void *p = malloc(size);
+  if (!p)
+    die("Out of memory");
+  return p;
+}
+
 static const char * const syscall_names[] = {
 #include "syscall-table.h"
 };
@@ -239,7 +248,7 @@ syscall_by_name(char *name)
 }
 
 static int
-set_action(char *a)
+set_syscall_action(char *a)
 {
   char *sep = strchr(a, '=');
   enum action act = SC_YES;
@@ -284,6 +293,35 @@ static struct path_rule default_path_rules[] = {
   { "/proc/self/stat", SC_YES },
   { "/proc/self/exe", SC_YES },			// Needed by FPC 2.0.x runtime
 };
+
+static struct path_rule *user_path_rules;
+static struct path_rule **last_path_rule = &user_path_rules;
+
+static int
+set_path_action(char *a)
+{
+  char *sep = strchr(a, '=');
+  enum action act = SC_YES;
+  if (sep)
+    {
+      *sep++ = 0;
+      if (!strcmp(sep, "yes"))
+	act = SC_YES;
+      else if (!strcmp(sep, "no"))
+	act = SC_NO;
+      else
+	return 0;
+    }
+
+  struct path_rule *r = xmalloc(sizeof(*r) + strlen(a));
+  r->path = (char *)(r+1);
+  strcpy(r->path, a);
+  r->action = act;
+  r->next = NULL;
+  *last_path_rule = r;
+  last_path_rule = &r->next;
+  return 1;
+}
 
 static enum action
 match_path_rule(struct path_rule *r, char *path)
@@ -355,6 +393,10 @@ valid_filename(unsigned long addr)
   enum action act = SC_DEFAULT;
   if (strstr(namebuf, ".."))
     act = SC_NO;
+
+  // Scan user rules
+  for (struct path_rule *r = user_path_rules; r && !act; r=r->next)
+    act = match_path_rule(r, namebuf);
 
   // Scan built-in rules
   if (file_access >= 2)
@@ -656,6 +698,8 @@ Options:\n\
 -i <file>\tRedirect stdin from <file>\n\
 -m <size>\tLimit address space to <size> KB\n\
 -o <file>\tRedirect stdout to <file>\n\
+-p <path>\tPermit access to the specified path (or subtree if it ends with a `/')\n\
+-p <path>=<act>\tDefine action for the specified path (<act>=yes/no)\n\
 -s <sys>\tPermit the specified syscall (be careful)\n\
 -s <sys>=<act>\tDefine action for the specified syscall (<act>=yes/no/file)\n\
 -t <time>\tSet run time limit (seconds, fractions allowed)\n\
@@ -672,7 +716,7 @@ main(int argc, char **argv)
   int c;
   uid_t uid;
 
-  while ((c = getopt(argc, argv, "a:c:efi:m:o:s:t:Tvw:")) >= 0)
+  while ((c = getopt(argc, argv, "a:c:efi:m:o:p:s:t:Tvw:")) >= 0)
     switch (c)
       {
       case 'a':
@@ -696,8 +740,12 @@ main(int argc, char **argv)
       case 'o':
 	redir_stdout = optarg;
 	break;
+      case 'p':
+	if (!set_path_action(optarg))
+	  usage();
+	break;
       case 's':
-	if (!set_action(optarg))
+	if (!set_syscall_action(optarg))
 	  usage();
 	break;
       case 't':
