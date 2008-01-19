@@ -277,6 +277,7 @@ static struct path_rule default_path_rules[] = {
   { "/usr/lib/", SC_YES },
   { "/opt/lib/", SC_YES },
   { "/usr/share/zoneinfo/", SC_YES },
+  { "/usr/share/locale/", SC_YES },
   { "/dev/null", SC_YES },
   { "/dev/zero", SC_YES },
   { "/proc/meminfo", SC_YES },
