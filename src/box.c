@@ -107,112 +107,112 @@ static const char * const syscall_names[] = {
 #define NUM_ACTIONS (NUM_SYSCALLS+64)
 
 enum action {
-  SC_DEFAULT,		// Use the default action
-  SC_NO,		// Always forbid
-  SC_YES,		// Always permit
-  SC_FILENAME,		// Permit if arg1 is a known filename
-  SC_LIBERAL = 128,	// Valid only in liberal mode
+  A_DEFAULT,		// Use the default action
+  A_NO,		// Always forbid
+  A_YES,		// Always permit
+  A_FILENAME,		// Permit if arg1 is a known filename
+  A_LIBERAL = 128,	// Valid only in liberal mode
 };
 
 static unsigned char syscall_action[NUM_ACTIONS] = {
 #define S(x) [__NR_##x]
 
     // Syscalls permitted for specific file names
-    S(open) = SC_FILENAME,
-    S(creat) = SC_FILENAME,
-    S(unlink) = SC_FILENAME,
-    S(oldstat) = SC_FILENAME,
-    S(access) = SC_FILENAME,			
-    S(oldlstat) = SC_FILENAME,			
-    S(truncate) = SC_FILENAME,
-    S(stat) = SC_FILENAME,
-    S(lstat) = SC_FILENAME,
-    S(truncate64) = SC_FILENAME,
-    S(stat64) = SC_FILENAME,
-    S(lstat64) = SC_FILENAME,
-    S(readlink) = SC_FILENAME,
+    S(open) = A_FILENAME,
+    S(creat) = A_FILENAME,
+    S(unlink) = A_FILENAME,
+    S(oldstat) = A_FILENAME,
+    S(access) = A_FILENAME,			
+    S(oldlstat) = A_FILENAME,			
+    S(truncate) = A_FILENAME,
+    S(stat) = A_FILENAME,
+    S(lstat) = A_FILENAME,
+    S(truncate64) = A_FILENAME,
+    S(stat64) = A_FILENAME,
+    S(lstat64) = A_FILENAME,
+    S(readlink) = A_FILENAME,
 
     // Syscalls permitted always
-    S(exit) = SC_YES,
-    S(read) = SC_YES,
-    S(write) = SC_YES,
-    S(close) = SC_YES,
-    S(lseek) = SC_YES,
-    S(getpid) = SC_YES,
-    S(getuid) = SC_YES,
-    S(oldfstat) = SC_YES,
-    S(dup) = SC_YES,
-    S(brk) = SC_YES,
-    S(getgid) = SC_YES,
-    S(geteuid) = SC_YES,
-    S(getegid) = SC_YES,
-    S(dup2) = SC_YES,
-    S(ftruncate) = SC_YES,
-    S(fstat) = SC_YES,
-    S(personality) = SC_YES,
-    S(_llseek) = SC_YES,
-    S(readv) = SC_YES,
-    S(writev) = SC_YES,
-    S(getresuid) = SC_YES,
+    S(exit) = A_YES,
+    S(read) = A_YES,
+    S(write) = A_YES,
+    S(close) = A_YES,
+    S(lseek) = A_YES,
+    S(getpid) = A_YES,
+    S(getuid) = A_YES,
+    S(oldfstat) = A_YES,
+    S(dup) = A_YES,
+    S(brk) = A_YES,
+    S(getgid) = A_YES,
+    S(geteuid) = A_YES,
+    S(getegid) = A_YES,
+    S(dup2) = A_YES,
+    S(ftruncate) = A_YES,
+    S(fstat) = A_YES,
+    S(personality) = A_YES,
+    S(_llseek) = A_YES,
+    S(readv) = A_YES,
+    S(writev) = A_YES,
+    S(getresuid) = A_YES,
 #ifdef __NR_pread64
-    S(pread64) = SC_YES,
-    S(pwrite64) = SC_YES,
+    S(pread64) = A_YES,
+    S(pwrite64) = A_YES,
 #else
-    S(pread) = SC_YES,
-    S(pwrite) = SC_YES,
+    S(pread) = A_YES,
+    S(pwrite) = A_YES,
 #endif
-    S(ftruncate64) = SC_YES,
-    S(fstat64) = SC_YES,
-    S(fcntl) = SC_YES,
-    S(fcntl64) = SC_YES,
-    S(mmap) = SC_YES,
-    S(munmap) = SC_YES,
-    S(ioctl) = SC_YES,
-    S(uname) = SC_YES,
-    S(gettid) = SC_YES,
-    S(set_thread_area) = SC_YES,
-    S(get_thread_area) = SC_YES,
-    S(exit_group) = SC_YES,
+    S(ftruncate64) = A_YES,
+    S(fstat64) = A_YES,
+    S(fcntl) = A_YES,
+    S(fcntl64) = A_YES,
+    S(mmap) = A_YES,
+    S(munmap) = A_YES,
+    S(ioctl) = A_YES,
+    S(uname) = A_YES,
+    S(gettid) = A_YES,
+    S(set_thread_area) = A_YES,
+    S(get_thread_area) = A_YES,
+    S(exit_group) = A_YES,
 
     // Syscalls permitted only in liberal mode
-    S(time) = SC_YES | SC_LIBERAL,
-    S(alarm) = SC_YES | SC_LIBERAL,
-    S(pause) = SC_YES | SC_LIBERAL,
-    S(signal) = SC_YES | SC_LIBERAL,
-    S(fchmod) = SC_YES | SC_LIBERAL,
-    S(sigaction) = SC_YES | SC_LIBERAL,
-    S(sgetmask) = SC_YES | SC_LIBERAL,
-    S(ssetmask) = SC_YES | SC_LIBERAL,
-    S(sigsuspend) = SC_YES | SC_LIBERAL,
-    S(sigpending) = SC_YES | SC_LIBERAL,
-    S(getrlimit) = SC_YES | SC_LIBERAL,
-    S(getrusage) = SC_YES | SC_LIBERAL,
-    S(ugetrlimit) = SC_YES | SC_LIBERAL,
-    S(gettimeofday) = SC_YES | SC_LIBERAL,
-    S(select) = SC_YES | SC_LIBERAL,
-    S(readdir) = SC_YES | SC_LIBERAL,
-    S(setitimer) = SC_YES | SC_LIBERAL,
-    S(getitimer) = SC_YES | SC_LIBERAL,
-    S(sigreturn) = SC_YES | SC_LIBERAL,
-    S(mprotect) = SC_YES | SC_LIBERAL,
-    S(sigprocmask) = SC_YES | SC_LIBERAL,
-    S(getdents) = SC_YES | SC_LIBERAL,
-    S(getdents64) = SC_YES | SC_LIBERAL,
-    S(_newselect) = SC_YES | SC_LIBERAL,
-    S(fdatasync) = SC_YES | SC_LIBERAL,
-    S(mremap) = SC_YES | SC_LIBERAL,
-    S(poll) = SC_YES | SC_LIBERAL,
-    S(getcwd) = SC_YES | SC_LIBERAL,
-    S(nanosleep) = SC_YES | SC_LIBERAL,
-    S(rt_sigreturn) = SC_YES | SC_LIBERAL,
-    S(rt_sigaction) = SC_YES | SC_LIBERAL,
-    S(rt_sigprocmask) = SC_YES | SC_LIBERAL,
-    S(rt_sigpending) = SC_YES | SC_LIBERAL,
-    S(rt_sigtimedwait) = SC_YES | SC_LIBERAL,
-    S(rt_sigqueueinfo) = SC_YES | SC_LIBERAL,
-    S(rt_sigsuspend) = SC_YES | SC_LIBERAL,
-    S(mmap2) = SC_YES | SC_LIBERAL,
-    S(_sysctl) = SC_YES | SC_LIBERAL,
+    S(time) = A_YES | A_LIBERAL,
+    S(alarm) = A_YES | A_LIBERAL,
+    S(pause) = A_YES | A_LIBERAL,
+    S(signal) = A_YES | A_LIBERAL,
+    S(fchmod) = A_YES | A_LIBERAL,
+    S(sigaction) = A_YES | A_LIBERAL,
+    S(sgetmask) = A_YES | A_LIBERAL,
+    S(ssetmask) = A_YES | A_LIBERAL,
+    S(sigsuspend) = A_YES | A_LIBERAL,
+    S(sigpending) = A_YES | A_LIBERAL,
+    S(getrlimit) = A_YES | A_LIBERAL,
+    S(getrusage) = A_YES | A_LIBERAL,
+    S(ugetrlimit) = A_YES | A_LIBERAL,
+    S(gettimeofday) = A_YES | A_LIBERAL,
+    S(select) = A_YES | A_LIBERAL,
+    S(readdir) = A_YES | A_LIBERAL,
+    S(setitimer) = A_YES | A_LIBERAL,
+    S(getitimer) = A_YES | A_LIBERAL,
+    S(sigreturn) = A_YES | A_LIBERAL,
+    S(mprotect) = A_YES | A_LIBERAL,
+    S(sigprocmask) = A_YES | A_LIBERAL,
+    S(getdents) = A_YES | A_LIBERAL,
+    S(getdents64) = A_YES | A_LIBERAL,
+    S(_newselect) = A_YES | A_LIBERAL,
+    S(fdatasync) = A_YES | A_LIBERAL,
+    S(mremap) = A_YES | A_LIBERAL,
+    S(poll) = A_YES | A_LIBERAL,
+    S(getcwd) = A_YES | A_LIBERAL,
+    S(nanosleep) = A_YES | A_LIBERAL,
+    S(rt_sigreturn) = A_YES | A_LIBERAL,
+    S(rt_sigaction) = A_YES | A_LIBERAL,
+    S(rt_sigprocmask) = A_YES | A_LIBERAL,
+    S(rt_sigpending) = A_YES | A_LIBERAL,
+    S(rt_sigtimedwait) = A_YES | A_LIBERAL,
+    S(rt_sigqueueinfo) = A_YES | A_LIBERAL,
+    S(rt_sigsuspend) = A_YES | A_LIBERAL,
+    S(mmap2) = A_YES | A_LIBERAL,
+    S(_sysctl) = A_YES | A_LIBERAL,
 #undef S
 };
 
@@ -251,16 +251,16 @@ static int
 set_syscall_action(char *a)
 {
   char *sep = strchr(a, '=');
-  enum action act = SC_YES;
+  enum action act = A_YES;
   if (sep)
     {
       *sep++ = 0;
       if (!strcmp(sep, "yes"))
-	act = SC_YES;
+	act = A_YES;
       else if (!strcmp(sep, "no"))
-	act = SC_NO;
+	act = A_NO;
       else if (!strcmp(sep, "file"))
-	act = SC_FILENAME;
+	act = A_FILENAME;
       else
 	return 0;
     }
@@ -281,17 +281,17 @@ struct path_rule {
 };
 
 static struct path_rule default_path_rules[] = {
-  { "/etc/", SC_YES },
-  { "/lib/", SC_YES },
-  { "/usr/lib/", SC_YES },
-  { "/opt/lib/", SC_YES },
-  { "/usr/share/zoneinfo/", SC_YES },
-  { "/usr/share/locale/", SC_YES },
-  { "/dev/null", SC_YES },
-  { "/dev/zero", SC_YES },
-  { "/proc/meminfo", SC_YES },
-  { "/proc/self/stat", SC_YES },
-  { "/proc/self/exe", SC_YES },			// Needed by FPC 2.0.x runtime
+  { "/etc/", A_YES },
+  { "/lib/", A_YES },
+  { "/usr/lib/", A_YES },
+  { "/opt/lib/", A_YES },
+  { "/usr/share/zoneinfo/", A_YES },
+  { "/usr/share/locale/", A_YES },
+  { "/dev/null", A_YES },
+  { "/dev/zero", A_YES },
+  { "/proc/meminfo", A_YES },
+  { "/proc/self/stat", A_YES },
+  { "/proc/self/exe", A_YES },			// Needed by FPC 2.0.x runtime
 };
 
 static struct path_rule *user_path_rules;
@@ -301,14 +301,14 @@ static int
 set_path_action(char *a)
 {
   char *sep = strchr(a, '=');
-  enum action act = SC_YES;
+  enum action act = A_YES;
   if (sep)
     {
       *sep++ = 0;
       if (!strcmp(sep, "yes"))
-	act = SC_YES;
+	act = A_YES;
       else if (!strcmp(sep, "no"))
-	act = SC_NO;
+	act = A_NO;
       else
 	return 0;
     }
@@ -332,10 +332,10 @@ match_path_rule(struct path_rule *r, char *path)
       {
 	if (rr[-1] == '/' && !path[-1])
 	  break;
-	return SC_DEFAULT;
+	return A_DEFAULT;
       }
   if (rr > r->path && rr[-1] != '/' && *path)
-    return SC_DEFAULT;
+    return A_DEFAULT;
   return r->action;
 }
 
@@ -390,9 +390,9 @@ valid_filename(unsigned long addr)
     return;
 
   // ".." anywhere in the path is forbidden
-  enum action act = SC_DEFAULT;
+  enum action act = A_DEFAULT;
   if (strstr(namebuf, ".."))
-    act = SC_NO;
+    act = A_NO;
 
   // Scan user rules
   for (struct path_rule *r = user_path_rules; r && !act; r=r->next)
@@ -403,7 +403,7 @@ valid_filename(unsigned long addr)
     for (int i=0; i<ARRAY_SIZE(default_path_rules) && !act; i++)
       act = match_path_rule(&default_path_rules[i], namebuf);
 
-  if (act != SC_YES)
+  if (act != A_YES)
     die("Forbidden access to file `%s'", namebuf);
 }
 
@@ -411,22 +411,22 @@ static int
 valid_syscall(struct user *u)
 {
   unsigned int sys = u->regs.orig_eax;
-  enum action act = (sys < NUM_ACTIONS) ? syscall_action[sys] : SC_DEFAULT;
+  enum action act = (sys < NUM_ACTIONS) ? syscall_action[sys] : A_DEFAULT;
 
-  if (act & SC_LIBERAL)
+  if (act & A_LIBERAL)
     {
       if (filter_syscalls == 1)
-        act &= ~SC_LIBERAL;
+        act &= ~A_LIBERAL;
       else
-        act = SC_DEFAULT;
+        act = A_DEFAULT;
     }
   switch (act)
     {
-    case SC_YES:
+    case A_YES:
       return 1;
-    case SC_NO:
+    case A_NO:
       return 0;
-    case SC_FILENAME:
+    case A_FILENAME:
       valid_filename(u->regs.ebx);
       return 1;
     default: ;
@@ -752,7 +752,7 @@ main(int argc, char **argv)
 	timeout = 1000*atof(optarg);
 	break;
       case 'T':
-	syscall_action[__NR_times] = SC_YES;
+	syscall_action[__NR_times] = A_YES;
 	break;
       case 'v':
 	verbose++;
