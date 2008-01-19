@@ -1,7 +1,7 @@
 /*
- *	A Simple Testing Sandbox
+ *	A Simple Sandbox for MO-Eval
  *
- *	(c) 2001--2007 Martin Mares <mj@ucw.cz>
+ *	(c) 2001--2008 Martin Mares <mj@ucw.cz>
  */
 
 #define _LARGEFILE64_SOURCE
@@ -35,7 +35,6 @@ static int pass_environ;
 static int file_access;
 static int verbose;
 static int memory_limit;
-static int allow_times;
 static char *redir_stdin, *redir_stdout;
 static char *set_cwd;
 
@@ -91,21 +90,126 @@ msg(char *msg, ...)
   va_end(args);
 }
 
-struct syscall {
-  const char *name;
-  int override;
-};
-
-static struct syscall syscall_tab[] = {
+static const char * const syscall_tab[] = {
 #include "syscall-table.h"
 };
 #define NUM_SYSCALLS (sizeof(syscall_tab)/sizeof(syscall_tab[0]))
+#define NUM_ACTIONS (NUM_SYSCALLS+64)
+
+enum syscall_action {
+  SC_DEFAULT,		// Use the default action
+  SC_NO,		// Always forbid
+  SC_YES,		// Always permit
+  SC_FILENAME,		// Permit if arg1 is a known filename
+  SC_LIBERAL = 128,	// Valid only in liberal mode
+};
+
+static unsigned char syscall_action[NUM_ACTIONS] = {
+#define S(x) [__NR_##x]
+
+    // Syscalls permitted for specific file names
+    S(open) = SC_FILENAME,
+    S(creat) = SC_FILENAME,
+    S(unlink) = SC_FILENAME,
+    S(oldstat) = SC_FILENAME,
+    S(access) = SC_FILENAME,			
+    S(oldlstat) = SC_FILENAME,			
+    S(truncate) = SC_FILENAME,
+    S(stat) = SC_FILENAME,
+    S(lstat) = SC_FILENAME,
+    S(truncate64) = SC_FILENAME,
+    S(stat64) = SC_FILENAME,
+    S(lstat64) = SC_FILENAME,
+    S(readlink) = SC_FILENAME,
+
+    // Syscalls permitted always
+    S(exit) = SC_YES,
+    S(read) = SC_YES,
+    S(write) = SC_YES,
+    S(close) = SC_YES,
+    S(lseek) = SC_YES,
+    S(getpid) = SC_YES,
+    S(getuid) = SC_YES,
+    S(oldfstat) = SC_YES,
+    S(dup) = SC_YES,
+    S(brk) = SC_YES,
+    S(getgid) = SC_YES,
+    S(geteuid) = SC_YES,
+    S(getegid) = SC_YES,
+    S(dup2) = SC_YES,
+    S(ftruncate) = SC_YES,
+    S(fstat) = SC_YES,
+    S(personality) = SC_YES,
+    S(_llseek) = SC_YES,
+    S(readv) = SC_YES,
+    S(writev) = SC_YES,
+    S(getresuid) = SC_YES,
+#ifdef __NR_pread64
+    S(pread64) = SC_YES,
+    S(pwrite64) = SC_YES,
+#else
+    S(pread) = SC_YES,
+    S(pwrite) = SC_YES,
+#endif
+    S(ftruncate64) = SC_YES,
+    S(fstat64) = SC_YES,
+    S(fcntl) = SC_YES,
+    S(fcntl64) = SC_YES,
+    S(mmap) = SC_YES,
+    S(munmap) = SC_YES,
+    S(ioctl) = SC_YES,
+    S(uname) = SC_YES,
+    S(gettid) = SC_YES,
+    S(set_thread_area) = SC_YES,
+    S(get_thread_area) = SC_YES,
+    S(exit_group) = SC_YES,
+
+    // Syscalls permitted only in liberal mode
+    S(time) = SC_YES | SC_LIBERAL,
+    S(alarm) = SC_YES | SC_LIBERAL,
+    S(pause) = SC_YES | SC_LIBERAL,
+    S(signal) = SC_YES | SC_LIBERAL,
+    S(fchmod) = SC_YES | SC_LIBERAL,
+    S(sigaction) = SC_YES | SC_LIBERAL,
+    S(sgetmask) = SC_YES | SC_LIBERAL,
+    S(ssetmask) = SC_YES | SC_LIBERAL,
+    S(sigsuspend) = SC_YES | SC_LIBERAL,
+    S(sigpending) = SC_YES | SC_LIBERAL,
+    S(getrlimit) = SC_YES | SC_LIBERAL,
+    S(getrusage) = SC_YES | SC_LIBERAL,
+    S(gettimeofday) = SC_YES | SC_LIBERAL,
+    S(select) = SC_YES | SC_LIBERAL,
+    S(readdir) = SC_YES | SC_LIBERAL,
+    S(setitimer) = SC_YES | SC_LIBERAL,
+    S(getitimer) = SC_YES | SC_LIBERAL,
+    S(sigreturn) = SC_YES | SC_LIBERAL,
+    S(mprotect) = SC_YES | SC_LIBERAL,
+    S(sigprocmask) = SC_YES | SC_LIBERAL,
+    S(getdents) = SC_YES | SC_LIBERAL,
+    S(getdents64) = SC_YES | SC_LIBERAL,
+    S(_newselect) = SC_YES | SC_LIBERAL,
+    S(fdatasync) = SC_YES | SC_LIBERAL,
+    S(mremap) = SC_YES | SC_LIBERAL,
+    S(poll) = SC_YES | SC_LIBERAL,
+    S(getcwd) = SC_YES | SC_LIBERAL,
+    S(nanosleep) = SC_YES | SC_LIBERAL,
+    S(rt_sigreturn) = SC_YES | SC_LIBERAL,
+    S(rt_sigaction) = SC_YES | SC_LIBERAL,
+    S(rt_sigprocmask) = SC_YES | SC_LIBERAL,
+    S(rt_sigpending) = SC_YES | SC_LIBERAL,
+    S(rt_sigtimedwait) = SC_YES | SC_LIBERAL,
+    S(rt_sigqueueinfo) = SC_YES | SC_LIBERAL,
+    S(rt_sigsuspend) = SC_YES | SC_LIBERAL,
+    S(mmap2) = SC_YES | SC_LIBERAL,
+    S(_sysctl) = SC_YES | SC_LIBERAL,
+#undef S
+};
 
 static const char *
 syscall_name(unsigned int id, char *buf)
 {
-  if (id < NUM_SYSCALLS && syscall_tab[id].name)
-    return syscall_tab[id].name;
+  if (id < NUM_SYSCALLS && syscall_tab[id])
+    return syscall_tab[id];
   else
     {
       sprintf(buf, "#%d", id);
@@ -113,16 +217,14 @@ syscall_name(unsigned int id, char *buf)
     }
 }
 
-#if 0
-static struct syscall *
+static int
 syscall_by_name(char *name)
 {
   for (unsigned int i=0; i<sizeof(syscall_tab)/sizeof(syscall_tab[0]); i++)
-    if (!strcmp(syscall_tab[i].name, name))
-      return &syscall_tab[i];
-  return NULL;
+    if (!strcmp(syscall_tab[i], name))
+      return i;
+  return -1;
 }
-#endif
 
 static void
 valid_filename(unsigned long addr)
@@ -193,104 +295,30 @@ valid_filename(unsigned long addr)
 static int
 valid_syscall(struct user *u)
 {
-  switch (u->regs.orig_eax)
+  unsigned int sys = u->regs.orig_eax;
+  enum syscall_action act = (sys < NUM_ACTIONS) ? syscall_action[sys] : SC_DEFAULT;
+
+  if (act & SC_LIBERAL)
     {
-    case __NR_open:
-    case __NR_creat:
-    case __NR_unlink:
-    case __NR_oldstat:
-    case __NR_access:			
-    case __NR_oldlstat:			
-    case __NR_truncate:
-    case __NR_stat:
-    case __NR_lstat:
-    case __NR_truncate64:
-    case __NR_stat64:
-    case __NR_lstat64:
-    case __NR_readlink:
+      if (filter_syscalls == 1)
+        act &= ~SC_LIBERAL;
+      else
+        act = SC_DEFAULT;
+    }
+  switch (act)
+    {
+    case SC_YES:
+      return 1;
+    case SC_NO:
+      return 0;
+    case SC_FILENAME:
       valid_filename(u->regs.ebx);
       return 1;
-    case __NR_exit:
-    case __NR_read:
-    case __NR_write:
-    case __NR_close:
-    case __NR_lseek:
-    case __NR_getpid:
-    case __NR_getuid:
-    case __NR_oldfstat:
-    case __NR_dup:
-    case __NR_brk:
-    case __NR_getgid:
-    case __NR_geteuid:
-    case __NR_getegid:
-    case __NR_dup2:
-    case __NR_ftruncate:
-    case __NR_fstat:
-    case __NR_personality:
-    case __NR__llseek:
-    case __NR_readv:
-    case __NR_writev:
-    case __NR_getresuid:
-#ifdef __NR_pread64
-    case __NR_pread64:
-    case __NR_pwrite64:
-#else
-    case __NR_pread:
-    case __NR_pwrite:
-#endif
-    case __NR_ftruncate64:
-    case __NR_fstat64:
-    case __NR_fcntl:
-    case __NR_fcntl64:
-    case __NR_mmap:
-    case __NR_munmap:
-    case __NR_ioctl:
-    case __NR_uname:
-    case __NR_gettid:
-    case __NR_set_thread_area:
-    case __NR_get_thread_area:
-    case __NR_exit_group:
-      return 1;
-    case __NR_time:
-    case __NR_alarm:
-    case __NR_pause:
-    case __NR_signal:
-    case __NR_fchmod:
-    case __NR_sigaction:
-    case __NR_sgetmask:
-    case __NR_ssetmask:
-    case __NR_sigsuspend:
-    case __NR_sigpending:
-    case __NR_getrlimit:
-    case __NR_getrusage:
-    case __NR_gettimeofday:
-    case __NR_select:
-    case __NR_readdir:
-    case __NR_setitimer:
-    case __NR_getitimer:
-    case __NR_sigreturn:
-    case __NR_mprotect:
-    case __NR_sigprocmask:
-    case __NR_getdents:
-    case __NR_getdents64:
-    case __NR__newselect:
-    case __NR_fdatasync:
-    case __NR_mremap:
-    case __NR_poll:
-    case __NR_getcwd:
-    case __NR_nanosleep:
-    case __NR_rt_sigreturn:
-    case __NR_rt_sigaction:
-    case __NR_rt_sigprocmask:
-    case __NR_rt_sigpending:
-    case __NR_rt_sigtimedwait:
-    case __NR_rt_sigqueueinfo:
-    case __NR_rt_sigsuspend:
-    case __NR_mmap2:
-    case __NR__sysctl:
-      return (filter_syscalls == 1);
-    case __NR_times:
-      return allow_times;
+    default: ;
+    }
+
+  switch (sys)
+    {
     case __NR_kill:
       if (u->regs.ebx == box_pid)
 	die("Committed suicide by signal %d", (int)u->regs.ecx);
@@ -597,7 +625,7 @@ main(int argc, char **argv)
 	timeout = 1000*atof(optarg);
 	break;
       case 'T':
-	allow_times++;
+	syscall_action[__NR_times] = SC_YES;
 	break;
       case 'v':
 	verbose++;
