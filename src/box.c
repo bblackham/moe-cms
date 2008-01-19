@@ -221,9 +221,46 @@ static int
 syscall_by_name(char *name)
 {
   for (unsigned int i=0; i<sizeof(syscall_tab)/sizeof(syscall_tab[0]); i++)
-    if (!strcmp(syscall_tab[i], name))
+    if (syscall_tab[i] && !strcmp(syscall_tab[i], name))
       return i;
-  return -1;
+  if (name[0] == '#')
+    name++;
+  if (!*name)
+    return -1;
+  char *ep;
+  unsigned long l = strtoul(name, &ep, 0);
+  if (*ep)
+    return -1;
+  if (l >= NUM_ACTIONS)
+    return NUM_ACTIONS;
+  return l;
+}
+
+static int
+set_action(char *a)
+{
+  char *sep = strchr(a, '=');
+  enum syscall_action act = SC_YES;
+  if (sep)
+    {
+      *sep++ = 0;
+      if (!strcmp(sep, "yes"))
+	act = SC_YES;
+      else if (!strcmp(sep, "no"))
+	act = SC_NO;
+      else if (!strcmp(sep, "file"))
+	act = SC_FILENAME;
+      else
+	return 0;
+    }
+
+  int sys = syscall_by_name(a);
+  if (sys < 0)
+    die("Unknown syscall `%s'", a);
+  if (sys >= (int)NUM_ACTIONS)
+    die("Syscall `%s' out of range", a);
+  syscall_action[sys] = act;
+  return 1;
 }
 
 static void
@@ -583,6 +620,8 @@ Options:\n\
 -i <file>\tRedirect stdin from <file>\n\
 -m <size>\tLimit address space to <size> KB\n\
 -o <file>\tRedirect stdout to <file>\n\
+-s <sys>\tPermit the specified syscall (be careful)\n\
+-s <sys>=<act>\tDefine action for the specified syscall (<act>=yes/no/file)\n\
 -t <time>\tSet run time limit (seconds, fractions allowed)\n\
 -T\t\tAllow syscalls for measuring run time\n\
 -v\t\tBe verbose\n\
@@ -597,7 +636,7 @@ main(int argc, char **argv)
   int c;
   uid_t uid;
 
-  while ((c = getopt(argc, argv, "a:c:efi:m:o:t:Tvw:")) >= 0)
+  while ((c = getopt(argc, argv, "a:c:efi:m:o:s:t:Tvw:")) >= 0)
     switch (c)
       {
       case 'a':
@@ -620,6 +659,10 @@ main(int argc, char **argv)
 	break;
       case 'o':
 	redir_stdout = optarg;
+	break;
+      case 's':
+	if (!set_action(optarg))
+	  usage();
 	break;
       case 't':
 	timeout = 1000*atof(optarg);
