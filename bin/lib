@@ -57,7 +57,7 @@ function box-init
 	if [ -z "$TEST_USER" -o "$TEST_USER" == $EVAL_USER ] ; then
 		pcont "running locally (INSECURE), "
 		TEST_USER=$EVAL_USER
-		BOXDIR=box
+		BOXDIR=`pwd`/box
 		BOXCMD=bin/box
 		mkdir -p box
 	else
