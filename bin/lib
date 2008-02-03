@@ -53,14 +53,13 @@ function try-ln
 
 function override-vars
 {
-	local OR V OLDIFS
+	local OR V W
 	declare -a OR
-	OLDIFS="$IFS"
-	IFS=$'\n'
-	OR=($(set | sed "s/^$1_//;t;d")) || true
-	IFS="$OLDIFS"
+	# `${!${1}_@}' does not work, so we have to use eval
+	OR=($(eval echo '${!'$1'_@}'))
 	for V in "${OR[@]}" ; do
-		eval "$V"
+		W=${V##$1_}
+		eval $W='"$'$V'"'
 	done
 }
 
