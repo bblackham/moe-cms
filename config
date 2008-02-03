@@ -134,6 +134,9 @@ OUTPUT_CHECK='diff -bBu $TDIR/$TEST.ok $TDIR/$TEST.out'
 # Sandbox options used when testing
 TEST_SANDBOX_OPTS='-a2 -f -m$MEM_LIMIT -t$TIME_LIMIT $BOX_EXTRAS'
 
+# Extra options to be overridden in task configuration
+BOX_EXTRAS=
+
 # Sandbox initialization commands
 SANDBOX_INIT=
 
