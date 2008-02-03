@@ -132,7 +132,7 @@ OUTPUT_CHECK='diff -bBu $TDIR/$TEST.ok $TDIR/$TEST.out'
 #IC_CHECK='$PDIR/checker $PDIR/$TEST.in $PDIR/$TEST.chk'
 
 # Sandbox options used when testing
-TEST_SANDBOX_OPTS='-a2 -f -m$MEM_LIMIT -t$TIME_LIMIT'
+TEST_SANDBOX_OPTS='-a2 -f -m$MEM_LIMIT -t$TIME_LIMIT $BOX_EXTRAS'
 
 # Sandbox initialization commands
 SANDBOX_INIT=

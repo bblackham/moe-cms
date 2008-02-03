@@ -358,7 +358,7 @@ function test-run-file
 {
 	test-prolog
 	pcont "<run> "
-	BOXOPTS="$(expand-var TEST_SANDBOX_OPTS) $(expand-var BOX_EXTRAS)"
+	BOXOPTS=$(expand-var TEST_SANDBOX_OPTS)
 	echo "Sandbox options: $BOXOPTS"
 	if ! $BOXCMD $BOXOPTS -- ./$PROBLEM 2>$TMPDIR/exec.out ; then
 		cat $TMPDIR/exec.out
@@ -375,7 +375,7 @@ function test-run-interactive
 {
 	test-prolog
 	pcont "<run> "
-	BOXOPTS="$(expand-var TEST_SANDBOX_OPTS) $(expand-var BOX_EXTRAS)"
+	BOXOPTS=$(expand-var TEST_SANDBOX_OPTS)
 	echo "Sandbox options: $BOXOPTS"
 	ICCMD=$(expand-var IA_CHECK)
 	echo "Interactive checker: $ICCMD"
