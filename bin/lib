@@ -49,6 +49,13 @@ function try-ln
 	ln $1 $2 2>/dev/null || cp $1 $2
 }
 
+# Expand occurrences of `$var' in a given variable
+
+function expand-var
+{
+	eval echo ${!1}
+}
+
 # Given a <prefix>, override each variable <x> by <prefix>_<x>
 
 function override-vars
@@ -177,8 +184,8 @@ function compile
 	box-clean
 	for a in $SRC $COMP_EXTRAS ; do cp $TDIR/$a $BOXDIR/ ; done
 	EXE=$PROBLEM
-	CCMD=`eval echo $COMP`
-	COMP_SANDBOX_OPTS=`eval echo $COMP_SANDBOX_OPTS`
+	CCMD=$(expand-var COMP)
+	COMP_SANDBOX_OPTS=$(expand-var COMP_SANDBOX_OPTS)
 	echo "Compiler command: $CCMD"
 	echo "Compiler sandbox options: $COMP_SANDBOX_OPTS"
 	eval $COMP_SANDBOX_INIT
@@ -332,7 +339,7 @@ function test-epilog
 
 	if [ -n "$OUTPUT_FILTER" -a "$OUT_TYPE" != none -a -z "$EV_NOFILTER" ] ; then
 		pcont "<filter> "
-		FILTER=`eval echo \"$OUTPUT_FILTER\"`
+		FILTER=$(expand-var OUTPUT_FILTER)
 		echo "Output filter command: $FILTER"
 		mv $TDIR/$TEST.out $TDIR/$TEST.raw
 		if ! eval $FILTER 2>$TMPDIR/exec.out ; then
@@ -351,7 +358,7 @@ function test-run-file
 {
 	test-prolog
 	pcont "<run> "
-	BOXOPTS="`eval echo $TEST_SANDBOX_OPTS`$BOX_EXTRAS"
+	BOXOPTS="$(expand-var TEST_SANDBOX_OPTS) $(expand-var BOX_EXTRAS)"
 	echo "Sandbox options: $BOXOPTS"
 	if ! $BOXCMD $BOXOPTS -- ./$PROBLEM 2>$TMPDIR/exec.out ; then
 		cat $TMPDIR/exec.out
@@ -368,9 +375,9 @@ function test-run-interactive
 {
 	test-prolog
 	pcont "<run> "
-	BOXOPTS="`eval echo $TEST_SANDBOX_OPTS`$BOX_EXTRAS"
+	BOXOPTS="$(expand-var TEST_SANDBOX_OPTS) $(expand-var BOX_EXTRAS)"
 	echo "Sandbox options: $BOXOPTS"
-	ICCMD=`eval echo $IA_CHECK`
+	ICCMD=$(expand-var IA_CHECK)
 	echo "Interactive checker: $ICCMD"
 	if ! $HDIR/bin/iwrapper $BOXCMD $BOXOPTS -- ./$PROBLEM @@ $ICCMD 2>$TMPDIR/exec.out ; then
 		cat $TMPDIR/exec.out
@@ -396,7 +403,7 @@ function syntax-check
 	[ -n "$SYNTAX_CHECK" ] || return 0
 	[ -z "$EV_NOCHECK" ] || return 0
 	pcont "<syntax> "
-	SCHECK=`eval echo \"$SYNTAX_CHECK\"`
+	SCHECK=$(expand-var SYNTAX_CHECK)
 	echo "Syntax check command: $SCHECK"
 	if ! eval $SCHECK 2>$TMPDIR/exec.out ; then
 		cat $TMPDIR/exec.out
@@ -415,7 +422,7 @@ function output-check
 	if [ -n "$OUTPUT_CHECK" -a "$OUT_TYPE" != none -a -z "$EV_NOCHECK" ] ; then
 		pcont "<check> "
 		[ -f $PDIR/$TEST.out ] && ln $PDIR/$TEST.out $TDIR/$TEST.ok
-		OCHECK=`eval echo \"$OUTPUT_CHECK\"`
+		OCHECK=$(expand-var OUTPUT_CHECK)
 		echo "Output check command: $OCHECK"
 		if ! eval $OCHECK 2>$TMPDIR/exec.out ; then
 			cat $TMPDIR/exec.out
