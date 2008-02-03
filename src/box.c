@@ -100,6 +100,8 @@ xmalloc(size_t size)
   return p;
 }
 
+/*** Syscall rules ***/
+
 static const char * const syscall_names[] = {
 #include "syscall-table.h"
 };
@@ -108,7 +110,7 @@ static const char * const syscall_names[] = {
 
 enum action {
   A_DEFAULT,		// Use the default action
-  A_NO,		// Always forbid
+  A_NO,			// Always forbid
   A_YES,		// Always permit
   A_FILENAME,		// Permit if arg1 is a known filename
   A_LIBERAL = 128,	// Valid only in liberal mode
@@ -274,6 +276,8 @@ set_syscall_action(char *a)
   return 1;
 }
 
+/*** Path rules ***/
+
 struct path_rule {
   char *path;
   enum action action;
@@ -313,7 +317,7 @@ set_path_action(char *a)
 	return 0;
     }
 
-  struct path_rule *r = xmalloc(sizeof(*r) + strlen(a));
+  struct path_rule *r = xmalloc(sizeof(*r) + strlen(a) + 1);
   r->path = (char *)(r+1);
   strcpy(r->path, a);
   r->action = act;
@@ -338,6 +342,143 @@ match_path_rule(struct path_rule *r, char *path)
     return A_DEFAULT;
   return r->action;
 }
+
+/*** Environment rules ***/
+
+struct env_rule {
+  char *var;			// Variable to match
+  char *val;			// ""=clear, NULL=inherit
+  int var_len;
+  struct env_rule *next;
+};
+
+static struct env_rule *first_env_rule;
+static struct env_rule **last_env_rule = &first_env_rule;
+
+static struct env_rule default_env_rules[] = {
+  { "LIBC_FATAL_STDERR_", "1" }
+};
+
+static int
+set_env_action(char *a0)
+{
+  struct env_rule *r = xmalloc(sizeof(*r) + strlen(a0) + 1);
+  char *a = (char *)(r+1);
+  strcpy(a, a0);
+
+  char *sep = strchr(a, '=');
+  if (sep == a)
+    return 0;
+  r->var = a;
+  if (sep)
+    {
+      *sep++ = 0;
+      r->val = sep;
+    }
+  else
+    r->val = NULL;
+  *last_env_rule = r;
+  last_env_rule = &r->next;
+  r->next = NULL;
+  return 1;
+}
+
+static int
+match_env_var(char *env_entry, struct env_rule *r)
+{
+  if (strncmp(env_entry, r->var, r->var_len))
+    return 0;
+  return (env_entry[r->var_len] == '=');
+}
+
+static void
+apply_env_rule(char **env, int *env_sizep, struct env_rule *r)
+{
+  // First remove the variable if already set
+  int pos = 0;
+  while (pos < *env_sizep && !match_env_var(env[pos], r))
+    pos++;
+  if (pos < *env_sizep)
+    {
+      (*env_sizep)--;
+      env[pos] = env[*env_sizep];
+      env[*env_sizep] = NULL;
+    }
+
+  // What is the new value?
+  char *new;
+  if (r->val)
+    {
+      if (!r->val[0])
+	return;
+      new = xmalloc(r->var_len + 1 + strlen(r->val) + 1);
+      sprintf(new, "%s=%s", r->var, r->val);
+    }
+  else
+    {
+      pos = 0;
+      while (environ[pos] && !match_env_var(environ[pos], r))
+	pos++;
+      if (!(new = environ[pos]))
+	return;
+    }
+
+  // Add it at the end of the array
+  env[(*env_sizep)++] = new;
+  env[*env_sizep] = NULL;
+}
+
+static char **
+setup_environment(void)
+{
+  // Link built-in rules with user rules
+  for (int i=ARRAY_SIZE(default_env_rules)-1; i >= 0; i--)
+    {
+      default_env_rules[i].next = first_env_rule;
+      first_env_rule = &default_env_rules[i];
+    }
+
+  // Scan the original environment
+  char **orig_env = environ;
+  int orig_size = 0;
+  while (orig_env[orig_size])
+    orig_size++;
+
+  // For each rule, reserve one more slot and calculate length
+  int num_rules = 0;
+  for (struct env_rule *r = first_env_rule; r; r=r->next)
+    {
+      num_rules++;
+      r->var_len = strlen(r->var);
+    }
+
+  // Create a new environment
+  char **env = xmalloc((orig_size + num_rules + 1) * sizeof(char *));
+  int size;
+  if (pass_environ)
+    {
+      memcpy(env, environ, orig_size * sizeof(char *));
+      size = orig_size;
+    }
+  else
+    size = 0;
+  env[size] = NULL;
+
+  // Apply the rules one by one
+  for (struct env_rule *r = first_env_rule; r; r=r->next)
+    apply_env_rule(env, &size, r);
+
+  // Return the new env and pass some gossip
+  if (verbose > 1)
+    {
+      fprintf(stderr, "Passing environment:\n");
+      for (int i=0; env[i]; i++)
+	fprintf(stderr, "\t%s\n", env[i]);
+    }
+  return env;
+}
+
+/*** Syscall checks ***/
 
 static void
 valid_filename(unsigned long addr)
@@ -642,7 +783,6 @@ box_inside(int argc, char **argv)
 {
   struct rlimit rl;
   char *args[argc+1];
-  char *env[] = { "LIBC_FATAL_STDERR_=1", NULL };
 
   memcpy(args, argv, argc * sizeof(char *));
   args[argc] = NULL;
@@ -679,7 +819,7 @@ box_inside(int argc, char **argv)
       signal(SIGCHLD, SIG_IGN);
       raise(SIGCHLD);
     }
-  execve(args[0], args, (pass_environ ? environ : env));
+  execve(args[0], args, setup_environment());
   die("execve(\"%s\"): %m", args[0]);
 }
 
@@ -693,7 +833,9 @@ Usage: box [<options>] -- <command> <arguments>\n\
 Options:\n\
 -a <level>\tSet file access level (0=none, 1=cwd, 2=/etc,/lib,..., 3=whole fs, 9=no checks; needs -f)\n\
 -c <dir>\tChange directory to <dir> first\n\
--e\t\tPass full environment of parent process\n\
+-e\t\tInherit full environment of the parent process\n\
+-E <var>\tInherit the environment variable <var> from the parent process\n\
+-E <var>=<val>\tSet the environment variable <var> to <val>; unset it if <var> is empty\n\
 -f\t\tFilter system calls (-ff=very restricted)\n\
 -i <file>\tRedirect stdin from <file>\n\
 -m <size>\tLimit address space to <size> KB\n\
@@ -704,7 +846,7 @@ Options:\n\
 -s <sys>=<act>\tDefine action for the specified syscall (<act>=yes/no/file)\n\
 -t <time>\tSet run time limit (seconds, fractions allowed)\n\
 -T\t\tAllow syscalls for measuring run time\n\
--v\t\tBe verbose\n\
+-v\t\tBe verbose (use multiple times for even more verbosity)\n\
 -w <time>\tSet wall clock time limit (seconds, fractions allowed)\n\
 ");
   exit(1);
@@ -716,7 +858,7 @@ main(int argc, char **argv)
   int c;
   uid_t uid;
 
-  while ((c = getopt(argc, argv, "a:c:efi:m:o:p:s:t:Tvw:")) >= 0)
+  while ((c = getopt(argc, argv, "a:c:eE:fi:m:o:p:s:t:Tvw:")) >= 0)
     switch (c)
       {
       case 'a':
@@ -727,6 +869,10 @@ main(int argc, char **argv)
 	break;
       case 'e':
 	pass_environ = 1;
+	break;
+      case 'E':
+	if (!set_env_action(optarg))
+	  usage();
 	break;
       case 'f':
 	filter_syscalls++;
