@@ -9,3 +9,4 @@ solutions
 testing
 tmp
 userlist
+src/syscall-table.h
