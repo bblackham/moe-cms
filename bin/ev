@@ -1,6 +1,6 @@
 #!/bin/bash
 # The Evaluator -- Master Control Script
-# (c) 2001--2004 Martin Mares <mj@ucw.cz>
+# (c) 2001--2008 Martin Mares <mj@ucw.cz>
 
 set -e
 if [ ! -f config -o ! -f bin/lib ] ; then
@@ -43,8 +43,8 @@ function test-verdict
 [ -z "$EV_SAMPLE" ] || TESTS="$SAMPLE_TESTS $TESTS"
 for TEST in $TESTS ; do
 	(
-	[ -f $PDIR/$TEST.config ] && . $PDIR/$TEST.config
 	exec >$TDIR/$TEST.log
+	test-config
 	pstart "Test $TEST... "
 	echo "Test $TEST ($POINTS_PER_TEST points)"
 	test-run

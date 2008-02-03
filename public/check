@@ -1,6 +1,6 @@
 #!/bin/bash
 # The Evaluator -- Public Checking Script
-# (c) 2001--2007 Martin Mares <mj@ucw.cz>
+# (c) 2001--2008 Martin Mares <mj@ucw.cz>
 
 set -e
 [ -n "$MO_ROOT" -a -d "$MO_ROOT" ] || { echo >&2 "MO_ROOT not set, giving up." ; exit 1 ; }
@@ -48,7 +48,7 @@ function test-verdict
 if [ $TASK_TYPE == open-data ] ; then
 	[ -n "$TEST" ] || die "You need to specify test number for open data problems."
 	pstart "Checking $TEST: "
-	[ -f $PDIR/$TEST.config ] && . $PDIR/$TEST.config
+	test-config
 	open-locate "$SRCFILE"
 	try-ln "$SDIR/$SRCN" $TDIR/$TEST.out
 	syntax-check
@@ -61,7 +61,7 @@ else
 	for TEST in $SAMPLE_TESTS ; do
 		(
 		pstart "Checking on sample input $TEST: "
-		[ -f $PDIR/$TEST.config ] && . $PDIR/$TEST.config
+		test-config
 		test-run
 		syntax-check
 		output-check

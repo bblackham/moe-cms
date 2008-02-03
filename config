@@ -1,5 +1,5 @@
 # Configuration file for the MO Evaluator
-# (c) 2001--2007 Martin Mares <mj@ucw.cz>
+# (c) 2001--2008 Martin Mares <mj@ucw.cz>
 
 # The root of the whole directory hierarchy
 MO_ROOT=/mo
@@ -150,3 +150,9 @@ FREE_PASCAL_RTE=1
 
 # DEBUG: Skip output filters (if you suspect they are buggy)
 #EV_NOFILTER=1
+
+### Variables overrides (most variables can be overridden for specific tests or source extensions):
+
+#EXT_pas_TIME_LIMIT=100
+#TEST_1_TIME_LIMIT=100
+#EXT_pas_TEST_1_TIME_LIMIT=100

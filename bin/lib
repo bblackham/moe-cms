@@ -1,5 +1,5 @@
 # The Evaluator -- Shell Function Library
-# (c) 2001--2007 Martin Mares <mj@ucw.cz>
+# (c) 2001--2008 Martin Mares <mj@ucw.cz>
 
 # General settings
 shopt -s dotglob
@@ -47,6 +47,21 @@ function fatal
 function try-ln
 {
 	ln $1 $2 2>/dev/null || cp $1 $2
+}
+
+# Given a <prefix>, override each variable <x> by <prefix>_<x>
+
+function override-vars
+{
+	local OR V OLDIFS
+	declare -a OR
+	OLDIFS="$IFS"
+	IFS=$'\n'
+	OR=($(set | sed "s/^$1_//;t;d")) || true
+	IFS="$OLDIFS"
+	for V in "${OR[@]}" ; do
+		eval "$V"
+	done
 }
 
 # Sandbox subroutines
@@ -152,6 +167,7 @@ function locate-source
 function compile
 {
 	pstart "Compiling... "
+	override-vars "EXT_$SRCEXT"
 	# Beware, the original SRCN can be a strange user-supplied name
 	SRC=$PROBLEM.$SRCEXT
 	cp "$SDIR/$SRCN" $TDIR/$SRC
@@ -194,6 +210,12 @@ function compile
 }
 
 # Running of test program according to current task type (returns exit code and TEST_MSG)
+
+function test-config
+{
+	[ -f $PDIR/$TEST.config ] && . $PDIR/$TEST.config
+	override-vars "TEST_$TEST"
+}
 
 function test-run
 {
