@@ -178,8 +178,7 @@ function compile
 	box-clean
 	for a in $SRC $COMP_EXTRAS ; do cp $TDIR/$a $BOXDIR/ ; done
 	EXE=$PROBLEM
-	CCMD=COMP_$SRCEXT
-	CCMD=`eval echo ${!CCMD}`
+	CCMD=`eval echo $COMP`
 	COMP_SANDBOX_OPTS=`eval echo $COMP_SANDBOX_OPTS`
 	echo "Compiler command: $CCMD"
 	echo "Compiler sandbox options: $COMP_SANDBOX_OPTS"

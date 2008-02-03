@@ -47,12 +47,13 @@ EXTRA_CFLAGS=
 EXTRA_PFLAGS=
 
 # For each source extension, we must give compiler command
-COMP_c='/usr/bin/gcc -std=gnu99 -O2 -g -o $EXE $EXTRA_CFLAGS $SRC -lm'
-COMP_C='/usr/bin/g++ -O2 -g -o $EXE $EXTRA_CFLAGS $SRC -lm'
-COMP_cpp="$COMP_C"
-COMP_cc="$COMP_C"
-COMP_p='/usr/bin/fpc -Ci -Cr -Ct -g -O2 -Sg -o$EXE $EXTRA_PFLAGS $SRC'
-COMP_pas="$COMP_p"
+COMP=false
+EXT_c_COMP='/usr/bin/gcc -std=gnu99 -O2 -g -o $EXE $EXTRA_CFLAGS $SRC -lm'
+EXT_C_COMP='/usr/bin/g++ -O2 -g -o $EXE $EXTRA_CFLAGS $SRC -lm'
+EXT_cpp_COMP="$EXT_C_COMP"
+EXT_cc_COMP="$EXT_C_COMP"
+EXT_p_COMP='/usr/bin/fpc -Ci -Cr -Ct -g -O2 -Sg -o$EXE $EXTRA_PFLAGS $SRC'
+EXT_pas_COMP="$EXT_p_COMP"
 
 # Sandbox options used when compiling
 COMP_SANDBOX_OPTS='-m262144 -w60 -e -i/dev/null'
