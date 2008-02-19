@@ -45,6 +45,7 @@ static volatile int timer_tick;
 static struct timeval start_time;
 static int ticks_per_sec;
 static int exec_seen;
+static int partial_line;
 
 #if defined(__GLIBC__) && __GLIBC__ == 2 && __GLIBC_MINOR__ > 0
 /* glibc 2.1 or newer -> has lseek64 */
@@ -68,11 +69,20 @@ box_exit(void)
   exit(1);
 }
 
+static void
+flush_line(void)
+{
+  if (partial_line)
+    fputc('\n', stderr);
+  partial_line = 0;
+}
+
 static void NONRET __attribute__((format(printf,1,2)))
 die(char *msg, ...)
 {
   va_list args;
   va_start(args, msg);
+  flush_line();
   vfprintf(stderr, msg, args);
   fputc('\n', stderr);
   box_exit();
@@ -85,6 +95,9 @@ msg(char *msg, ...)
   va_start(args, msg);
   if (verbose)
     {
+      int len = strlen(msg);
+      if (len > 0)
+        partial_line = (msg[len-1] != '\n');
       vfprintf(stderr, msg, args);
       fflush(stderr);
     }
@@ -712,6 +725,7 @@ boxkeeper(void)
 	    die("Time limit exceeded");
 	  if (wall_timeout && wall_ms > wall_timeout)
 	    die("Time limit exceeded (wall clock)");
+	  flush_line();
 	  fprintf(stderr, "OK (%d.%03d sec real, %d.%03d sec wall, %d syscalls)\n",
 	      (int) total.tv_sec, (int) total.tv_usec/1000,
 	      (int) wall.tv_sec, (int) wall.tv_usec/1000,
