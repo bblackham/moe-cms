@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # A simple system for making software releases
-# (c) 2003 Martin Mares <mj@ucw.cz>
+# (c) 2003--2006 Martin Mares <mj@ucw.cz>
 
 package UCW::Release;
 use strict;
@@ -15,7 +15,7 @@ sub new($$) {
 		"PACKAGE" => $basename,
 		"rules" => [
 			# p=preprocess, s=subst, -=discard
-			'(^|/)(CVS|\.arch-ids|{arch}|tmp)/' => '-',
+			'(^|/)(CVS|\.arch-ids|{arch}|\.git|tmp)/' => '-',
 			'\.(lsm|spec)$' => 'ps',
 			'(^|/)README$' => 's'
 			],
@@ -147,7 +147,7 @@ sub CopyFile($$$$) {
 					$empty && next;
 					$empty = 1;
 				} else { $empty = 0; }
-			}		
+			}
 			print O;
 		}
 		close O;
