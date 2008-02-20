@@ -1,7 +1,7 @@
 # Makefile for mo-eval and related utilities
 # (c) 2007 Martin Mares <mj@ucw.cz>
 
-VERSION=1.0.1
+VERSION=1.0.99-20080220
 #DEBUG=-ggdb
 CFLAGS=-O2 -Wall -W -Wno-parentheses -Wstrict-prototypes -Wmissing-prototypes -Wundef -Wredundant-decls -Winline $(DEBUG) -std=gnu99
 

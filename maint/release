@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # A simple script for making releases of mo-eval
-# (c) 2005 Martin Mares <mj@ucw.cz>
+# (c) 2005--2008 Martin Mares <mj@ucw.cz>
 
 use strict;
 use warnings;
@@ -9,10 +9,12 @@ require "maint/release.pm";
 my $r = new UCW::Release("mo-eval");
 my $ver = $r->GetVersionFromFile("Makefile", "VERSION=(.*)");
 #$r->GetVersionsFromChangelog("ChangeLog", "Released as (.*)\.");
-unshift @{$r->{"rules"}}, '^(problems|testing|solutions|maint)/.*' => '-';
+unshift @{$r->{"rules"}}, '^(problems|testing|solutions|maint|certs)/.*' => '-';
 push @{$r->{"directories"}}, "problems", "testing", "solutions";
 push @{$r->{"uploads"}}, {
-	"url" => "scp://atrey.karlin.mff.cuni.cz/~ftp/pub/local/mj/eval/"
+		"url" => "scp://atrey.karlin.mff.cuni.cz/~ftp/pub/local/mj/eval/"
+	}, {
+		"url" => "scp://jabberwock.ucw.cz/~ftp/pub/mj/eval/"
 	};
 $r->ParseOptions;
 $r->InitDist("maint/dist");
@@ -21,6 +23,6 @@ $r->GenFile("README");
 $r->Dispatch;
 
 if ($r->{"do_upload"}) {
-	print "Updating checked-out documentation at Atrey\n";
-	`ssh atrey cd src/eval && Cu`; die if $?;
+	print "Updating documentation at Jabberwock\n";
+	`rsync -a doc/. jabberwock.ucw.cz:www/mo-eval/`; die if $?;
 }
