@@ -3,7 +3,6 @@
 [ -f config ] || { echo "Missing config file, check cwd." ; exit 1 ; }
 set -e
 . config
-make
 
 H=`pwd`
 cd $MO_ROOT/eval

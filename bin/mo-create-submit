@@ -4,7 +4,6 @@
 set -e
 . config
 [ -n "$REMOTE_SUBMIT" ] || { echo "Remote submit not enabled." ; exit 1 ; }
-make
 
 echo "Creating submit directory"
 

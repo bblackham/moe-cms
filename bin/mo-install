@@ -3,7 +3,6 @@
 [ -f config ] || { echo "Missing config file, check cwd." ; exit 1 ; }
 set -e
 . config
-make
 
 H=`pwd`
 
@@ -16,7 +15,7 @@ chmod 755 eval
 cd eval
 
 # mo-eval home
-bin/mo-create-eval
+( cd $H && bin/mo-create-eval )
 
 # testusers
 ( cd eval && bin/mo-create-testusers )
