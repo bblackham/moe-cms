@@ -5,7 +5,7 @@ TLSLF:=$(shell libgnutls-config --libs)
 GCRCF:=$(shell libgcrypt-config --cflags)
 
 CFLAGS+=$(UCWCF) $(TLSCF) $(GCRCF)
-LDFLAGS+=$(UCWLF) $(TLSLF)
+LDLIBS+=$(UCWLF) $(TLSLF)
 
 all: submitd privkey lib
 
