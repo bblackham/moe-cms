@@ -24,7 +24,7 @@ UseAssistant=false
 
 [Editor]
 DirtyAction=nothing
-EmbeddedKTextEditor=katepart
+EmbeddedKTextEditor=qeditor_part
 
 [General Options]
 CppBgParserDelay=500
