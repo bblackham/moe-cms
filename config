@@ -33,33 +33,44 @@ REMOTE_SUBMIT=1
 REMOTE_SUBMIT_USER=mo-submit
 REMOTE_SUBMIT_GROUP=mo-submit
 
-### Per-task configuration variables (default values, override in per-task config)
-
-## Compiler settings:
+### Programming language settings
 
 # Known source file extensions
 EXTENSIONS="c cc C cpp p pas"
 
-# Extra compiler flags for C (null, but can be overriden)
-EXTRA_CFLAGS=
+## Variables which control compilation and execution
+## (see below for values for individual languages)
 
-# Extra compiler flags for Pascal
-EXTRA_PFLAGS=
-
-# For each source extension, we must give compiler command
+# Command used to run the compiler
 COMP=false
-EXT_c_COMP='/usr/bin/gcc -std=gnu99 -O2 -g -o $EXE $EXTRA_CFLAGS $SRC -lm'
-EXT_C_COMP='/usr/bin/g++ -O2 -g -o $EXE $EXTRA_CFLAGS $SRC -lm'
-EXT_cpp_COMP="$EXT_C_COMP"
-EXT_cc_COMP="$EXT_C_COMP"
-EXT_p_COMP='/usr/bin/fpc -Ci -Cr -Ct -g -O2 -Sg -o$EXE $EXTRA_PFLAGS $SRC'
-EXT_pas_COMP="$EXT_p_COMP"
 
 # Sandbox options used when compiling
 COMP_SANDBOX_OPTS='-m262144 -w60 -e -i/dev/null'
 
 # Sandbox initialization commands for compilation
 COMP_SANDBOX_INIT=
+
+## Settings for individual languages
+
+# C
+EXT_c_COMP='/usr/bin/gcc -std=gnu99 -O2 -g -o $EXE $EXTRA_CFLAGS $SRC -lm'
+EXTRA_CFLAGS=
+
+# C++
+EXT_C_COMP='/usr/bin/g++ -O2 -g -o $EXE $EXTRA_CXXFLAGS $SRC -lm'
+EXT_cpp_COMP="$EXT_C_COMP"
+EXT_cc_COMP="$EXT_C_COMP"
+EXTRA_CXXFLAGS=
+
+# Pascal
+EXT_p_COMP='/usr/bin/fpc -Ci -Cr -Ct -g -O2 -Sg -o$EXE $EXTRA_PFLAGS $SRC'
+EXT_pas_COMP="$EXT_p_COMP"
+EXTRA_PFLAGS=
+
+# Translate FreePascal exit codes to names of well-known runtime errors
+FREE_PASCAL_RTE=1
+
+### Per-task configuration variables (default values, override in per-task config)
 
 # List of extra files needed for compilation. They are copied to the compiler
 # sandbox from the problem's directory.
@@ -140,8 +151,7 @@ BOX_EXTRAS=
 # Sandbox initialization commands
 SANDBOX_INIT=
 
-# Translate FreePascal exit codes to names of well-known runtime errors
-FREE_PASCAL_RTE=1
+### Debugging and testing
 
 # DEBUG: Let `ev' run sample tests, too.
 #EV_SAMPLE=1
