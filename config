@@ -38,6 +38,11 @@ REMOTE_SUBMIT_GROUP=mo-submit
 # Known source file extensions
 EXTENSIONS="c cc C cpp p pas"
 
+# Some of the extensions can be aliases for other extensions
+ALIAS_EXT_cc=cpp
+ALIAS_EXT_C=cpp
+ALIAS_EXT_p=pas
+
 ## Variables which control compilation and execution
 ## (see below for values for individual languages)
 
@@ -61,16 +66,12 @@ EXT_c_COMP='/usr/bin/gcc -std=gnu99 -O2 -g -o $EXE $EXTRA_CFLAGS $SRC -lm'
 EXTRA_CFLAGS=
 
 # C++
-EXT_C_COMP='/usr/bin/g++ -O2 -g -o $EXE $EXTRA_CXXFLAGS $SRC -lm'
-EXT_cpp_COMP="$EXT_C_COMP"
-EXT_cc_COMP="$EXT_C_COMP"
+EXT_cpp_COMP='/usr/bin/g++ -O2 -g -o $EXE $EXTRA_CXXFLAGS $SRC -lm'
 EXTRA_CXXFLAGS=
 
 # Pascal
-EXT_p_COMP='/usr/bin/fpc -Ci -Cr -Ct -g -O2 -Sg -o$EXE $EXTRA_PFLAGS $SRC'
-EXT_pas_COMP="$EXT_p_COMP"
+EXT_pas_COMP='/usr/bin/fpc -Ci -Cr -Ct -g -O2 -Sg -o$EXE $EXTRA_PFLAGS $SRC'
 EXTRA_PFLAGS=
-EXT_p_EXIT_CODE_HOOK=fpc-exit-code
 EXT_pas_EXIT_CODE_HOOK=fpc-exit-code
 
 ### Per-task configuration variables (default values, override in per-task config)

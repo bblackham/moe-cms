@@ -173,7 +173,14 @@ function locate-source
 function compile
 {
 	pstart "Compiling... "
+
+	a="ALIAS_EXT_$SRCEXT"
+	if [ -n "${!a}" ] ; then
+		SRCEXT="${!a}"
+		echo "Normalized file extension: $SRCEXT"
+	fi
 	override-vars "EXT_$SRCEXT"
+
 	# Beware, the original SRCN can be a strange user-supplied name
 	SRC=$PROBLEM.$SRCEXT
 	cp "$SDIR/$SRCN" $TDIR/$SRC
@@ -181,6 +188,7 @@ function compile
 		echo "Extras: $COMP_EXTRAS"
 		for a in $COMP_EXTRAS ; do cp $PDIR/$a $TDIR/ ; done
 	fi
+
 	box-clean
 	for a in $SRC $COMP_EXTRAS ; do cp $TDIR/$a $BOXDIR/ ; done
 	EXE=$PROBLEM
