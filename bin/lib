@@ -275,7 +275,6 @@ function test-prolog
 		test-result 0 "Compile error"
 	fi
 	cp $TDIR/$PROBLEM $BOXDIR/
-	BOX_EXTRAS=
 	IN_TYPE=${IN_TYPE:-$IO_TYPE}
 	OUT_TYPE=${OUT_TYPE:-$IO_TYPE}
 	case $IN_TYPE in
