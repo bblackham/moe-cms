@@ -50,6 +50,10 @@ COMP_SANDBOX_OPTS='-m262144 -w60 -e -i/dev/null'
 # Sandbox initialization commands for compilation
 COMP_SANDBOX_INIT=
 
+# Translation of runtime errors: a function, which receives the exit code as an argument and
+# if it is recognized as a runtime error code, it prints its name to the standard output.
+EXIT_CODE_HOOK=
+
 ## Settings for individual languages
 
 # C
@@ -66,9 +70,8 @@ EXTRA_CXXFLAGS=
 EXT_p_COMP='/usr/bin/fpc -Ci -Cr -Ct -g -O2 -Sg -o$EXE $EXTRA_PFLAGS $SRC'
 EXT_pas_COMP="$EXT_p_COMP"
 EXTRA_PFLAGS=
-
-# Translate FreePascal exit codes to names of well-known runtime errors
-FREE_PASCAL_RTE=1
+EXT_p_EXIT_CODE_HOOK=fpc-exit-code
+EXT_pas_EXIT_CODE_HOOK=fpc-exit-code
 
 ### Per-task configuration variables (default values, override in per-task config)
 

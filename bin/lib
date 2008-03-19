@@ -244,20 +244,13 @@ function test-result
 		[ -z "$SG" ] || M="$M (SIG$SG)"
 	fi
 
-	# Translate Free Pascal runtime errors to readable strings
+	# Translate runtime errors to readable strings
 	RE=${M#Exited with error status }
-	if [ "$FREE_PASCAL_RTE" == 1 -a "$RE" != "$M" ] ; then
-		N="Runtime error $RE"
-		case "$RE" in
-			200)	M="$N: Division by zero" ;;
-			201)	M="$N: Range check error" ;;
-			202)	M="$N: Stack overflow" ;;
-			203)	M="$N: Heap overflow" ;;
-			205)	M="$N: Floating point overflow" ;;
-			215)	M="$N: Arithmetic overflow" ;;
-			216)	M="$N: Segmentation fault" ;;
-			???)	M="$N" ;;
-		esac
+	if [ -n "$EXIT_CODE_HOOK" -a "$RE" != "$M" ] ; then
+		NEWMSG=`$EXIT_CODE_HOOK $RE`
+		if [ -n "$NEWMSG" ] ; then
+			M="Runtime error $RE: $NEWMSG"
+		fi
 	fi
 
 	echo "Verdict: $M"
@@ -472,4 +465,19 @@ function open-locate
 		SRCN=$SDIR/$PROBLEM$TEST.out
 	fi
 	[ -f "$SDIR/$SRCN" ] || fatal "Output file $SRCN not found"
+}
+
+# Translation of runtime error codes for various compilers
+
+function fpc-exit-code
+{
+	case "$1" in
+		200)	echo -n "Division by zero" ;;
+		201)	echo -n "Range check error" ;;
+		202)	echo -n "Stack overflow" ;;
+		203)	echo -n "Heap overflow" ;;
+		205)	echo -n "Floating point overflow" ;;
+		215)	echo -n "Arithmetic overflow" ;;
+		216)	echo -n "Segmentation fault" ;;
+	esac
 }
