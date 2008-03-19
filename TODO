@@ -6,6 +6,7 @@ interactive tasks: logging of messages
 terminology: problem -> task ?
 writing of verdicts to stdout (include timing and check on interactive tasks, including judge errors)
 box: memory usage statistics (need to search for VMPeak in /proc/$PID/status, but it disappears too early)
+remove scanning of users by UID
 
 Judges
 ~~~~~~
@@ -18,7 +19,6 @@ Environment
 fpc: add switch -gl (runtime errors write line#), but avoid that when inside the sandbox
 
 Installer:
-- mo-install: reduce what gets copied to mo-eval home
 - update group permissions
 - quotas
 
@@ -31,16 +31,11 @@ box: configurable access to timers and /proc/self/{stat,fd}
 box: limit the total amount of data written to files, so that quotas don't have to be set up
 
 TomGav:
-- hook for translation of exit codes
 - substitute $VAR without using eval
 - stderr parsers
-- {pre,post}{comp,run} hooks
-- document which hook can be overridden by problem's config
-- box: add redirection of stderr
 - VMMax -> getrusage()
 - clean up names of temporary files
 - machine-readable log file
 - split bin
 - configurable names of in/out files
 - multiple in files (stored as an archive or directory)
-- locate-source: arbitrary input file name
