@@ -52,12 +52,15 @@ COMP=false
 # Sandbox options used when compiling
 COMP_SANDBOX_OPTS='-m262144 -w60 -e -i/dev/null'
 
-# Sandbox initialization commands for compilation
-COMP_SANDBOX_INIT=
-
 # Translation of runtime errors: a function, which receives the exit code as an argument and
 # if it is recognized as a runtime error code, it prints its name to the standard output.
 EXIT_CODE_HOOK=
+
+# Hooks which can alter the contents of the sandbox in $BOXDIR before/after compilation/running
+PRE_COMPILE_HOOK=
+POST_COMPILE_HOOK=
+PRE_RUN_HOOK=
+POST_RUN_HOOK=
 
 ## Settings for individual languages
 
@@ -151,9 +154,6 @@ TEST_SANDBOX_OPTS='-a2 -f -m$MEM_LIMIT -t$TIME_LIMIT $BOX_EXTRAS'
 
 # Extra options to be overridden in task configuration
 BOX_EXTRAS=
-
-# Sandbox initialization commands
-SANDBOX_INIT=
 
 ### Debugging and testing
 

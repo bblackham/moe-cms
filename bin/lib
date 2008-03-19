@@ -196,7 +196,10 @@ function compile
 	COMP_SANDBOX_OPTS=$(expand-var COMP_SANDBOX_OPTS)
 	echo "Compiler command: $CCMD"
 	echo "Compiler sandbox options: $COMP_SANDBOX_OPTS"
-	eval $COMP_SANDBOX_INIT
+	if [ -n "$PRE_COMPILE_HOOK" ] ; then
+		echo "Pre-compile hook: $PRE_COMPILE_HOOK"
+		eval $PRE_COMPILE_HOOK
+	fi
 
 	echo "Compiler input files:"
 	ls -Al $BOXDIR
@@ -209,6 +212,10 @@ function compile
 	fi
 	cat $TDIR/compile.out
 	rm $TDIR/compile.out
+	if [ -n "$POST_COMPILE_HOOK ] ; then
+		echo "Post-compile hook: $POST_COMPILE_HOOK"
+		eval $POST_COMPILE_HOOK
+	fi
 	echo "Compiler output files:"
 	ls -Al $BOXDIR
 	if [ ! -f $BOXDIR/$PROBLEM ] ; then
@@ -319,13 +326,20 @@ function test-prolog
 	esac
 	echo "Timeout: $TIME_LIMIT s"
 	echo "Memory: $MEM_LIMIT KB"
-	eval $SANDBOX_INIT
+	if [ -n "$PRE_RUN_HOOK" ] ; then
+		echo "Pre-run hook: $PRE_RUN_HOOK"
+		eval $PRE_RUN_HOOK
+	fi
 	echo "Sandbox contents before start:"
 	ls -Al $BOXDIR
 }
 
 function test-epilog
 {
+	if [ -n "$POST_RUN_HOOK" ] ; then
+		echo "Post-run hook: $POST_RUN_HOOK"
+		eval $POST_RUN_HOOK
+	fi
 	echo "Sandbox contents after exit:"
 	ls -Al $BOXDIR
 	case ${OUT_TYPE:-$IO_TYPE} in
