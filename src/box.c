@@ -36,7 +36,7 @@ static int pass_environ;
 static int file_access;
 static int verbose;
 static int memory_limit;
-static char *redir_stdin, *redir_stdout;
+static char *redir_stdin, *redir_stdout, *redir_stderr;
 static char *set_cwd;
 
 static pid_t box_pid;
@@ -814,7 +814,14 @@ box_inside(int argc, char **argv)
       if (open(redir_stdout, O_WRONLY | O_CREAT | O_TRUNC, 0666) != 1)
 	die("open(\"%s\"): %m", redir_stdout);
     }
-  dup2(1, 2);
+  if (redir_stderr)
+    {
+      close(2);
+      if (open(redir_stderr, O_WRONLY | O_CREAT | O_TRUNC, 0666) != 2)
+	die("open(\"%s\"): %m", redir_stderr);
+    }
+  else
+    dup2(1, 2);
   setpgrp();
   if (memory_limit)
     {
@@ -856,6 +863,7 @@ Options:\n\
 -o <file>\tRedirect stdout to <file>\n\
 -p <path>\tPermit access to the specified path (or subtree if it ends with a `/')\n\
 -p <path>=<act>\tDefine action for the specified path (<act>=yes/no)\n\
+-r <file>\tRedirect stderr to <file>\n\
 -s <sys>\tPermit the specified syscall (be careful)\n\
 -s <sys>=<act>\tDefine action for the specified syscall (<act>=yes/no/file)\n\
 -t <time>\tSet run time limit (seconds, fractions allowed)\n\
@@ -872,7 +880,7 @@ main(int argc, char **argv)
   int c;
   uid_t uid;
 
-  while ((c = getopt(argc, argv, "a:c:eE:fi:m:o:p:s:t:Tvw:")) >= 0)
+  while ((c = getopt(argc, argv, "a:c:eE:fi:m:o:p:r:s:t:Tvw:")) >= 0)
     switch (c)
       {
       case 'a':
@@ -903,6 +911,9 @@ main(int argc, char **argv)
       case 'p':
 	if (!set_path_action(optarg))
 	  usage();
+	break;
+      case 'r':
+	redir_stderr = optarg;
 	break;
       case 's':
 	if (!set_syscall_action(optarg))
