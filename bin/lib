@@ -212,7 +212,7 @@ function compile
 	fi
 	cat $TDIR/compile.out
 	rm $TDIR/compile.out
-	if [ -n "$POST_COMPILE_HOOK ] ; then
+	if [ -n "$POST_COMPILE_HOOK" ] ; then
 		echo "Post-compile hook: $POST_COMPILE_HOOK"
 		eval $POST_COMPILE_HOOK
 	fi
