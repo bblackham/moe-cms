@@ -9,8 +9,11 @@ if [ ! -f config -o ! -f bin/lib ] ; then
 fi
 . bin/lib
 . config
+while parse-cmdline "$1" ; do
+	shift
+done
 
-[ -n "$2" -a -z "$4" ] || die "Usage: ev <contestant> <problem> [<program>]"
+[ -n "$2" -a -z "$4" ] || die "Usage: ev [<var>=<value>] <contestant> <problem> [<program>]"
 CONTESTANT=$1
 PROBLEM=$2
 dir-init
