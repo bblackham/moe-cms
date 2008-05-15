@@ -27,6 +27,7 @@ include $(s)/box/Makefile
 include $(s)/utils/Makefile
 include $(s)/eval/Makefile
 include $(s)/judge/Makefile
+include $(s)/submit/Makefile
 
 # And finally the default rules of the build system
 include $(s)/build/Makebottom

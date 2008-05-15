@@ -1,22 +1,46 @@
-UCWCF:=$(shell PKG_CONFIG_PATH=$(LIBUCW)/lib/pkgconfig pkg-config --cflags libucw libsh)
-UCWLF:=$(shell PKG_CONFIG_PATH=$(LIBUCW)/lib/pkgconfig pkg-config --libs libucw libsh)
+# Makefile for MO-Eval submitter
+# (c) 2008 Martin Mares <mj@ucw.cz>
+
 TLSCF:=$(shell libgnutls-config --cflags)
 TLSLF:=$(shell libgnutls-config --libs)
 GCRCF:=$(shell libgcrypt-config --cflags)
 
-CFLAGS+=$(UCWCF) $(TLSCF) $(GCRCF)
-LDLIBS+=$(UCWLF) $(TLSLF)
+DIRS+=submit
+SDIR=$(o)/submit
 
-all: submitd privkey lib
+### The submit server ###
 
-submitd: submitd.o commands.o tasks.o
-submitd.o: submitd.c submitd.h
-commands.o: commands.c submitd.h
-tasks.o: tasks.c submitd.h
-connect: connect.o
-connect.o: connect.c
-privkey: privkey.o
-privkey.o: privkey.c
+PROGS+=$(addprefix $(SDIR)/,submitd privkey connect)
+
+$(SHERLOCK_PERL_MODS): PERL_MODULE_DIR=MO
+
+$(SDIR)/submitd: $(addprefix $(SDIR)/,submitd.o commands.o tasks.o) $(LIBUCW) $(LIBSH)
+$(SDIR)/submitd: CFLAGS+=$(TLSCF) $(GCRCF)
+$(SDIR)/submitd: LIBS+=$(TLSLF)
+
+$(SDIR)/connect: $(SDIR)/connect.o $(LIBUCW)
+$(SDIR)/connect: CFLAGS+=$(TLSCF) $(GCRCF)
+$(SDIR)/connect: LIBS+=$(TLSLF)
+
+$(SDIR)/privkey: $(SDIR)/privkey.o $(LIBUCW)
+$(SDIR)/privkey: CFLAGS+=$(TLSCF) $(GCRCF)
+$(SDIR)/privkey: LIBS+=$(TLSLF)
+
+### Submitter perl module ###
+
+EXTRA_RUNDIRS+=lib/perl5/MO
+SUBMIT_PERL_MODS=$(o)/submit/Submit.pm
+PROGS+=$(SUBMIT_PERL_MODS)
+
+### The submit client and utilities ###
+
+PROGS+=$(addprefix $(SDIR)/,contest create-certs remote-status remote-submit show-submits)
+
+$(SDIR)/contest: $(s)/submit/contest.pl
+$(SDIR)/create-certs: $(s)/submit/create-certs.sh
+$(SDIR)/remote-status: $(s)/submit/remote-status.pl
+$(SDIR)/remote-submit: $(s)/submit/remote-submit.pl
+$(SDIR)/show-submits: $(s)/submit/show-submits.pl
 
 certs:
 	certtool --generate-privkey --outfile ca-key.pem
@@ -28,22 +52,3 @@ certs:
 	certtool --generate-request --load-privkey client-key.pem --outfile client-req.pem --template client-cert.tpl
 	certtool --generate-certificate --load-request client-req.pem --outfile client-cert.pem --load-ca-certificate ca-cert.pem --load-ca-privkey ca-key.pem --template client-cert.tpl
 	# Beware of serial numbers
-
-lib: .lib-stamp lib/perl5/MO/Submit.pm lib/perl5/Sherlock/Object.pm
-
-.lib-stamp:
-	mkdir -p lib/perl5/{MO,Sherlock}
-	touch .lib-stamp
-
-lib/perl5/MO/Submit.pm: MO/Submit.pm
-	cp $^ $@
-
-lib/perl5/Sherlock/Object.pm: $(LIBUCW)/lib/perl5/Sherlock/Object.pm
-	cp $^ $@
-
-clean:
-	rm -f `find . -name "*~" -or -name "*.[oa]" -or -name "\#*\#" -or -name TAGS -or -name core -or -name .depend -or -name .#*`
-	rm -f submitd connect privkey
-	rm -rf lib .lib-stamp
-
-.PHONY: lib
