@@ -4,7 +4,7 @@
 VERSION=1.0.99-20080220
 
 # The default target
-all: runtree programs
+all: runtree programs datafiles
 
 # Include configuration
 s=.
