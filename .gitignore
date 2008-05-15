@@ -1,12 +1,6 @@
-bin/box
-bin/pedant
-bin/iwrapper
-bin/md5crypt
-box
 certs
 problems
 solutions
 testing
 tmp
 userlist
-src/syscall-table.h

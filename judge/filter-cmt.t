@@ -1,6 +1,6 @@
 # Test cases for filter-cmt.c
 
-Run:	./filter-cmt
+Run:	bin/filter-cmt
 In:	abc//comment
 	de///fgh
 	//full-line comment

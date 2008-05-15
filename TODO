@@ -1,3 +1,5 @@
+Convert md5crypt to use MD5 from libucw
+
 Evaluator
 ~~~~~~~~~
 score: better formatting of the score table

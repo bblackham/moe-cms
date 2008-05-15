@@ -19,11 +19,14 @@ include $(s)/build/Maketop
 ifdef CONFIG_UCW_LIBS
 include $(s)/lib/Makefile
 include $(s)/sherlock/Makefile
+# Disable built-in tests of these libraries
+TESTS=
 endif
 
 include $(s)/box/Makefile
 include $(s)/utils/Makefile
 include $(s)/eval/Makefile
+include $(s)/judge/Makefile
 
 # And finally the default rules of the build system
 include $(s)/build/Makebottom

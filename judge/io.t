@@ -1,6 +1,6 @@
 # Test cases for io.c
 
-Run:	./test-io
+Run:	bin/test-io
 In:	abc
 	def
 Out:	abc
