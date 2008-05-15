@@ -26,7 +26,7 @@ tls_init(void)
 {
   int err;
 
-  log(L_INFO, "Initializing TLS");
+  msg(L_INFO, "Initializing TLS");
   gnutls_global_init();
   err = gnutls_certificate_allocate_credentials(&cert_cred);
   TLS_CHECK(gnutls_certificate_allocate_credentials);
@@ -100,7 +100,7 @@ tls_log_params(gnutls_session_t s)
   const char *comp = gnutls_compression_get_name(gnutls_compression_get(s));
   const char *cipher = gnutls_cipher_get_name(gnutls_cipher_get(s));
   const char *mac = gnutls_mac_get_name(gnutls_mac_get(s));
-  log(L_DEBUG, "TLS params: proto=%s kx=%s cert=%s comp=%s cipher=%s mac=%s",
+  msg(L_DEBUG, "TLS params: proto=%s kx=%s cert=%s comp=%s cipher=%s mac=%s",
     proto, kx, cert, comp, cipher, mac);
 }
 
@@ -112,7 +112,7 @@ int main(int argc UNUSED, char **argv UNUSED)
   if (sk < 0)
     die("socket: %m");
 
-  log(L_INFO, "Connecting to port %d", port);
+  msg(L_INFO, "Connecting to port %d", port);
   struct sockaddr_in sa;
   bzero(&sa, sizeof(sa));
   sa.sin_family = AF_INET;
@@ -121,23 +121,23 @@ int main(int argc UNUSED, char **argv UNUSED)
   if (connect(sk, (struct sockaddr *) &sa, sizeof(sa)) < 0)
     die("Cannot connect: %m");
 
-  log(L_INFO, "Waiting for initial message");
-  char msg[256];
+  msg(L_INFO, "Waiting for initial message");
+  char mesg[256];
   int i = 0;
   do
     {
-      if (i >= (int)sizeof(msg))
+      if (i >= (int)sizeof(mesg))
 	die("Response too long");
-      int c = read(sk, msg+i, sizeof(msg)-i);
+      int c = read(sk, mesg+i, sizeof(mesg)-i);
       if (c <= 0)
 	die("Connection broken");
       i += c;
     }
-  while (msg[i-1] != '\n');
-  msg[i-1] = 0;
-  if (msg[0] != '+')
-    die("%s", msg);
-  log(L_INFO, "%s", msg);
+  while (mesg[i-1] != '\n');
+  mesg[i-1] = 0;
+  if (mesg[0] != '+')
+    die("%s", mesg);
+  msg(L_INFO, "%s", mesg);
 
   gnutls_session_t s;
   gnutls_init(&s, GNUTLS_CLIENT);
@@ -145,14 +145,14 @@ int main(int argc UNUSED, char **argv UNUSED)
   gnutls_credentials_set(s, GNUTLS_CRD_CERTIFICATE, cert_cred);
   gnutls_transport_set_ptr(s, (gnutls_transport_ptr_t) sk);
 
-  log(L_INFO, "Handshaking");
+  msg(L_INFO, "Handshaking");
   int err = gnutls_handshake(s); TLS_CHECK(gnutls_handshake);
   tls_log_params(s);
   const char *cert_err = tls_verify_cert(s);
   if (cert_err)
     die("Certificate verification failed: %s", cert_err);
 
-  log(L_INFO, "Session established");
+  msg(L_INFO, "Session established");
   for (;;)
     {
       char buf[1024];
@@ -170,7 +170,7 @@ int main(int argc UNUSED, char **argv UNUSED)
 	  err = gnutls_record_recv(s, buf, sizeof(buf)); TLS_CHECK(gnutls_record_recv);
 	  if (!err)
 	    {
-	      log(L_INFO, "Connection closed");
+	      msg(L_INFO, "Connection closed");
 	      break;
 	    }
 	  fwrite(buf, 1, err, stdout);
