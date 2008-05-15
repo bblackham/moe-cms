@@ -116,7 +116,7 @@ xmalloc(size_t size)
 /*** Syscall rules ***/
 
 static const char * const syscall_names[] = {
-#include "syscall-table.h"
+#include "box/syscall-table.h"
 };
 #define NUM_SYSCALLS ARRAY_SIZE(syscall_names)
 #define NUM_ACTIONS (NUM_SYSCALLS+64)

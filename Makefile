@@ -21,9 +21,7 @@ include $(s)/lib/Makefile
 include $(s)/sherlock/Makefile
 endif
 
-# Programs we want to compile
-#PROGS+=$(o)/test
-#$(o)/test: $(o)/test.o $(LIBUCW) $(LIBLANG) $(LIBCHARSET) $(LIBIMAGES)
+include $(s)/box/Makefile
 
 # And finally the default rules of the build system
 include $(s)/build/Makebottom
