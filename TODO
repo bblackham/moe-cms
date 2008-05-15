@@ -1,6 +1,6 @@
 New directory layout
 ~~~~~~~~~~~~~~~~~~~~
-public/ is broken
+mop/ and public/ are broken
 
 Evaluator
 ~~~~~~~~~
@@ -14,7 +14,6 @@ remove scanning of users by UID
 
 Judges
 ~~~~~~
-integrate to the top-level makefile
 clean up exit codes
 test cases for judge-shuff
 
@@ -40,6 +39,5 @@ TomGav:
 - VMMax -> getrusage()
 - clean up names of temporary files
 - machine-readable log file
-- split bin
 - configurable names of in/out files
 - multiple in files (stored as an archive or directory)
