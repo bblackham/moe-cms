@@ -1,0 +1,33 @@
+#!/usr/bin/perl
+# Configure script for MO-Eval
+# (c) 2008 Martin Mares <mj@ucw.cz>
+
+use warnings;
+use strict;
+
+our $srcdir;
+BEGIN {
+	my $pkgfile = "judge/token.c";
+	if (!defined ($srcdir = $ENV{"SRCDIR"})) {
+		if (-f $pkgfile) {
+			$srcdir=".";
+		} elsif ($0 =~ m@^(.*)/configure$@ && -f "$1/$pkgfile") {
+			$srcdir=$1;
+		} else {
+			die "Don't know how to find myself. Please set SRCDIR manually.";
+		}
+	}
+	require "$srcdir/lib/perl/Configure.pm";
+	UCW::Configure::import UCW::Configure;
+}
+
+Init($srcdir, "default.cfg");
+Include "lib/default.cfg";
+Log "### Configuring MO-Eval ###\n\n";
+Include Get("CONFIG");
+Include "lib/autoconf.cfg";
+
+Set("CONFIG_UCW_LIBS" => 1);
+
+Finish();
+Log "\nConfigured, run `make' to build everything.\n";
