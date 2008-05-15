@@ -22,6 +22,7 @@ include $(s)/sherlock/Makefile
 endif
 
 include $(s)/box/Makefile
+include $(s)/utils/Makefile
 
 # And finally the default rules of the build system
 include $(s)/build/Makebottom
