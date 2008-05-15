@@ -27,7 +27,10 @@ include $(s)/box/Makefile
 include $(s)/utils/Makefile
 include $(s)/eval/Makefile
 include $(s)/judge/Makefile
+
+ifdef CONFIG_SUBMIT
 include $(s)/submit/Makefile
+endif
 
 # And finally the default rules of the build system
 include $(s)/build/Makebottom
