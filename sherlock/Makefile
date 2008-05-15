@@ -2,8 +2,10 @@
 
 DIRS+=sherlock
 
+LIBSH+=$(o)/sherlock/libsh.pc
+
 LIBSH_MODS= \
-	object bucket buck2obj obj2buck obj-linear obj-format \
+	object buck2obj obj2buck obj-format \
 	attrset conf-parse
 
 LIBSH_MOD_PATHS=$(addprefix $(o)/sherlock/,$(LIBSH_MODS))
