@@ -1,7 +1,6 @@
 New directory layout
 ~~~~~~~~~~~~~~~~~~~~
 public/ is broken
-Convert md5crypt to use MD5 from libucw
 
 Evaluator
 ~~~~~~~~~
