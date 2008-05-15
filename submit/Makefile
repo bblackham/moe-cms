@@ -26,6 +26,9 @@ $(SDIR)/privkey: $(SDIR)/privkey.o $(LIBUCW)
 $(SDIR)/privkey: CFLAGS+=$(TLSCF) $(GCRCF)
 $(SDIR)/privkey: LIBS+=$(TLSLF)
 
+CONFIGS+=submitd
+run/cf/submitd: $(SDIR)/submitd.cf
+
 ### Submitter perl module ###
 
 EXTRA_RUNDIRS+=lib/perl5/MO

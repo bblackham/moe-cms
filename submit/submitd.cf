@@ -1,5 +1,7 @@
 # Configuration file for the submit server
 
+include cf/library
+
 SubmitD {
 
 # Log file (optional)
