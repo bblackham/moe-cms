@@ -9,11 +9,13 @@
  * ----------------------------------------------------------------------------
  */
 
+#include "lib/lib.h"
+#include "lib/md5.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include "md5.h"
 
 static unsigned char itoa64[] =		/* 0 ... 63 => ascii - 64 */
 	"./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
