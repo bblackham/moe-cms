@@ -7,3 +7,6 @@ DATAFILES+=$(o)/eval/libeval.sh
 
 $(o)/eval/iwrapper: $(o)/eval/iwrapper.o
 $(o)/eval/ev: $(s)/eval/ev.sh
+
+CONFIGS+=eval
+run/cf/eval: $(o)/eval/eval.cf

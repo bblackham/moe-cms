@@ -3,12 +3,12 @@
 # (c) 2001--2008 Martin Mares <mj@ucw.cz>
 
 set -e
-if [ ! -f config -o ! -f lib/libeval.sh ] ; then
+if [ ! -f cf/eval -o ! -f lib/libeval.sh ] ; then
 	echo "Unable to find evaluator files!"
 	exit 1
 fi
 . lib/libeval.sh
-. config
+. cf/eval
 while parse-cmdline "$1" ; do
 	shift
 done
