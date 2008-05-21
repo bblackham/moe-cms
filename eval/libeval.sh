@@ -53,7 +53,7 @@ function try-ln
 
 function expand-var
 {
-	eval echo ${!1}
+	eval echo \"${!1}\"
 }
 
 # Given a <prefix>, override each variable <x> by <prefix>_<x>
