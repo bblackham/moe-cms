@@ -75,16 +75,22 @@ function override-vars
 function box-init
 {
 	pstart "Preparing sandbox... "
-	if [ -z "$TEST_USER" -o "$TEST_USER" == $EVAL_USER ] ; then
+
+	# Default values for user/group
+	EVAL_USER=${EVAL_USER:-$USER}
+	EVAL_GROUP=${EVAL_GROUP:-$GROUP}
+	TEST_USER=${TEST_USER:-$EVAL_USER}
+
+	if [ -z "$TEST_USER" -o "$TEST_USER" == "$EVAL_USER" ] ; then
 		pcont "running locally (INSECURE), "
-		TEST_USER=$EVAL_USER
-		BOXDIR=`pwd`/box
-		BOXCMD=bin/box
-		mkdir -p box
+		TEST_USER="$EVAL_USER"
+		BOXDIR=$HDIR/box
+		BOXCMD=$HDIR/bin/box
+		mkdir -p $BOXDIR
 	else
 		pcont "used account $TEST_USER, "
-		BOXDIR=$MO_ROOT/eval/$TEST_USER
-		BOXCMD=bin/box-$TEST_USER
+		BOXDIR=$HDIR/box
+		BOXCMD=$HDIR/bin/box-$TEST_USER
 	fi
 	[ -d $BOXDIR -a -f $BOXCMD ] || die "Sandbox set up incorrectly"
 	BOXCMD="$BOXCMD -c$BOXDIR"
