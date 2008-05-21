@@ -305,6 +305,15 @@ function test-prolog
 			;;
 		none)	echo "Input file: <none>"
 			;;
+		dir)	echo "Input file: files in directory $PDIR/$TEST.in/"
+			[ -d $PDIR/$TEST.in ] || die "Not a directory: $PDIR/$TEST.in"
+			# TODO: recursive ln to $TDIR
+			cp -r $PDIR/$TEST.in $TDIR/$TEST.in
+			cp -r $PDIR/$TEST.in/* $BOXDIR/
+			# Can have .stdin, but empty by default
+			touch $BOXDIR/.stdin
+			BOX_EXTRAS="$BOX_EXTRAS -i.stdin"
+			;;
 		*)	die "Unknown IN_TYPE $IN_TYPE"
 			;;
 	esac
