@@ -93,8 +93,8 @@ TASK_TYPE=file
 # I/O type (IO_TYPE sets defaults for IN_TYPE and OUT_TYPE)
 # file		input from $PROBLEM.in, output to $PROBLEM.out (possible even for interactive tasks)
 # stdio		input from stdin, output to stdout
-# dir 		input from all files in the directory $TEST.in, these are copied to $BOXDIR,
-# 		can contain .stdin, which will be aviable as program stdin
+# dir 		input from all files in the directory $TEST.in; these are copied to $BOXDIR
+# 		and if they include .stdin, it will be available as program's std. input.
 # none		no input/output
 IO_TYPE=stdio
 #IN_TYPE=stdio
