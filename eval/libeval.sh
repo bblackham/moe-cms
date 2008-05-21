@@ -111,11 +111,12 @@ function box-clean
 function dir-init
 {
 	pstart "Initializing... "
-	HDIR=.
-	PDIR=problems/$PROBLEM
-	SDIR=solutions/$CONTESTANT/$PROBLEM
-	TDIR=testing/$CONTESTANT/$PROBLEM
-	TMPDIR=tmp
+	[ -z "$HDIR" ] && HDIR=`pwd`
+	PDIR=$HDIR/problems/$PROBLEM
+	SDIR=$HDIR/solutions/$CONTESTANT/$PROBLEM
+	TDIR=$HDIR/testing/$CONTESTANT/$PROBLEM
+	TMPDIR=$HDIR/tmp/
+
 	[ -d $PDIR ] || die "Problem $PROBLEM not known"
 	[ -d $SDIR ] || fatal "Solution of $PROBLEM not found"
 	mkdir -p $TDIR $TMPDIR
@@ -124,6 +125,7 @@ function dir-init
 	cat >$TDIR/log <<EOF
 Testing solution of $PROBLEM by $CONTESTANT
 Test started at `date`
+Eval base directory: $HDIR
 Contestant's solution directory: $SDIR
 Problem directory: $PDIR
 Testing directory: $TDIR
