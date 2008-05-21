@@ -48,6 +48,10 @@ POST_COMPILE_HOOK=
 PRE_RUN_HOOK=
 POST_RUN_HOOK=
 
+# Command used to execute the compiled program, may be ./$PROGRAM (default) or an
+# interpreter with $PROGRAM as a parameter.
+TEST_EXEC_CMD=
+
 ## Settings for individual languages
 
 # C

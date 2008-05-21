@@ -382,7 +382,10 @@ function test-run-file
 	pcont "<run> "
 	BOXOPTS=$(expand-var TEST_SANDBOX_OPTS)
 	echo "Sandbox options: $BOXOPTS"
-	if ! $BOXCMD $BOXOPTS -- ./$PROBLEM 2>$TMPDIR/exec.out ; then
+	EXECMD=$(expand-var TEST_EXEC_CMD)
+	[ -z "$EXECMD" ] || echo "Exec command: $EXECMD" 
+	[ -z "$EXECMD" ] && EXECMD="./$PROBLEM" 
+	if ! $BOXCMD $BOXOPTS -- $EXECMD 2>$TMPDIR/exec.out ; then
 		cat $TMPDIR/exec.out
 		MSG=`tail -1 $TMPDIR/exec.out`
 		test-result 0 "$MSG"
@@ -401,7 +404,10 @@ function test-run-interactive
 	echo "Sandbox options: $BOXOPTS"
 	ICCMD=$(expand-var IA_CHECK)
 	echo "Interactive checker: $ICCMD"
-	if ! $HDIR/bin/iwrapper $BOXCMD $BOXOPTS -- ./$PROBLEM @@ $ICCMD 2>$TMPDIR/exec.out ; then
+	EXECMD=$(expand-var TEST_EXEC_CMD)
+	[ -z "$EXECMD" ] || echo "Exec command: $EXECMD" 
+	[ -z "$EXECMD" ] && EXECMD="./$PROBLEM" 
+	if ! $HDIR/bin/iwrapper $BOXCMD $BOXOPTS -- $EXECMD @@ $ICCMD 2>$TMPDIR/exec.out ; then
 		cat $TMPDIR/exec.out
 		MSG="`head -1 $TMPDIR/exec.out`"
 		test-result 0 "$MSG"
