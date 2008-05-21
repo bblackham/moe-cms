@@ -111,7 +111,7 @@ function box-clean
 function dir-init
 {
 	pstart "Initializing... "
-	[ -z "$HDIR" ] && HDIR=`pwd`
+	[ -z "$HDIR" ] && HDIR=.
 	PDIR=$HDIR/problems/$PROBLEM
 	SDIR=$HDIR/solutions/$CONTESTANT/$PROBLEM
 	TDIR=$HDIR/testing/$CONTESTANT/$PROBLEM
