@@ -1,4 +1,7 @@
 #!/bin/sh
+# Find all submits in the local copy of contestants' home directories
+# (as created by mo-backup) and print their status.
+
 if [ -z "$1" ] ; then
 	echo "Directory name expected"
 	exit 1

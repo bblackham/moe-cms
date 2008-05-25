@@ -1,4 +1,6 @@
 #!/bin/bash
+# Grab all submits from contestants' home directories located on the
+# local machine and copy them to solutions/.
 
 [ -n "$1" ] || { echo "Usage: mo-grab <tasks>" ; exit 1 ; }
 [ -f config ] || { echo "Missing config file, check cwd." ; exit 1 ; }

@@ -1,4 +1,6 @@
 #!/bin/sh
+# A trivial script to back up contestants' home directories.
+
 if [ -z "$1" ] ; then
 	D=back/`date '+%H%M'`
 else

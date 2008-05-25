@@ -1,4 +1,5 @@
 #!/bin/bash
+# Grab all submits from the submit server and copy them to solutions/.
 
 [ -n "$1" ] || { echo "Usage: mo-grab-remote <tasks>" ; exit 1 ; }
 [ -f config ] || { echo "Missing config file, check cwd." ; exit 1 ; }
