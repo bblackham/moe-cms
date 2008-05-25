@@ -32,5 +32,9 @@ ifdef CONFIG_SUBMIT
 include $(s)/submit/Makefile
 endif
 
+ifdef CONFIG_MOP
+include $(s)/mop/Makefile
+endif
+
 # And finally the default rules of the build system
 include $(s)/build/Makebottom

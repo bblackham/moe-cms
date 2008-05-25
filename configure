@@ -27,7 +27,10 @@ Log "### Configuring MO-Eval ###\n\n";
 Include Get("CONFIG");
 Include "lib/autoconf.cfg";
 
-Set("CONFIG_UCW_LIBS" => 1);
+if (Get("CONFIG_SUBMIT") || Get("CONFIG_MOP")) {
+	# Build libucw only if it is needed
+	Set("CONFIG_UCW_LIBS" => 1);
+}
 
 Finish();
 Log "\nConfigured, run `make' to build everything.\n";
