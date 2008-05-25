@@ -6,7 +6,7 @@ PROGS+=$(addprefix $(o)/mop/admin/,\
 	md5crypt \
 	mo-backup mo-back-status \
 	mo-install mo-create-contestants mo-create-eval mo-create-logins \
-	mo-create-packages mo-create-public mo-create-submit mo-create-testusers \
+	mo-create-public mo-create-submit mo-create-testusers \
 	mo-grab mo-back-grab mo-grab-remote \
 	mo-push-certs mo-push-feedback)
 
@@ -18,7 +18,6 @@ $(o)/mop/admin/mo-backup: mop/admin/mo-backup.sh
 $(o)/mop/admin/mo-create-contestants: mop/admin/mo-create-contestants.sh
 $(o)/mop/admin/mo-create-eval: mop/admin/mo-create-eval.sh
 $(o)/mop/admin/mo-create-logins: mop/admin/mo-create-logins.sh
-$(o)/mop/admin/mo-create-packages: mop/admin/mo-create-packages.sh
 $(o)/mop/admin/mo-create-public: mop/admin/mo-create-public.sh
 $(o)/mop/admin/mo-create-submit: mop/admin/mo-create-submit.sh
 $(o)/mop/admin/mo-create-testusers: mop/admin/mo-create-testusers.sh
