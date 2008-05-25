@@ -26,7 +26,7 @@ close CT;
 print STDERR 0+keys %users, "\n";
 
 print STDERR "Scanning teoretical results... ";
-if (open (EX, "mop/teorie.txt")) {
+if (open (EX, "../mop/score/teorie.txt")) {
 	while (<EX>) {
 		chomp;
 		(/^$/ || /^#/) && next;
@@ -41,7 +41,7 @@ if (open (EX, "mop/teorie.txt")) {
 	}
 	close EX;
 	print STDERR "OK\n";
-} else {die "none, cannot find file mop/teorie.txt!\n";}
+} else {die "none, cannot find file teorie.txt!\n";}
 
 print STDERR "Scanning task results... ";
 $need_tasks = join("|", @ARGV);
@@ -124,13 +124,13 @@ while ($i < @table) {
 print STDERR "OK\n";
 
 if ($tex) {
-        open HDR,"mop/listina.hdr" or die "Cannot open file mop/listina.hdr with TeX template!";
+        open HDR,"../mop/score/listina.hdr" or die "Cannot open file ../mop/score/listina.hdr with TeX template!";
 	while (<HDR>) {print; }
 	close HDR;
 	
 	foreach $r (@table) { print join('&',@$r), "\\cr\n";}
 
-        open FTR,"mop/listina.ftr" or die "Cannot open file mop/listina.ftr with TeX template!";
+        open FTR,"../mop/score/listina.ftr" or die "Cannot open file ../mop/score/listina.ftr with TeX template!";
 	while (<FTR>) {print; }
 	close FTR;
 } else {
