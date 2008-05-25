@@ -17,7 +17,7 @@ void die(char *msg, ...)
   vfprintf(stderr, msg, args);
   fputc('\n', stderr);
   va_end(args);
-  exit(1);
+  exit(2);
 }
 
 void *xmalloc(size_t size)

@@ -16,7 +16,7 @@
 
 /* utils.c: Utility functions */
 
-void die(char *msg, ...) NONRET;
+void die(char *msg, ...) NONRET;		/* Dies with exit code 2 (judge error) */
 void *xmalloc(size_t size);
 void *xrealloc(void *p, size_t size);
 
