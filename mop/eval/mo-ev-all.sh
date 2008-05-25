@@ -1,4 +1,5 @@
 #!/bin/bash
+# Run `ev' on all solutions of given tasks
 
 [ -n "$1" ] || { echo "Usage: mo-ev-all <tasks>" ; exit 1 ; }
 

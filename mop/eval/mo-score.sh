@@ -1,4 +1,5 @@
 #!/usr/bin/perl
+# A generator of score sheets. More ugly than it deserves.
 
 $debug = 0;
 $detail = 0;
@@ -199,7 +200,7 @@ if ($debug) {
 	my @perm;
  	&printHtmlHeader(\@perm);
 	print "<tbody>";
-	
+
 	foreach $r (@table[1..($#table - 1)]) {
 		&printHtmlRow(@{$r}[@perm]);
 	}
@@ -252,18 +253,18 @@ sub printHtmlHeader {
 	$p++;
 	map { push @$perm, $p++ } (1..$nSub);
 	push @$perm, $p - $nSub - 1;
-	
+
 	$colspec .= "<colgroup span='" . $nSub . "'>\n";
 	$colspec .= "<colgroup span='1'>\n";
 	$hdr1 .= "<th colspan='" . ($nSub + 1) . "' style='border-bottom:1px solid black;'>$task";
 	$hdr2 .= join("", map { "<th>$_" } sort {$a <=> $b} keys %{$known_tests{$task}});
 	$hdr2 .= "<th>Total";
      }
-   
+
      $hdr1 .= "<th rowspan='2'>Total";
-     
+
    } else {  ## no detail
-   
+
      $hdr1 = "<th>Rank<th>User<th>Name";
      $extras and $p++ and push @$perm, 3 and $hdr1.="<th>Extra" and $colspec.="<colgroup span=1>";                  ##Extra hack
 
@@ -276,10 +277,10 @@ sub printHtmlHeader {
    }
 
    push @$perm, $p++;
-   
+
    print "<TABLE rules=groups frame=all border='1' cellpadding='2'>\n";
    print "$colspec<colgroup span='1'>\n";
    print "<tr>$hdr1</tr>\n";
    print "<tr>$hdr2</tr>\n" if $detail;
-  
+
 }

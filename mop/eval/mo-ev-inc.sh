@@ -1,4 +1,6 @@
 #!/bin/bash
+# An incremental evaluator: detect which solutions were changed since
+# last run and run `ev' on them.
 
 [ -n "$1" ] || { echo "Usage: mo-ev-inc [--force] <tasks>" ; exit 1 ; }
 

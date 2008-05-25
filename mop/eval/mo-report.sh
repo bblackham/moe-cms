@@ -1,4 +1,6 @@
 #!/usr/bin/perl
+# A simple generator of evaluation reports
+# (c) 2007 Martin Mares <mj@ucw.cz>
 
 use strict;
 use warnings;

@@ -1,4 +1,5 @@
 #!/bin/bash
+# List all contestants according to $CT_USER_LIST
 
 if [ "$1" = --help ] ; then
 	echo "Usage: mo-get-users [--full]"
