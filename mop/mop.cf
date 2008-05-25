@@ -8,7 +8,6 @@ MO_ROOT=/mo
 # (group id's are from the same range)
 EVAL_UID_MIN=65000
 CT_UID_MIN=65100
-CT_UID_MAX=65199
 
 # A file with the list of all contestants. Consists of tab-separated fields:
 # <login>	<full name>	[<machine>]
