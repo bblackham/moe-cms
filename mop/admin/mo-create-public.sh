@@ -1,26 +1,29 @@
 #!/bin/bash
+# Create a directory with the public scripts from mop/public/.
 
-[ -f config ] || { echo "Missing config file, check cwd." ; exit 1 ; }
+[ -f cf/mop ] || { echo "Missing config file, check cwd." ; exit 1 ; }
 set -e
-. config
+. cf/mop
 
 echo "Populating $MO_ROOT/public"
 H=`pwd`
 cd $MO_ROOT/public
-rm -rf bin lib
+rm -rf bin lib cf
 
-sed '/^\(TEST_USER\|MO_ROOT\)=/s/^/#/' <$H/config >config
-
-mkdir bin
-cp -a $H/public/[a-z]* bin/
-for a in `cat $H/public/COPY` ; do
-	cp -a $H/$a bin/
+mkdir cf
+for a in eval mop ; do
+	sed '/^\(TEST_USER\|MO_ROOT\)=/s/^/#/' <$H/cf/$a >cf/$a
 done
 
+mkdir bin
+cp -a $H/bin/{check,submit,compile,status,box,iwrapper} bin/
+
+mkdir lib
+cp -a $H/lib/libeval.sh lib/
+
 if [ -n "$REMOTE_SUBMIT" ] ; then
-	cp $H/submit/{contest,remote-submit,remote-status} bin/
-	mkdir lib
-	cp -a $H/submit/lib .
+	cp -a $H/bin/{contest,remote-submit,remote-status} bin/
+	cp -a $H/lib/perl5 lib/
 fi
 
 mkdir -p problems

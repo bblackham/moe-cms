@@ -1,8 +1,9 @@
 #!/bin/bash
+# Create home directory of the submit server.
 
-[ -f config ] || { echo "Missing config file, check cwd." ; exit 1 ; }
+[ -f cf/mop ] || { echo "Missing config file, check cwd." ; exit 1 ; }
 set -e
-. config
+. cf/mop
 [ -n "$REMOTE_SUBMIT" ] || { echo "Remote submit not enabled." ; exit 1 ; }
 
 echo "Creating submit directory"

@@ -3,9 +3,9 @@
 # local machine and copy them to solutions/.
 
 [ -n "$1" ] || { echo "Usage: mo-grab <tasks>" ; exit 1 ; }
-[ -f config ] || { echo "Missing config file, check cwd." ; exit 1 ; }
+[ -f cf/mop ] || { echo "Missing config file, check cwd." ; exit 1 ; }
 set -e
-. config
+. cf/mop
 
 for user in `bin/mo-get-users` ; do
 	echo -n "$user:"

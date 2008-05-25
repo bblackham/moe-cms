@@ -1,8 +1,10 @@
 #!/bin/bash
+# Create /etc/shadow, /etc/passwd and /etc/group records for accounts
+# used by the evaluator and the contestants.
 
-[ -f config ] || { echo "Missing config file, check cwd." ; exit 1 ; }
+[ -f cf/mop ] || { echo "Missing config file, check cwd." ; exit 1 ; }
 set -e
-. config
+. cf/mop
 
 mode=$1
 
@@ -56,7 +58,7 @@ case $mode in
 	\\def\\user#1#2#3{\\vbox to 4.5cm{\\hsize=6cm\\vss\\vss{\\fit Practice Session}\\vss\\vss{\\frm #3}\\vss\\vss#1\\vss#2\\vss\\vss}}
 	\\leavevmode
 	EOF
-    
+
     bin/mo-get-users --full | while read user name; do
       passwd=`apg -n1 -m6 -Mncl | cut -d" " -f1 | tr l1O0 '@*?-' `
       passwd_md5=`echo $passwd | bin/md5crypt`

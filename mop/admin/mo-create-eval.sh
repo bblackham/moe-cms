@@ -1,8 +1,9 @@
 #!/bin/bash
+# Create home directory of the user who runs the evaluator.
 
-[ -f config ] || { echo "Missing config file, check cwd." ; exit 1 ; }
+[ -f cf/mop ] || { echo "Missing config file, check cwd." ; exit 1 ; }
 set -e
-. config
+. cf/mop
 
 H=`pwd`
 cd $MO_ROOT/eval

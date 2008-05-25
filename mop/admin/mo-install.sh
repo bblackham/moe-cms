@@ -1,8 +1,8 @@
 #!/bin/bash
 
-[ -f config ] || { echo "Missing config file, check cwd." ; exit 1 ; }
+[ -f cf/mop ] || { echo "Missing config file, check cwd." ; exit 1 ; }
 set -e
-. config
+. cf/mop
 
 H=`pwd`
 
