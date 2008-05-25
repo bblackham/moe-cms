@@ -1,16 +1,13 @@
 New directory layout
 ~~~~~~~~~~~~~~~~~~~~
-mop/ and public/ are broken
+The scripts in mop/admin/ need debugging
 
 Evaluator
 ~~~~~~~~~
-score: better formatting of the score table
 interactive tasks: solve deadlocks?
 interactive tasks: logging of messages
 terminology: problem -> task ?
-writing of verdicts to stdout (include timing and check on interactive tasks, including judge errors)
 box: memory usage statistics (need to search for VMPeak in /proc/$PID/status, but it disappears too early)
-remove scanning of users by UID
 
 Judges
 ~~~~~~
@@ -35,10 +32,8 @@ box: limit the total amount of data written to files, so that quotas don't have 
 
 TomGav
 ~~~~~~
-
 recursive try-ln for dir input
 clean and well-defined expansion (beware of per-test re-expansion)
 machine-readable log file and/or metadata output from the sandbox
 configurable names of in/out files (independent of $PROBLEM)
 paranoidly check file mode/owner before running the sandbox
-
