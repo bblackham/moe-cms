@@ -2,9 +2,11 @@
 # (c) 2008 Martin Mares <mj@ucw.cz>
 
 DIRS+=mop
-PROGS+=$(addprefix $(o)/mop/,md5crypt)
 
-$(o)/mop/md5crypt: $(o)/mop/md5crypt.o $(LIBUCW)
+include mop/admin/Makefile
+include mop/eval/Makefile
+include mop/public/Makefile
+include mop/score/Makefile
 
 CONFIGS+=mop
 run/cf/mop: $(o)/mop/mop.cf
