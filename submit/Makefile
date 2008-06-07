@@ -1,9 +1,8 @@
 # Makefile for MO-Eval submitter
 # (c) 2008 Martin Mares <mj@ucw.cz>
 
-TLSCF:=$(shell libgnutls-config --cflags)
-TLSLF:=$(shell libgnutls-config --libs)
-GCRCF:=$(shell libgcrypt-config --cflags)
+SUBCF=$(CFLAGS_LIBGCRYPT) $(CFLAGS_LIBGNUTLS)
+SUBLF=$(LIBS_LIBGCRYPT) $(LIBS_LIBGNUTLS)
 
 DIRS+=submit
 SDIR=$(o)/submit
@@ -15,16 +14,16 @@ PROGS+=$(addprefix $(SDIR)/,submitd privkey connect)
 $(SHERLOCK_PERL_MODS): PERL_MODULE_DIR=MO
 
 $(SDIR)/submitd: $(addprefix $(SDIR)/,submitd.o commands.o tasks.o) $(LIBUCW) $(LIBSH)
-$(SDIR)/submitd: CFLAGS+=$(TLSCF) $(GCRCF)
-$(SDIR)/submitd: LIBS+=$(TLSLF)
+$(SDIR)/submitd: CFLAGS+=$(SUBCF)
+$(SDIR)/submitd: LIBS+=$(SUBLF)
 
 $(SDIR)/connect: $(SDIR)/connect.o $(LIBUCW)
-$(SDIR)/connect: CFLAGS+=$(TLSCF) $(GCRCF)
-$(SDIR)/connect: LIBS+=$(TLSLF)
+$(SDIR)/connect: CFLAGS+=$(SUBCF)
+$(SDIR)/connect: LIBS+=$(SUBLF)
 
 $(SDIR)/privkey: $(SDIR)/privkey.o $(LIBUCW)
-$(SDIR)/privkey: CFLAGS+=$(TLSCF) $(GCRCF)
-$(SDIR)/privkey: LIBS+=$(TLSLF)
+$(SDIR)/privkey: CFLAGS+=$(SUBCF)
+$(SDIR)/privkey: LIBS+=$(SUBLF)
 
 CONFIGS+=submitd
 run/cf/submitd: $(SDIR)/submitd.cf
