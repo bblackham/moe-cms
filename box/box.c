@@ -799,11 +799,18 @@ boxkeeper(void)
 	{
 	  box_pid = 0;
 	  final_stats(&rus);
-	  // FIXME: If the process has exited before being ptraced, signal an internal error
 	  if (WEXITSTATUS(stat))
 	    {
-	      meta_printf("exitcode:%d\n", WEXITSTATUS(stat));
-	      err("RE: Exited with error status %d", WEXITSTATUS(stat));
+	      if (syscall_count)
+		{
+		  meta_printf("exitcode:%d\n", WEXITSTATUS(stat));
+		  err("RE: Exited with error status %d", WEXITSTATUS(stat));
+		}
+	      else
+		{
+		  // Internal error happened inside the child process and it has been already reported.
+		  box_exit(2);
+		}
 	    }
 	  if (timeout && total_ms > timeout)
 	    err("TO: Time limit exceeded");
