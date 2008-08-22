@@ -140,7 +140,10 @@ die(char *msg, ...)
   va_list args;
   va_start(args, msg);
   flush_line();
-  vfprintf(stderr, msg, args);
+  char buf[1024];
+  vsnprintf(buf, sizeof(buf), msg, args);
+  meta_printf("status:XX\nmessage:%s\n", buf);
+  fputs(buf, stderr);
   fputc('\n', stderr);
   box_exit(2);
 }
@@ -151,7 +154,15 @@ err(char *msg, ...)
   va_list args;
   va_start(args, msg);
   flush_line();
-  vfprintf(stderr, msg, args);
+  if (msg[0] && msg[1] && msg[2] == ':' && msg[3] == ' ')
+    {
+      meta_printf("status:%c%c\n", msg[0], msg[1]);
+      msg += 4;
+    }
+  char buf[1024];
+  vsnprintf(buf, sizeof(buf), msg, args);
+  meta_printf("message:%s\n", buf);
+  fputs(buf, stderr);
   fputc('\n', stderr);
   box_exit(1);
 }
@@ -568,7 +579,7 @@ valid_filename(unsigned long addr)
   static int mem_fd;
 
   if (!file_access)
-    err("File access forbidden");
+    err("FA: File access forbidden");
   if (file_access >= 9)
     return;
 
@@ -589,14 +600,14 @@ valid_filename(unsigned long addr)
 	  if (l > remains)
 	    l = remains;
 	  if (!l)
-	    err("Access to file with name too long");
+	    err("FA: Access to file with name too long");
 	  if (lseek64(mem_fd, addr, SEEK_SET) < 0)
 	    die("lseek64(mem): %m");
 	  remains = read(mem_fd, end, l);
 	  if (remains < 0)
 	    die("read(mem): %m");
 	  if (!remains)
-	    err("Access to file with name out of memory");
+	    err("FA: Access to file with name out of memory");
 	  end += l;
 	  addr += l;
 	}
@@ -626,7 +637,7 @@ valid_filename(unsigned long addr)
       act = match_path_rule(&default_path_rules[i], namebuf);
 
   if (act != A_YES)
-    err("Forbidden access to file `%s'", namebuf);
+    err("FA: Forbidden access to file `%s'", namebuf);
 }
 
 static int
@@ -658,11 +669,17 @@ valid_syscall(struct user *u)
     {
     case __NR_kill:
       if (u->regs.ebx == box_pid)
-	err("Committed suicide by signal %d", (int)u->regs.ecx);
+	{
+	  meta_printf("exitsig:%d\n", (int)u->regs.ecx);
+	  err("SG: Committed suicide by signal %d", (int)u->regs.ecx);
+	}
       return 0;
     case __NR_tgkill:
       if (u->regs.ebx == box_pid && u->regs.ecx == box_pid)
-	err("Committed suicide by signal %d", (int)u->regs.edx);
+	{
+	  meta_printf("exitsig:%d\n", (int)u->regs.edx);
+	  err("SG: Committed suicide by signal %d", (int)u->regs.edx);
+	}
       return 0;
     default:
       return 0;
@@ -681,7 +698,8 @@ static void
 signal_int(int unused UNUSED)
 {
   /* Interrupts are fatal, so no synchronization requirements. */
-  err("Interrupted");
+  meta_printf("exitsig:%d\n", SIGINT);
+  err("SG: Interrupted");
 }
 
 static void
@@ -695,7 +713,7 @@ check_timeout(void)
       timersub(&now, &start_time, &wall);
       wall_ms = wall.tv_sec*1000 + wall.tv_usec/1000;
       if (wall_ms > wall_timeout)
-        err("Time limit exceeded (wall clock)");
+        err("TO: Time limit exceeded (wall clock)");
       if (verbose > 1)
         fprintf(stderr, "[wall time check: %d msec]\n", wall_ms);
     }
@@ -734,7 +752,7 @@ check_timeout(void)
       if (verbose > 1)
 	fprintf(stderr, "[time check: %d msec]\n", ms);
       if (ms > timeout)
-	err("Time limit exceeded");
+	err("TO: Time limit exceeded");
     }
 }
 
@@ -783,11 +801,14 @@ boxkeeper(void)
 	  final_stats(&rus);
 	  // FIXME: If the process has exited before being ptraced, signal an internal error
 	  if (WEXITSTATUS(stat))
-	    err("Exited with error status %d", WEXITSTATUS(stat));
+	    {
+	      meta_printf("exitcode:%d\n", WEXITSTATUS(stat));
+	      err("RE: Exited with error status %d", WEXITSTATUS(stat));
+	    }
 	  if (timeout && total_ms > timeout)
-	    err("Time limit exceeded");
+	    err("TO: Time limit exceeded");
 	  if (wall_timeout && wall_ms > wall_timeout)
-	    err("Time limit exceeded (wall clock)");
+	    err("TO: Time limit exceeded (wall clock)");
 	  flush_line();
 	  fprintf(stderr, "OK (%d.%03d sec real, %d.%03d sec wall, %d syscalls)\n",
 	      total_ms/1000, total_ms%1000,
@@ -798,7 +819,8 @@ boxkeeper(void)
       if (WIFSIGNALED(stat))
 	{
 	  box_pid = 0;
-	  err("Caught fatal signal %d%s", WTERMSIG(stat), (syscall_count ? "" : " during startup"));
+	  meta_printf("exitsig:%d\n", WTERMSIG(stat));
+	  err("SG: Caught fatal signal %d%s", WTERMSIG(stat), (syscall_count ? "" : " during startup"));
 	}
       if (WIFSTOPPED(stat))
 	{
@@ -835,7 +857,7 @@ boxkeeper(void)
 		      u.regs.orig_eax = 0xffffffff;
 		      if (ptrace(PTRACE_SETREGS, box_pid, NULL, &u) < 0)
 			die("ptrace(PTRACE_SETREGS): %m");
-		      err("Forbidden syscall %s", syscall_name(sys, namebuf));
+		      err("FO: Forbidden syscall %s", syscall_name(sys, namebuf));
 		    }
 		}
 	      else					/* Syscall return */
@@ -848,7 +870,10 @@ boxkeeper(void)
 	      ptrace(PTRACE_SYSCALL, box_pid, 0, sig);
 	    }
 	  else
-	    err("Received signal %d", sig);
+	    {
+	      meta_printf("exitsig:%d", sig);
+	      err("SG: Received signal %d", sig);
+	    }
 	}
       else
 	die("wait4: unknown status %x, giving up!", stat);
