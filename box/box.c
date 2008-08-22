@@ -56,8 +56,66 @@ extern loff_t llseek(int fd, loff_t pos, int whence);
 #define long_seek(f,o,w) llseek(f,o,w)
 #endif
 
+static void die(char *msg, ...) NONRET;
+
+/*** Meta-files ***/
+
+static FILE *metafile;
+
+static void
+meta_open(const char *name)
+{
+  if (!strcmp(name, "-"))
+    {
+      metafile = stdout;
+      return;
+    }
+  metafile = fopen(name, "w");
+  if (!metafile)
+    die("Failed to open metafile '%s'",name);
+}
+
+static void
+meta_close(void)
+{
+  if (metafile && metafile != stdout)
+    fclose(metafile);
+}
+
+static void __attribute__((format(printf,1,2)))
+meta_printf(const char *fmt, ...)
+{
+  if (!metafile)
+    return;
+
+  va_list args;
+  va_start(args, fmt);
+  vfprintf(metafile, fmt, args);
+  va_end(args);
+}
+
+static int total_ms, wall_ms;
+
+static void
+final_stats(struct rusage *rus)
+{
+  struct timeval total, now, wall;
+  timeradd(&rus->ru_utime, &rus->ru_stime, &total);
+  total_ms = total.tv_sec*1000 + total.tv_usec/1000;
+  gettimeofday(&now, NULL);
+  // FIXME: We are not guaranteed to have start_time always initialized
+  timersub(&now, &start_time, &wall);
+  wall_ms = wall.tv_sec*1000 + wall.tv_usec/1000;
+
+  meta_printf("time:%d.%03d\ntime_wall:%d.%03d\n",
+    total_ms/1000, total_ms%1000,
+    wall_ms/1000, wall_ms%1000);
+}
+
+/*** Messages and exits ***/
+
 static void NONRET
-box_exit(void)
+box_exit(int rc)
 {
   if (box_pid > 0)
     {
@@ -65,8 +123,17 @@ box_exit(void)
 	ptrace(PTRACE_KILL, box_pid);
       kill(-box_pid, SIGKILL);
       kill(box_pid, SIGKILL);
+
+      struct rusage rus;
+      int stat;
+      int p = wait4(box_pid, &stat, 0, &rus);
+      if (p < 0)
+	fprintf(stderr, "UGH: Lost track of the process\n");
+      else
+	final_stats(&rus);
     }
-  exit(1);
+  meta_close();
+  exit(rc);
 }
 
 static void
@@ -85,7 +152,8 @@ die(char *msg, ...)
   flush_line();
   vfprintf(stderr, msg, args);
   fputc('\n', stderr);
-  box_exit();
+  box_exit(1);
+  // FIXME: exit(2) for errors of the box itself
 }
 
 static void __attribute__((format(printf,1,2)))
@@ -670,34 +738,6 @@ check_timeout(void)
     }
 }
 
-static FILE *metafile;
-
-static void
-metafile_open(const char *name)
-{
-  if (!name)
-    {
-      metafile=NULL;
-      return;
-    }
-  if (!strcmp(name,"-"))
-    {
-      metafile=stdout;
-      return;
-    }
-  metafile=fopen(name, "w");
-  if (!metafile)
-    die("Failed to open metafile '%s'",name);
-}
-
-static void
-metafile_write(double t_total, double t_wall)
-{
-  if (!metafile)
-    return;
-  fprintf(metafile, "time:%0.3f\ntime_wall:%0.3f\n", t_total, t_wall);
-}
-
 static void
 boxkeeper(void)
 {
@@ -739,27 +779,21 @@ boxkeeper(void)
 	die("wait4: unknown pid %d exited!", p);
       if (WIFEXITED(stat))
 	{
-	  struct timeval total, now, wall;
-	  int total_ms, wall_ms;
 	  box_pid = 0;
+	  final_stats(&rus);
+	  // FIXME: If the process has exited before being ptraced, signal an internal error
 	  if (WEXITSTATUS(stat))
 	    die("Exited with error status %d", WEXITSTATUS(stat));
-	  timeradd(&rus.ru_utime, &rus.ru_stime, &total);
-	  total_ms = total.tv_sec*1000 + total.tv_usec/1000;
-	  gettimeofday(&now, NULL);
-	  timersub(&now, &start_time, &wall);
-	  wall_ms = wall.tv_sec*1000 + wall.tv_usec/1000;
 	  if (timeout && total_ms > timeout)
 	    die("Time limit exceeded");
 	  if (wall_timeout && wall_ms > wall_timeout)
 	    die("Time limit exceeded (wall clock)");
 	  flush_line();
 	  fprintf(stderr, "OK (%d.%03d sec real, %d.%03d sec wall, %d syscalls)\n",
-	      (int) total.tv_sec, (int) total.tv_usec/1000,
-	      (int) wall.tv_sec, (int) wall.tv_usec/1000,
+	      total_ms/1000, total_ms%1000,
+	      wall_ms/1000, wall_ms%1000,
 	      syscall_count);
-	  metafile_write(total.tv_sec+total.tv_usec/1000000.0,wall.tv_sec+wall.tv_usec/1000000.0);
-	  exit(0);
+	  box_exit(0);
 	}
       if (WIFSIGNALED(stat))
 	{
@@ -936,7 +970,7 @@ main(int argc, char **argv)
 	memory_limit = atol(optarg);
 	break;
       case 'M':
-	metafile_open(optarg);
+	meta_open(optarg);
 	break;
       case 'o':
 	redir_stdout = optarg;
