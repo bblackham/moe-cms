@@ -151,8 +151,18 @@ die(char *msg, ...)
   flush_line();
   vfprintf(stderr, msg, args);
   fputc('\n', stderr);
+  box_exit(2);
+}
+
+static void NONRET __attribute__((format(printf,1,2)))
+err(char *msg, ...)
+{
+  va_list args;
+  va_start(args, msg);
+  flush_line();
+  vfprintf(stderr, msg, args);
+  fputc('\n', stderr);
   box_exit(1);
-  // FIXME: exit(2) for errors of the box itself
 }
 
 static void __attribute__((format(printf,1,2)))
@@ -567,7 +577,7 @@ valid_filename(unsigned long addr)
   static int mem_fd;
 
   if (!file_access)
-    die("File access forbidden");
+    err("File access forbidden");
   if (file_access >= 9)
     return;
 
@@ -588,14 +598,14 @@ valid_filename(unsigned long addr)
 	  if (l > remains)
 	    l = remains;
 	  if (!l)
-	    die("Access to file with name too long");
+	    err("Access to file with name too long");
 	  if (long_seek(mem_fd, addr, SEEK_SET) < 0)
 	    die("long_seek(mem): %m");
 	  remains = read(mem_fd, end, l);
 	  if (remains < 0)
 	    die("read(mem): %m");
 	  if (!remains)
-	    die("Access to file with name out of memory");
+	    err("Access to file with name out of memory");
 	  end += l;
 	  addr += l;
 	}
@@ -625,7 +635,7 @@ valid_filename(unsigned long addr)
       act = match_path_rule(&default_path_rules[i], namebuf);
 
   if (act != A_YES)
-    die("Forbidden access to file `%s'", namebuf);
+    err("Forbidden access to file `%s'", namebuf);
 }
 
 static int
@@ -657,11 +667,11 @@ valid_syscall(struct user *u)
     {
     case __NR_kill:
       if (u->regs.ebx == box_pid)
-	die("Committed suicide by signal %d", (int)u->regs.ecx);
+	err("Committed suicide by signal %d", (int)u->regs.ecx);
       return 0;
     case __NR_tgkill:
       if (u->regs.ebx == box_pid && u->regs.ecx == box_pid)
-	die("Committed suicide by signal %d", (int)u->regs.edx);
+	err("Committed suicide by signal %d", (int)u->regs.edx);
       return 0;
     default:
       return 0;
@@ -680,7 +690,7 @@ static void
 signal_int(int unused UNUSED)
 {
   /* Interrupts are fatal, so no synchronization requirements. */
-  die("Interrupted");
+  err("Interrupted");
 }
 
 static void
@@ -694,7 +704,7 @@ check_timeout(void)
       timersub(&now, &start_time, &wall);
       wall_ms = wall.tv_sec*1000 + wall.tv_usec/1000;
       if (wall_ms > wall_timeout)
-        die("Time limit exceeded (wall clock)");
+        err("Time limit exceeded (wall clock)");
       if (verbose > 1)
         fprintf(stderr, "[wall time check: %d msec]\n", wall_ms);
     }
@@ -733,7 +743,7 @@ check_timeout(void)
       if (verbose > 1)
 	fprintf(stderr, "[time check: %d msec]\n", ms);
       if (ms > timeout)
-	die("Time limit exceeded");
+	err("Time limit exceeded");
     }
 }
 
@@ -782,11 +792,11 @@ boxkeeper(void)
 	  final_stats(&rus);
 	  // FIXME: If the process has exited before being ptraced, signal an internal error
 	  if (WEXITSTATUS(stat))
-	    die("Exited with error status %d", WEXITSTATUS(stat));
+	    err("Exited with error status %d", WEXITSTATUS(stat));
 	  if (timeout && total_ms > timeout)
-	    die("Time limit exceeded");
+	    err("Time limit exceeded");
 	  if (wall_timeout && wall_ms > wall_timeout)
-	    die("Time limit exceeded (wall clock)");
+	    err("Time limit exceeded (wall clock)");
 	  flush_line();
 	  fprintf(stderr, "OK (%d.%03d sec real, %d.%03d sec wall, %d syscalls)\n",
 	      total_ms/1000, total_ms%1000,
@@ -797,7 +807,7 @@ boxkeeper(void)
       if (WIFSIGNALED(stat))
 	{
 	  box_pid = 0;
-	  die("Caught fatal signal %d%s", WTERMSIG(stat), (syscall_count ? "" : " during startup"));
+	  err("Caught fatal signal %d%s", WTERMSIG(stat), (syscall_count ? "" : " during startup"));
 	}
       if (WIFSTOPPED(stat))
 	{
@@ -834,7 +844,7 @@ boxkeeper(void)
 		      u.regs.orig_eax = 0xffffffff;
 		      if (ptrace(PTRACE_SETREGS, box_pid, NULL, &u) < 0)
 			die("ptrace(PTRACE_SETREGS): %m");
-		      die("Forbidden syscall %s", syscall_name(sys, namebuf));
+		      err("Forbidden syscall %s", syscall_name(sys, namebuf));
 		    }
 		}
 	      else					/* Syscall return */
@@ -847,7 +857,7 @@ boxkeeper(void)
 	      ptrace(PTRACE_SYSCALL, box_pid, 0, sig);
 	    }
 	  else
-	    die("Received signal %d", sig);
+	    err("Received signal %d", sig);
 	}
       else
 	die("wait4: unknown status %x, giving up!", stat);
