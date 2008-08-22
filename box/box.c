@@ -107,9 +107,8 @@ final_stats(struct rusage *rus)
   timersub(&now, &start_time, &wall);
   wall_ms = wall.tv_sec*1000 + wall.tv_usec/1000;
 
-  meta_printf("time:%d.%03d\ntime_wall:%d.%03d\n",
-    total_ms/1000, total_ms%1000,
-    wall_ms/1000, wall_ms%1000);
+  meta_printf("time:%d.%03d\n", total_ms/1000, total_ms%1000);
+  meta_printf("time-wall:%d.%03d\n", wall_ms/1000, wall_ms%1000);
 }
 
 /*** Messages and exits ***/
