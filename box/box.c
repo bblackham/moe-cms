@@ -670,6 +670,34 @@ check_timeout(void)
     }
 }
 
+static FILE *metafile;
+
+static void
+metafile_open(const char *name)
+{
+  if (!name)
+    {
+      metafile=NULL;
+      return;
+    }
+  if (!strcmp(name,"-"))
+    {
+      metafile=stdout;
+      return;
+    }
+  metafile=fopen(name, "w");
+  if (!metafile)
+    die("Failed to open metafile '%s'",name);
+}
+
+static void
+metafile_write(double t_total, double t_wall)
+{
+  if (!metafile)
+    return;
+  fprintf(metafile, "time:%0.3f\ntime_wall:%0.3f\n", t_total, t_wall);
+}
+
 static void
 boxkeeper(void)
 {
@@ -730,6 +758,7 @@ boxkeeper(void)
 	      (int) total.tv_sec, (int) total.tv_usec/1000,
 	      (int) wall.tv_sec, (int) wall.tv_usec/1000,
 	      syscall_count);
+	  metafile_write(total.tv_sec+total.tv_usec/1000000.0,wall.tv_sec+wall.tv_usec/1000000.0);
 	  exit(0);
 	}
       if (WIFSIGNALED(stat))
@@ -860,6 +889,7 @@ Options:\n\
 -f\t\tFilter system calls (-ff=very restricted)\n\
 -i <file>\tRedirect stdin from <file>\n\
 -m <size>\tLimit address space to <size> KB\n\
+-M <file>\tOutput process information to <file> (name:value)\n\
 -o <file>\tRedirect stdout to <file>\n\
 -p <path>\tPermit access to the specified path (or subtree if it ends with a `/')\n\
 -p <path>=<act>\tDefine action for the specified path (<act>=yes/no)\n\
@@ -880,7 +910,7 @@ main(int argc, char **argv)
   int c;
   uid_t uid;
 
-  while ((c = getopt(argc, argv, "a:c:eE:fi:m:o:p:r:s:t:Tvw:")) >= 0)
+  while ((c = getopt(argc, argv, "a:c:eE:fi:m:M:o:p:r:s:t:Tvw:")) >= 0)
     switch (c)
       {
       case 'a':
@@ -904,6 +934,9 @@ main(int argc, char **argv)
 	break;
       case 'm':
 	memory_limit = atol(optarg);
+	break;
+      case 'M':
+	metafile_open(optarg);
 	break;
       case 'o':
 	redir_stdout = optarg;
