@@ -47,15 +47,6 @@ static int ticks_per_sec;
 static int exec_seen;
 static int partial_line;
 
-#if defined(__GLIBC__) && __GLIBC__ == 2 && __GLIBC_MINOR__ > 0
-/* glibc 2.1 or newer -> has lseek64 */
-#define long_seek(f,o,w) lseek64(f,o,w)
-#else
-/* Touching clandestine places in glibc */
-extern loff_t llseek(int fd, loff_t pos, int whence);
-#define long_seek(f,o,w) llseek(f,o,w)
-#endif
-
 static void die(char *msg, ...) NONRET;
 
 /*** Meta-files ***/
@@ -599,8 +590,8 @@ valid_filename(unsigned long addr)
 	    l = remains;
 	  if (!l)
 	    err("Access to file with name too long");
-	  if (long_seek(mem_fd, addr, SEEK_SET) < 0)
-	    die("long_seek(mem): %m");
+	  if (lseek64(mem_fd, addr, SEEK_SET) < 0)
+	    die("lseek64(mem): %m");
 	  remains = read(mem_fd, end, l);
 	  if (remains < 0)
 	    die("read(mem): %m");
