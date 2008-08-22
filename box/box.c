@@ -94,7 +94,6 @@ final_stats(struct rusage *rus)
   timeradd(&rus->ru_utime, &rus->ru_stime, &total);
   total_ms = total.tv_sec*1000 + total.tv_usec/1000;
   gettimeofday(&now, NULL);
-  // FIXME: We are not guaranteed to have start_time always initialized
   timersub(&now, &start_time, &wall);
   wall_ms = wall.tv_sec*1000 + wall.tv_usec/1000;
 
