@@ -935,7 +935,7 @@ Options:\n\
 -v\t\tBe verbose (use multiple times for even more verbosity)\n\
 -w <time>\tSet wall clock time limit (seconds, fractions allowed)\n\
 ");
-  exit(1);
+  exit(2);
 }
 
 int
