@@ -47,7 +47,11 @@ static int ticks_per_sec;
 static int exec_seen;
 static int partial_line;
 
+static int mem_peak_kb;
+static int total_ms, wall_ms;
+
 static void die(char *msg, ...) NONRET;
+static void sample_mem_peak(void);
 
 /*** Meta-files ***/
 
@@ -85,8 +89,6 @@ meta_printf(const char *fmt, ...)
   va_end(args);
 }
 
-static int total_ms, wall_ms;
-
 static void
 final_stats(struct rusage *rus)
 {
@@ -99,6 +101,7 @@ final_stats(struct rusage *rus)
 
   meta_printf("time:%d.%03d\n", total_ms/1000, total_ms%1000);
   meta_printf("time-wall:%d.%03d\n", wall_ms/1000, wall_ms%1000);
+  meta_printf("mem:%llu\n", (unsigned long long) mem_peak_kb * 1024);
 }
 
 /*** Messages and exits ***/
@@ -108,6 +111,7 @@ box_exit(int rc)
 {
   if (box_pid > 0)
     {
+      sample_mem_peak();
       if (is_ptraced)
 	ptrace(PTRACE_KILL, box_pid);
       kill(-box_pid, SIGKILL);
@@ -705,6 +709,27 @@ signal_int(int unused UNUSED)
   err("SG: Interrupted");
 }
 
+#define PROC_BUF_SIZE 4096
+static void
+read_proc_file(char *buf, char *name, int *fdp)
+{
+  int c;
+
+  if (!*fdp)
+    {
+      sprintf(buf, "/proc/%d/%s", (int) box_pid, name);
+      *fdp = open(buf, O_RDONLY);
+      if (*fdp < 0)
+	die("open(%s): %m", buf);
+    }
+  lseek(*fdp, 0, SEEK_SET);
+  if ((c = read(*fdp, buf, PROC_BUF_SIZE-1)) < 0)
+    die("read on /proc/$pid/%s: %m", name);
+  if (c >= PROC_BUF_SIZE-1)
+    die("/proc/$pid/%s too long", name);
+  buf[c] = 0;
+}
+
 static void
 check_timeout(void)
 {
@@ -722,41 +747,74 @@ check_timeout(void)
     }
   if (timeout)
     {
-      char buf[4096], *x;
-      int c, utime, stime, ms;
-      static int proc_status_fd;
-      if (!proc_status_fd)
-	{
-	  sprintf(buf, "/proc/%d/stat", (int) box_pid);
-	  proc_status_fd = open(buf, O_RDONLY);
-	  if (proc_status_fd < 0)
-	    die("open(%s): %m", buf);
-	}
-      lseek(proc_status_fd, 0, SEEK_SET);
-      if ((c = read(proc_status_fd, buf, sizeof(buf)-1)) < 0)
-	die("read on /proc/$pid/stat: %m");
-      if (c >= (int) sizeof(buf) - 1)
-	die("/proc/$pid/stat too long");
-      buf[c] = 0;
+      char buf[PROC_BUF_SIZE], *x;
+      int utime, stime, ms;
+      static int proc_stat_fd;
+      read_proc_file(buf, "stat", &proc_stat_fd);
       x = buf;
       while (*x && *x != ' ')
 	x++;
       while (*x == ' ')
 	x++;
       if (*x++ != '(')
-	die("proc syntax error 1");
+	die("proc stat syntax error 1");
       while (*x && (*x != ')' || x[1] != ' '))
 	x++;
       while (*x == ')' || *x == ' ')
 	x++;
       if (sscanf(x, "%*c %*d %*d %*d %*d %*d %*d %*d %*d %*d %*d %d %d", &utime, &stime) != 2)
-	die("proc syntax error 2");
+	die("proc stat syntax error 2");
       ms = (utime + stime) * 1000 / ticks_per_sec;
       if (verbose > 1)
 	fprintf(stderr, "[time check: %d msec]\n", ms);
       if (ms > timeout)
 	err("TO: Time limit exceeded");
     }
+}
+
+static void
+sample_mem_peak(void)
+{
+  /*
+   *  We want to find out the peak memory usage of the process, which is
+   *  maintained by the kernel, but unforunately it gets lost when the
+   *  process exits (it is not reported in struct rusage). Therefore we
+   *  have to sample it whenever we suspect that the process is about
+   *  to exit.
+   */
+  char buf[PROC_BUF_SIZE], *x;
+  static int proc_status_fd;
+  read_proc_file(buf, "status", &proc_status_fd);
+
+  x = buf;
+  while (*x)
+    {
+      char *key = x;
+      while (*x && *x != ':' && *x != '\n')
+	x++;
+      if (!*x || *x == '\n')
+	break;
+      *x++ = 0;
+      while (*x == ' ' || *x == '\t')
+	x++;
+
+      char *val = x;
+      while (*x && *x != '\n')
+	x++;
+      if (!*x)
+	break;
+      *x++ = 0;
+
+      if (!strcmp(key, "VmPeak"))
+	{
+	  int peak = atoi(val);
+	  if (peak > mem_peak_kb)
+	    mem_peak_kb = peak;
+	}
+    }
+
+  if (verbose > 1)
+    msg("[mem-peak: %u KB]\n", mem_peak_kb);
 }
 
 static void
@@ -820,9 +878,10 @@ boxkeeper(void)
 	  if (wall_timeout && wall_ms > wall_timeout)
 	    err("TO: Time limit exceeded (wall clock)");
 	  flush_line();
-	  fprintf(stderr, "OK (%d.%03d sec real, %d.%03d sec wall, %d syscalls)\n",
+	  fprintf(stderr, "OK (%d.%03d sec real, %d.%03d sec wall, %d MB, %d syscalls)\n",
 	      total_ms/1000, total_ms%1000,
 	      wall_ms/1000, wall_ms%1000,
+	      (mem_peak_kb + 1023) / 1024,
 	      syscall_count);
 	  box_exit(0);
 	}
@@ -830,6 +889,7 @@ boxkeeper(void)
 	{
 	  box_pid = 0;
 	  meta_printf("exitsig:%d\n", WTERMSIG(stat));
+	  final_stats(&rus);
 	  err("SG: Caught fatal signal %d%s", WTERMSIG(stat), (syscall_count ? "" : " during startup"));
 	}
       if (WIFSTOPPED(stat))
@@ -872,11 +932,13 @@ boxkeeper(void)
 		}
 	      else					/* Syscall return */
 		msg("= %ld\n", u.regs.eax);
+	      sample_mem_peak();
 	      ptrace(PTRACE_SYSCALL, box_pid, 0, 0);
 	    }
 	  else if (sig != SIGSTOP && sig != SIGXCPU && sig != SIGXFSZ)
 	    {
 	      msg(">> Signal %d\n", sig);
+	      sample_mem_peak();			/* Signal might be fatal, so update mem-peak */
 	      ptrace(PTRACE_SYSCALL, box_pid, 0, sig);
 	    }
 	  else

@@ -8,6 +8,7 @@ interactive tasks: solve deadlocks?
 interactive tasks: logging of messages
 terminology: problem -> task ?
 box: memory usage statistics (need to search for VMPeak in /proc/$PID/status, but it disappears too early)
+box: explicit breakpoints are reported as syscall #-1
 
 Judges
 ~~~~~~
