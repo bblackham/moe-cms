@@ -901,6 +901,8 @@ boxkeeper(void)
 	      static int stop_count = -1;
 	      if (ptrace(PTRACE_GETREGS, box_pid, NULL, &u) < 0)
 		die("ptrace(PTRACE_GETREGS): %m");
+	      if (u.regs.orig_eax < 0)		/* Process issued a breakpoint instruction */
+		err("SG: Breakpoint");
 	      stop_count++;
 	      if (!stop_count)			/* Traceme request */
 		msg(">> Traceme request caught\n");
