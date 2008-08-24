@@ -262,6 +262,7 @@ static unsigned char syscall_action[NUM_ACTIONS] = {
     S(fcntl) = A_YES,
     S(fcntl64) = A_YES,
     S(mmap) = A_YES,
+    S(mmap) = A_YES,
     S(munmap) = A_YES,
     S(ioctl) = A_YES,
     S(uname) = A_YES,
@@ -308,7 +309,6 @@ static unsigned char syscall_action[NUM_ACTIONS] = {
     S(rt_sigtimedwait) = A_YES | A_LIBERAL,
     S(rt_sigqueueinfo) = A_YES | A_LIBERAL,
     S(rt_sigsuspend) = A_YES | A_LIBERAL,
-    S(mmap2) = A_YES | A_LIBERAL,
     S(_sysctl) = A_YES | A_LIBERAL,
 #undef S
 };
