@@ -7,8 +7,6 @@ Evaluator
 interactive tasks: solve deadlocks?
 interactive tasks: logging of messages
 terminology: problem -> task ?
-box: memory usage statistics (need to search for VMPeak in /proc/$PID/status, but it disappears too early)
-box: explicit breakpoints are reported as syscall #-1
 
 Judges
 ~~~~~~
@@ -27,13 +25,11 @@ New submitter:
 
 Various ideas:
 scores dependent on time (like PL olympiad)
-box: configurable access to timers and /proc/self/{stat,fd}
 box: limit the total amount of data written to files, so that quotas don't have to be set up
 
 TomGav
 ~~~~~~
 recursive try-ln for dir input
 clean and well-defined expansion (beware of per-test re-expansion)
-machine-readable log file and/or metadata output from the sandbox
 configurable names of in/out files (independent of $PROBLEM)
 paranoidly check file mode/owner before running the sandbox
