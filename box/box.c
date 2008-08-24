@@ -268,6 +268,7 @@ static unsigned char syscall_action[NUM_ACTIONS] = {
     S(gettid) = A_YES,
     S(set_thread_area) = A_YES,
     S(get_thread_area) = A_YES,
+    S(set_tid_address) = A_YES,
     S(exit_group) = A_YES,
 
     // Syscalls permitted only in liberal mode
