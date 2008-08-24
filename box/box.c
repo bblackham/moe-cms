@@ -133,6 +133,7 @@ flush_line(void)
   partial_line = 0;
 }
 
+/* Report an error of the sandbox itself */
 static void NONRET __attribute__((format(printf,1,2)))
 die(char *msg, ...)
 {
@@ -147,6 +148,7 @@ die(char *msg, ...)
   box_exit(2);
 }
 
+/* Report an error of the program inside the sandbox */
 static void NONRET __attribute__((format(printf,1,2)))
 err(char *msg, ...)
 {
@@ -166,6 +168,7 @@ err(char *msg, ...)
   box_exit(1);
 }
 
+/* Write a message, but only if in verbose mode */
 static void __attribute__((format(printf,1,2)))
 msg(char *msg, ...)
 {
