@@ -211,7 +211,10 @@ enum action {
   A_NO,			// Always forbid
   A_YES,		// Always permit
   A_FILENAME,		// Permit if arg1 is a known filename
+  A_ACTION_MASK = 15,
+  A_SAMPLE_MEM = 64,	// Sample memory usage before the syscall
   A_LIBERAL = 128,	// Valid only in liberal mode
+  // Must fit in a unsigned char
 };
 
 static unsigned char syscall_action[NUM_ACTIONS] = {
@@ -233,7 +236,7 @@ static unsigned char syscall_action[NUM_ACTIONS] = {
     S(readlink) = A_FILENAME,
 
     // Syscalls permitted always
-    S(exit) = A_YES,
+    S(exit) = A_YES | A_SAMPLE_MEM,
     S(read) = A_YES,
     S(write) = A_YES,
     S(close) = A_YES,
@@ -274,7 +277,7 @@ static unsigned char syscall_action[NUM_ACTIONS] = {
     S(set_thread_area) = A_YES,
     S(get_thread_area) = A_YES,
     S(set_tid_address) = A_YES,
-    S(exit_group) = A_YES,
+    S(exit_group) = A_YES | A_SAMPLE_MEM,
 
     // Syscalls permitted only in liberal mode
     S(time) = A_YES | A_LIBERAL,
@@ -647,28 +650,28 @@ valid_filename(unsigned long addr)
     err("FA: Forbidden access to file `%s'", namebuf);
 }
 
+// Check syscall. If invalid, return -1, otherwise return the action mask.
 static int
 valid_syscall(struct user *u)
 {
   unsigned int sys = u->regs.orig_eax;
-  enum action act = (sys < NUM_ACTIONS) ? syscall_action[sys] : A_DEFAULT;
+  unsigned int act = (sys < NUM_ACTIONS) ? syscall_action[sys] : A_DEFAULT;
 
   if (act & A_LIBERAL)
     {
-      if (filter_syscalls == 1)
-        act &= ~A_LIBERAL;
-      else
+      if (filter_syscalls != 1)
         act = A_DEFAULT;
     }
-  switch (act)
+
+  switch (act & A_ACTION_MASK)
     {
     case A_YES:
-      return 1;
+      return act;
     case A_NO:
-      return 0;
+      return -1;
     case A_FILENAME:
       valid_filename(u->regs.ebx);
-      return 1;
+      return act;
     default: ;
     }
 
@@ -680,16 +683,16 @@ valid_syscall(struct user *u)
 	  meta_printf("exitsig:%d\n", (int)u->regs.ecx);
 	  err("SG: Committed suicide by signal %d", (int)u->regs.ecx);
 	}
-      return 0;
+      return -1;
     case __NR_tgkill:
       if (u->regs.ebx == box_pid && u->regs.ecx == box_pid)
 	{
 	  meta_printf("exitsig:%d\n", (int)u->regs.edx);
 	  err("SG: Committed suicide by signal %d", (int)u->regs.edx);
 	}
-      return 0;
+      return -1;
     default:
-      return 0;
+      return -1;
     }
 }
 
@@ -909,6 +912,7 @@ boxkeeper(void)
 	      else if (stop_count & 1)		/* Syscall entry */
 		{
 		  char namebuf[32];
+		  int act;
 		  msg(">> Syscall %-12s (%08lx,%08lx,%08lx) ", syscall_name(u.regs.orig_eax, namebuf), u.regs.ebx, u.regs.ecx, u.regs.edx);
 		  if (!exec_seen)
 		    {
@@ -916,8 +920,12 @@ boxkeeper(void)
 		      if (u.regs.orig_eax == __NR_execve)
 			exec_seen = 1;
 		    }
-		  else if (valid_syscall(&u))
-		    syscall_count++;
+		  else if ((act = valid_syscall(&u)) >= 0)
+		    {
+		      syscall_count++;
+		      if (act & A_SAMPLE_MEM)
+			sample_mem_peak();
+		    }
 		  else
 		    {
 		      /*
@@ -934,7 +942,6 @@ boxkeeper(void)
 		}
 	      else					/* Syscall return */
 		msg("= %ld\n", u.regs.eax);
-	      sample_mem_peak();
 	      ptrace(PTRACE_SYSCALL, box_pid, 0, 0);
 	    }
 	  else if (sig != SIGSTOP && sig != SIGXCPU && sig != SIGXFSZ)
