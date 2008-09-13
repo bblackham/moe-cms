@@ -263,7 +263,7 @@ function test-result
 	SG=${M#Caught fatal signal }
 	SG=${SG#Committed suicide by signal }
 	if [ "$SG" != "$M" ] ; then
-		SG=`perl -MConfig -e '@s=split / /,$Config{sig_name}; print $s[$ARGV[0]]' $SG`
+		SG=`kill -l $SG 2>/dev/null`
 		[ -z "$SG" ] || M="$M (SIG$SG)"
 	fi
 
