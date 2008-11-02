@@ -263,14 +263,14 @@ function test-result
 	SG=${M#Caught fatal signal }
 	SG=${SG#Committed suicide by signal }
 	if [ "$SG" != "$M" ] ; then
-		SG=`kill -l $SG 2>/dev/null`
+		SG=`kill -l $SG 2>/dev/null` || SG=
 		[ -z "$SG" ] || M="$M (SIG$SG)"
 	fi
 
 	# Translate runtime errors to readable strings
 	RE=${M#Exited with error status }
 	if [ -n "$EXIT_CODE_HOOK" -a "$RE" != "$M" ] ; then
-		NEWMSG=`$EXIT_CODE_HOOK $RE`
+		NEWMSG=`$EXIT_CODE_HOOK $RE` || NEWMSG=
 		if [ -n "$NEWMSG" ] ; then
 			M="Runtime error $RE: $NEWMSG"
 		fi
