@@ -12,17 +12,17 @@ PROGS+=$(addprefix $(o)/mop/admin/,\
 
 $(o)/mop/admin/md5crypt: $(o)/mop/admin/md5crypt.o $(LIBUCW)
 
-$(o)/mop/admin/mo-back-grab: mop/admin/mo-back-grab.sh
-$(o)/mop/admin/mo-back-status: mop/admin/mo-back-status.sh
-$(o)/mop/admin/mo-backup: mop/admin/mo-backup.sh
-$(o)/mop/admin/mo-create-contestants: mop/admin/mo-create-contestants.sh
-$(o)/mop/admin/mo-create-eval: mop/admin/mo-create-eval.sh
-$(o)/mop/admin/mo-create-logins: mop/admin/mo-create-logins.sh
-$(o)/mop/admin/mo-create-public: mop/admin/mo-create-public.sh
-$(o)/mop/admin/mo-create-submit: mop/admin/mo-create-submit.sh
-$(o)/mop/admin/mo-create-testusers: mop/admin/mo-create-testusers.sh
-$(o)/mop/admin/mo-grab-remote: mop/admin/mo-grab-remote.sh
-$(o)/mop/admin/mo-grab: mop/admin/mo-grab.sh
-$(o)/mop/admin/mo-install: mop/admin/mo-install.sh
-$(o)/mop/admin/mo-push-certs: mop/admin/mo-push-certs.sh
-$(o)/mop/admin/mo-push-feedback: mop/admin/mo-push-feedback.sh
+$(o)/mop/admin/mo-back-grab: $(s)/mop/admin/mo-back-grab.sh
+$(o)/mop/admin/mo-back-status: $(s)/mop/admin/mo-back-status.sh
+$(o)/mop/admin/mo-backup: $(s)/mop/admin/mo-backup.sh
+$(o)/mop/admin/mo-create-contestants: $(s)/mop/admin/mo-create-contestants.sh
+$(o)/mop/admin/mo-create-eval: $(s)/mop/admin/mo-create-eval.sh
+$(o)/mop/admin/mo-create-logins: $(s)/mop/admin/mo-create-logins.sh
+$(o)/mop/admin/mo-create-public: $(s)/mop/admin/mo-create-public.sh
+$(o)/mop/admin/mo-create-submit: $(s)/mop/admin/mo-create-submit.sh
+$(o)/mop/admin/mo-create-testusers: $(s)/mop/admin/mo-create-testusers.sh
+$(o)/mop/admin/mo-grab-remote: $(s)/mop/admin/mo-grab-remote.sh
+$(o)/mop/admin/mo-grab: $(s)/mop/admin/mo-grab.sh
+$(o)/mop/admin/mo-install: $(s)/mop/admin/mo-install.sh
+$(o)/mop/admin/mo-push-certs: $(s)/mop/admin/mo-push-certs.sh
+$(o)/mop/admin/mo-push-feedback: $(s)/mop/admin/mo-push-feedback.sh
