@@ -163,3 +163,10 @@ GET(long, long int)
 GET(ulong, unsigned long int)
 GET(double, double)
 GET(long_double, long double)
+
+void get_nl(struct tokenizer *t)
+{
+  char *tok = get_token(t);
+  if (tok && *tok)
+    tok_err(t, "Expected end of line");
+}

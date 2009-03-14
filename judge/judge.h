@@ -96,3 +96,4 @@ long int get_long(struct tokenizer *t);
 unsigned long int get_ulong(struct tokenizer *t);
 double get_double(struct tokenizer *t);
 long double get_long_double(struct tokenizer *t);
+void get_nl(struct tokenizer *t);
