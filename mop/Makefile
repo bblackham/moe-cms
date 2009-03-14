@@ -3,10 +3,10 @@
 
 DIRS+=mop
 
-include mop/admin/Makefile
-include mop/eval/Makefile
-include mop/public/Makefile
-include mop/score/Makefile
+include $(s)/mop/admin/Makefile
+include $(s)/mop/eval/Makefile
+include $(s)/mop/public/Makefile
+include $(s)/mop/score/Makefile
 
 CONFIGS+=mop userlist
 run/cf/mop: $(o)/mop/mop.cf
