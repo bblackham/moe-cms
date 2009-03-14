@@ -15,12 +15,14 @@
 
 struct stream *sopen_fd(char *name, int fd)
 {
-  struct stream *s = xmalloc(sizeof(*s) + BUFSIZE + strlen(name) + 1);
+  char *slash = strrchr(name, '/');
+  char *basename = (slash ? slash+1 : name);
+  struct stream *s = xmalloc(sizeof(*s) + BUFSIZE + strlen(basename) + 1);
   s->fd = fd;
   s->pos = s->stop = s->buf;
   s->end = s->buf + BUFSIZE;
   s->name = s->end;
-  strcpy(s->name, name);
+  strcpy(s->name, basename);
   return s;
 }
 
