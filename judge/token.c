@@ -34,9 +34,9 @@ void tok_err(struct tokenizer *t, char *msg, ...)
 {
   va_list args;
   va_start(args, msg);
-  printf("%s:%d: ", t->stream->name, t->line);
-  vprintf(msg, args);
-  putchar('\n');
+  fprintf(stderr, "Error at %s line %d:\n", t->stream->name, t->line);
+  vfprintf(stderr, msg, args);
+  fputc('\n', stderr);
   va_end(args);
   exit(1);
 }
