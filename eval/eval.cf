@@ -60,7 +60,7 @@ EXT_cpp_COMP='/usr/bin/g++ -O2 -g -o $EXE $EXTRA_CXXFLAGS $SRC -lm'
 EXTRA_CXXFLAGS=
 
 # Pascal
-EXT_pas_COMP='/usr/bin/fpc -Ci -Cr -Ct -g -O2 -Sg -o$EXE $EXTRA_PFLAGS $SRC'
+EXT_pas_COMP='/usr/bin/fpc -Ci -g -O2 -Sg -o$EXE $EXTRA_PFLAGS $SRC'
 EXTRA_PFLAGS=
 EXT_pas_EXIT_CODE_HOOK=fpc-exit-code
 
