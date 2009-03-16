@@ -4,7 +4,7 @@
 
 # A simple test case with several spaces
 Name:	std
-Run:	bin/test-tok
+Run:	bin/test-tok 2>&1
 In:	   abc   
 	10  20   30
 Out:	<abc>
@@ -14,7 +14,7 @@ Out:	<abc>
 
 # The same test case in line mode
 Name:	std-l
-Run:	bin/test-tok -l
+Run:	bin/test-tok -l 2>&1
 In:	   abc   
 	10  20   30
 Out:	<abc>
@@ -26,31 +26,31 @@ Out:	<abc>
 
 # An unterminated line
 Name:	unterm
-Run:	tr -d '\n' | bin/test-tok
+Run:	tr -d '\n' | bin/test-tok 2>&1
 In:	abc
 Out:	<abc>
 
 # An unterminated line in line mode
 Name:	unterm-l
-Run:	tr -d '\n' | bin/test-tok -l
+Run:	tr -d '\n' | bin/test-tok -l 2>&1
 In:	abc
 Out:	<abc>
 
 # Small token size limit, but fits
 Name:	big1
-Run:	bin/test-tok -s
+Run:	bin/test-tok -s 2>&1
 In:	abcdefghijklmnop
 Out:	<abcdefghijklmnop>
 
 # Small token size limit, does not fit
 Name:	big2
-Run:	bin/test-tok -s
+Run:	bin/test-tok -s 2>&1
 In:	abcdefghijklmnopq
 Exit:	1
 
 # Testing parsers
 Name:	parse1
-Run:	bin/test-tok -vl
+Run:	bin/test-tok -vl 2>&1
 In:	abcdef
 	0 5 -5
 Out:	<abcdef>
@@ -62,7 +62,7 @@ Out:	<abcdef>
 
 # More parsing: integer extremes
 Name:	parse2
-Run:	bin/test-tok -v
+Run:	bin/test-tok -v 2>&1
 In:	-2147483647 2147483647
 	-2147483648 2147483648
 	-4294967295 4294967295
