@@ -11,15 +11,15 @@
 #undef LOCAL_DEBUG
 
 #include "sherlock/sherlock.h"
-#include "lib/unaligned.h"
-#include "lib/mempool.h"
-#include "lib/fastbuf.h"
-#include "lib/unicode.h"
+#include "ucw/unaligned.h"
+#include "ucw/mempool.h"
+#include "ucw/fastbuf.h"
+#include "ucw/unicode.h"
 #include "sherlock/object.h"
 #include "sherlock/objread.h"
-#include "lib/lizard.h"
-#include "lib/bbuf.h"
-#include "lib/ff-unicode.h"
+#include "ucw/lizard.h"
+#include "ucw/bbuf.h"
+#include "ucw/ff-unicode.h"
 
 #include <errno.h>
 #include <unistd.h>
@@ -73,7 +73,7 @@ get_attr(byte **pos, byte *end, struct parsed_attr *attr)
   else
   {
     uns len;
-    GET_UTF8_32(ptr, len);
+    ptr = utf8_32_get(ptr, &len);
     if (!len--)
     {
       *pos = ptr;
@@ -208,7 +208,7 @@ decode_attributes(byte *ptr, byte *end, struct odes *o, uns can_overwrite)
     while (ptr < end)
     {
       uns len;
-      GET_UTF8_32(ptr, len);
+      ptr = utf8_32_get(ptr, &len);
       if (!len--)
 	break;
       byte type = ptr[len];
@@ -222,7 +222,7 @@ decode_attributes(byte *ptr, byte *end, struct odes *o, uns can_overwrite)
     while (ptr < end)
     {
       uns len;
-      GET_UTF8_32(ptr, len);
+      ptr = utf8_32_get(ptr, &len);
       if (!len--)
 	break;
       byte type = ptr[len];
@@ -251,7 +251,7 @@ buck2obj_parse(struct buck2obj_buf *buf, uns buck_type, uns buck_len, struct fas
     obj_read_start(&st, o_hdr);
     byte *b;
     // ignore empty lines and read until the end of the bucket
-    sh_off_t end = btell(body) + buck_len;
+    ucw_off_t end = btell(body) + buck_len;
     while (btell(body) < end && bgets_bb(body, &buf->bb, ~0U))
       if ((b = buf->bb.ptr)[0])
 	obj_read_attr(&st, b[0], b+1);
@@ -260,8 +260,8 @@ buck2obj_parse(struct buck2obj_buf *buf, uns buck_type, uns buck_len, struct fas
   }
   else if (buck_type == BUCKET_TYPE_V30)
   {
-    sh_off_t start = btell(body);
-    sh_off_t end = start + buck_len;
+    ucw_off_t start = btell(body);
+    ucw_off_t end = start + buck_len;
     byte *b;
     struct obj_read_state st;
     obj_read_start(&st, o_hdr);
@@ -285,8 +285,8 @@ buck2obj_parse(struct buck2obj_buf *buf, uns buck_type, uns buck_len, struct fas
     /* Avoid reading the whole bucket if only its header is needed.  */
     if (body_start)
     {
-      sh_off_t start = btell(body);
-      sh_off_t end = start + buck_len;
+      ucw_off_t start = btell(body);
+      ucw_off_t end = start + buck_len;
       obj_read_start(&st, o_hdr);
       while (btell(body) < end)
       {

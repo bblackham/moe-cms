@@ -13,7 +13,7 @@
 #ifndef _SHERLOCK_LIB_H
 #define _SHERLOCK_LIB_H
 
-#include "lib/lib.h"
+#include "ucw/lib.h"
 
 #ifdef CONFIG_MAX_CONTEXTS
 #define CONFIG_CONTEXTS

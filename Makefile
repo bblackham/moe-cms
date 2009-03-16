@@ -1,5 +1,5 @@
 # Makefile for MO-Eval
-# (c) 2008 Martin Mares <mj@ucw.cz>
+# (c) 2008--2009 Martin Mares <mj@ucw.cz>
 
 VERSION=1.0.99-20080220
 
@@ -13,11 +13,12 @@ obj/config.mk:
 	@echo "You need to run configure first." && false
 
 # We will use the libucw build system
-include $(s)/build/Maketop
+BUILDSYS=$(s)/build
+include $(BUILDSYS)/Maketop
 
 # Include makefiles of libraries we wish to use
 ifdef CONFIG_UCW_LIBS
-include $(s)/lib/Makefile
+include $(s)/ucw/Makefile
 include $(s)/sherlock/Makefile
 # Disable built-in tests of these libraries
 TESTS=
@@ -37,4 +38,4 @@ include $(s)/mop/Makefile
 endif
 
 # And finally the default rules of the build system
-include $(s)/build/Makebottom
+include $(BUILDSYS)/Makebottom

@@ -10,7 +10,7 @@
 
 #include "sherlock/sherlock.h"
 #include "sherlock/object.h"
-#include "lib/stkstring.h"
+#include "ucw/stkstring.h"
 
 #include <stdio.h>
 

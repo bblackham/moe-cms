@@ -10,7 +10,7 @@
 #include "sherlock/sherlock.h"
 #include "sherlock/object.h"
 #include "sherlock/attrset.h"
-#include "lib/clists.h"
+#include "ucw/clists.h"
 #include "sherlock/conf.h"
 
 struct attr_node {

@@ -10,10 +10,10 @@
 
 #include "sherlock/sherlock.h"
 #include "sherlock/object.h"
-#include "lib/chartype.h"
-#include "lib/fastbuf.h"
-#include "lib/ff-unicode.h"
-#include "lib/unicode.h"
+#include "ucw/chartype.h"
+#include "ucw/fastbuf.h"
+#include "ucw/ff-unicode.h"
+#include "ucw/unicode.h"
 #include "sherlock/conf.h"
 
 /*** Attribute names ***/

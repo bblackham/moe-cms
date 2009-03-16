@@ -11,7 +11,7 @@
 #ifndef _SHERLOCK_CONF_H
 #define _SHERLOCK_CONF_H
 
-#include "lib/conf.h"
+#include "ucw/conf.h"
 
 /* All of the following objects are defined in conf-parse.c
  *

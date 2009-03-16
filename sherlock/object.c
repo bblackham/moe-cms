@@ -9,8 +9,8 @@
  */
 
 #include "sherlock/sherlock.h"
-#include "lib/mempool.h"
-#include "lib/fastbuf.h"
+#include "ucw/mempool.h"
+#include "ucw/fastbuf.h"
 #include "sherlock/object.h"
 
 #include <string.h>

@@ -197,10 +197,11 @@ sub read($$@) {
 	my $read_something = 0;
 	my $obj = $self;
 	my $raw;
+	my $read = $opts{read} ? $opts{read} : sub { my $fh = shift; return $_ = <$fh>; };
 	if ($opts{raw}) {
 		$raw = $obj->{"RAW"} = [];
 	}
-	while (<$fh>) {
+	while ($read->($fh)) {
 		chomp;
 		/^$/ && last;
 		my ($a, $v) = /^(.)(.*)$/ or return undef;

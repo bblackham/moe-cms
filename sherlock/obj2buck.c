@@ -9,8 +9,8 @@
  */
 
 #include "sherlock/sherlock.h"
-#include "lib/fastbuf.h"
-#include "lib/ff-unicode.h"
+#include "ucw/fastbuf.h"
+#include "ucw/ff-unicode.h"
 #include "sherlock/object.h"
 
 #include <stdio.h>
@@ -73,7 +73,7 @@ put_attr(byte *ptr, uns type, byte *val, uns len)
 {
   if (use_v33)
   {
-    PUT_UTF8_32(ptr, len+1);
+    ptr = utf8_32_put(ptr, len+1);
     memcpy(ptr, val, len);
     ptr += len;
     *ptr++ = type;
@@ -104,7 +104,7 @@ put_attr_vformat(byte *ptr, uns type, byte *mask, va_list va)
     if (len >= 127)
     {
       byte tmp[6], *tmp_end = tmp;
-      PUT_UTF8_32(tmp_end, len+1);
+      tmp_end = utf8_32_put(tmp_end, len+1);
       uns l = tmp_end - tmp;
       memmove(ptr+l, ptr+1, len);
       memcpy(ptr, tmp, l);

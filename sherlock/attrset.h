@@ -10,7 +10,7 @@
 #ifndef _SHERLOCK_ATTRSET_H
 #define _SHERLOCK_ATTRSET_H
 
-#include "lib/bitarray.h"
+#include "ucw/bitarray.h"
 #include "sherlock/object.h"
 
 COMPILE_ASSERT(son_value, OBJ_ATTR_SON == 256);
