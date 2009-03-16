@@ -4,11 +4,11 @@
  *  (c) 2007 Martin Mares <mj@ucw.cz>
  */
 
-#include "lib/lib.h"
-#include "lib/mempool.h"
-#include "lib/simple-lists.h"
-#include "lib/stkstring.h"
-#include "lib/fastbuf.h"
+#include "ucw/lib.h"
+#include "ucw/mempool.h"
+#include "ucw/simple-lists.h"
+#include "ucw/stkstring.h"
+#include "ucw/fastbuf.h"
 #include "sherlock/object.h"
 #include "sherlock/objread.h"
 

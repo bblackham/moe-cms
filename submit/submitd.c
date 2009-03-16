@@ -6,9 +6,9 @@
 
 #undef LOCAL_DEBUG
 
-#include "lib/lib.h"
-#include "lib/conf.h"
-#include "lib/getopt.h"
+#include "ucw/lib.h"
+#include "ucw/conf.h"
+#include "ucw/getopt.h"
 
 #include <string.h>
 #include <stdlib.h>

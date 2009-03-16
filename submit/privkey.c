@@ -7,7 +7,7 @@
  *  (c) 2007 Martin Mares <mj@ucw.cz>
  */
 
-#include "lib/lib.h"
+#include "ucw/lib.h"
 
 #include <stdio.h>
 #include <sys/types.h>

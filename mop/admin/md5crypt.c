@@ -9,8 +9,8 @@
  * ----------------------------------------------------------------------------
  */
 
-#include "lib/lib.h"
-#include "lib/md5.h"
+#include "ucw/lib.h"
+#include "ucw/md5.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -43,7 +43,7 @@ libshadow_md5_crypt(const char *pw, const char *salt)
 	static const char *sp,*ep;
 	unsigned char	final[16];
 	int sl,pl,i,j;
-	struct MD5Context ctx,ctx1;
+	md5_context ctx,ctx1;
 	unsigned long l;
 
 	/* Refine the Salt first */
@@ -60,25 +60,25 @@ libshadow_md5_crypt(const char *pw, const char *salt)
 	/* get the length of the true salt */
 	sl = ep - sp;
 
-	MD5Init(&ctx);
+	md5_init(&ctx);
 
 	/* The password first, since that is what is most unknown */
-	MD5Update(&ctx,pw,strlen(pw));
+	md5_update(&ctx,pw,strlen(pw));
 
 	/* Then our magic string */
-	MD5Update(&ctx,magic,strlen(magic));
+	md5_update(&ctx,magic,strlen(magic));
 
 	/* Then the raw salt */
-	MD5Update(&ctx,sp,sl);
+	md5_update(&ctx,sp,sl);
 
 	/* Then just as many characters of the MD5(pw,salt,pw) */
-	MD5Init(&ctx1);
-	MD5Update(&ctx1,pw,strlen(pw));
-	MD5Update(&ctx1,sp,sl);
-	MD5Update(&ctx1,pw,strlen(pw));
-	MD5Final(final,&ctx1);
+	md5_init(&ctx1);
+	md5_update(&ctx1,pw,strlen(pw));
+	md5_update(&ctx1,sp,sl);
+	md5_update(&ctx1,pw,strlen(pw));
+	memcpy(final, md5_final(&ctx1), 16);
 	for(pl = strlen(pw); pl > 0; pl -= 16)
-		MD5Update(&ctx,final,pl>16 ? 16 : pl);
+		md5_update(&ctx,final,pl>16 ? 16 : pl);
 
 	/* Don't leave anything around in vm they could use. */
 	memset(final,0,sizeof final);
@@ -86,16 +86,16 @@ libshadow_md5_crypt(const char *pw, const char *salt)
 	/* Then something really weird... */
 	for (j=0,i = strlen(pw); i ; i >>= 1)
 		if(i&1)
-		    MD5Update(&ctx, final+j, 1);
+		    md5_update(&ctx, final+j, 1);
 		else
-		    MD5Update(&ctx, pw+j, 1);
+		    md5_update(&ctx, pw+j, 1);
 
 	/* Now make the output string */
 	strcpy(passwd,magic);
 	strncat(passwd,sp,sl);
 	strcat(passwd,"$");
 
-	MD5Final(final,&ctx);
+	memcpy(final, md5_final(&ctx), 16);
 
 	/*
 	 * and now, just to make sure things don't run too fast
@@ -103,23 +103,23 @@ libshadow_md5_crypt(const char *pw, const char *salt)
 	 * need 30 seconds to build a 1000 entry dictionary...
 	 */
 	for(i=0;i<1000;i++) {
-		MD5Init(&ctx1);
+		md5_init(&ctx1);
 		if(i & 1)
-			MD5Update(&ctx1,pw,strlen(pw));
+			md5_update(&ctx1,pw,strlen(pw));
 		else
-			MD5Update(&ctx1,final,16);
+			md5_update(&ctx1,final,16);
 
 		if(i % 3)
-			MD5Update(&ctx1,sp,sl);
+			md5_update(&ctx1,sp,sl);
 
 		if(i % 7)
-			MD5Update(&ctx1,pw,strlen(pw));
+			md5_update(&ctx1,pw,strlen(pw));
 
 		if(i & 1)
-			MD5Update(&ctx1,final,16);
+			md5_update(&ctx1,final,16);
 		else
-			MD5Update(&ctx1,pw,strlen(pw));
-		MD5Final(final,&ctx1);
+			md5_update(&ctx1,pw,strlen(pw));
+		memcpy(final, md5_final(&ctx1), 16);
 	}
 
 	p = passwd + strlen(passwd);
@@ -159,7 +159,7 @@ int main(void)
 	  return 1;
 	}
       for (n=0; n<2; n++)
-	to64(salt+4*n, *(uint32 *)(rand+4*n), 4);
+	to64(salt+4*n, *(u32 *)(rand+4*n), 4);
       salt[8] = 0;
       printf("%s\n", libshadow_md5_crypt(pass, salt));
     }

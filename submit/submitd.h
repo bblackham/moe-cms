@@ -7,9 +7,9 @@
 #ifndef _SUBMITD_H
 #define _SUBMITD_H
 
-#include "lib/clists.h"
-#include "lib/ipaccess.h"
-#include "lib/fastbuf.h"
+#include "ucw/clists.h"
+#include "ucw/ipaccess.h"
+#include "ucw/fastbuf.h"
 
 #include <gnutls/gnutls.h>
 #include <gnutls/x509.h>
