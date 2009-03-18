@@ -6,6 +6,16 @@ set -e
 . cf/mop
 
 H=`pwd`
+if [ ! -d template ] ; then
+	if [ -d ../mop/template ] ; then
+		echo "Symlinking templates from ../mop/template"
+		ln -s ../mop/template .
+	else
+		echo "Templates not found!"
+		exit 1
+	fi
+fi
+
 cd $MO_ROOT
 rm -rf users
 mkdir users
@@ -16,7 +26,7 @@ for a in `cd $H && bin/mo-get-users` ; do
 	mkdir $a $a/$a
 	chown root.$a $a
 	chmod 750 $a
-	cp -a `find $H/template -mindepth 1 -maxdepth 1` $a/$a/
+	cp -a `find $H/template/ -mindepth 1 -maxdepth 1` $a/$a/
 
 	if [ -n "$REMOTE_SUBMIT" ] ; then
 		M=$a/$a/.mo
