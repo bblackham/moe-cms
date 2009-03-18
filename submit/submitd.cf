@@ -1,6 +1,6 @@
 # Configuration file for the submit server
 
-include cf/library
+include cf/libucw
 
 SubmitD {
 
