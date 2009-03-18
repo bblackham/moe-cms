@@ -91,4 +91,6 @@ Tasks {
 # Need to put temporary files locally to make sure they are on the same device
 # as the submission directories, so that we can rename the files to their final
 # locations.
-Tempfiles.Prefix	tmp/temp
+Tempfiles.Dir		tmp
+Tempfiles.Prefix	temp-
+Tempfiles.PublicDir	0
