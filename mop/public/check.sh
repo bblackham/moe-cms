@@ -4,8 +4,10 @@
 
 set -e
 [ -n "$MO_ROOT" -a -d "$MO_ROOT" ] || { echo >&2 "MO_ROOT not set, giving up." ; exit 1 ; }
-. $MO_ROOT/bin/lib
-. $MO_ROOT/config
+pushd $MO_ROOT >/dev/null
+. lib/libeval.sh
+. cf/mop
+popd >/dev/null
 
 function usage
 {

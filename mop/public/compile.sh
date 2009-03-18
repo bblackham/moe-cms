@@ -3,8 +3,10 @@
 
 set -e
 [ -n "$MO_ROOT" -a -d "$MO_ROOT" ] || { echo >&2 "MO_ROOT not set, giving up." ; exit 1 ; }
-. $MO_ROOT/bin/lib
-. $MO_ROOT/config
+pushd $MO_ROOT >/dev/null
+. lib/libeval.sh
+. cf/mop
+popd >/dev/null
 
 [ -n "$1" ] || die "Usage: compile (<problem> | <file> [<options>])"
 if [ "${1%%.*}" == "$1" ] ; then
