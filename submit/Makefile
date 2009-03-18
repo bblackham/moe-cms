@@ -44,13 +44,4 @@ $(SDIR)/remote-status: $(s)/submit/remote-status.pl
 $(SDIR)/remote-submit: $(s)/submit/remote-submit.pl
 $(SDIR)/show-submits: $(s)/submit/show-submits.pl
 
-certs:
-	certtool --generate-privkey --outfile ca-key.pem
-	certtool --generate-privkey --outfile ca-key.pem --template ca-cert.tpl
-	certtool --generate-privkey --outfile server-key.pem
-	certtool --generate-request --load-privkey server-key.pem --outfile server-req.pem --template server-cert.tpl
-	certtool --generate-certificate --load-request server-req.pem --outfile server-cert.pem --load-ca-certificate ca-cert.pem --load-ca-privkey ca-key.pem --template server-cert.tpl
-	certtool --generate-privkey --outfile client-key.pem
-	certtool --generate-request --load-privkey client-key.pem --outfile client-req.pem --template client-cert.tpl
-	certtool --generate-certificate --load-request client-req.pem --outfile client-cert.pem --load-ca-certificate ca-cert.pem --load-ca-privkey ca-key.pem --template client-cert.tpl
-	# Beware of serial numbers
+DATAFILES=$(addprefix $(SDIR)/,ca-cert.tpl client-cert.tpl server-cert.tpl)
