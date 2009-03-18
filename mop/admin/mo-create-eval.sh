@@ -12,8 +12,7 @@ echo "Creating $EVAL_USER"
 rm -rf eval
 mkdir eval
 cd eval
-cp -a $H/* .
-chmod +x bin/*
+cp -aL $H/* .
 if [ -d ~/.ssh ] ; then echo "Copying SSH configuration from ~/.ssh" ; cp -a ~/.ssh . ; fi
 cd ..
 chown -R $EVAL_USER.$EVAL_GROUP eval

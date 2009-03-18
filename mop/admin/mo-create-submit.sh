@@ -14,17 +14,15 @@ mkdir -p certs
 cp $H/certs/server* certs/
 cp $H/certs/ca-cert.pem certs/
 
-rm -rf submit
-mkdir -p submit
-cp $H/submit/{submitd,config,show-submits} submit/
+rm -rf bin cf
+mkdir bin cf
+cp $H/bin/{submitd,show-submits} bin/
+cp $H/cf/{submitd,libucw} cf/
 
 mkdir -p solutions 
 for a in `cd $H && bin/mo-get-users` ; do
 	mkdir -p solutions/$a
 done
-
-rm -rf lib
-cp -a $H/submit/lib lib
 
 rm -rf tmp
 mkdir -p tmp
