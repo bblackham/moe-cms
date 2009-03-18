@@ -16,14 +16,14 @@ for a in eval mop ; do
 done
 
 mkdir bin
-cp -a $H/bin/{check,submit,compile,status,box,iwrapper} bin/
+cp -aL $H/bin/{check,submit,compile,status,box,iwrapper} bin/
 
 mkdir lib
-cp -a $H/lib/libeval.sh lib/
+cp -aL $H/lib/libeval.sh lib/
 
 if [ -n "$REMOTE_SUBMIT" ] ; then
-	cp -a $H/bin/{contest,remote-submit,remote-status} bin/
-	cp -a $H/lib/perl5 lib/
+	cp -aL $H/bin/{contest,remote-submit,remote-status} bin/
+	cp -aL $H/lib/perl5 lib/
 fi
 
 mkdir -p problems
