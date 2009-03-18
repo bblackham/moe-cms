@@ -11,8 +11,6 @@ SDIR=$(o)/submit
 
 PROGS+=$(addprefix $(SDIR)/,submitd privkey connect)
 
-$(SHERLOCK_PERL_MODS): PERL_MODULE_DIR=MO
-
 $(SDIR)/submitd: $(addprefix $(SDIR)/,submitd.o commands.o tasks.o) $(LIBUCW) $(LIBSH)
 $(SDIR)/submitd: CFLAGS+=$(SUBCF)
 $(SDIR)/submitd: LIBS+=$(SUBLF)
@@ -34,6 +32,8 @@ EXTRA_RUNDIRS+=lib/perl5/MO
 SUBMIT_PERL_MODS=$(o)/submit/Submit.pm
 PROGS+=$(SUBMIT_PERL_MODS)
 
+$(SUBMIT_PERL_MODS): PERL_MODULE_DIR=MO
+
 ### The submit client and utilities ###
 
 PROGS+=$(addprefix $(SDIR)/,contest create-certs remote-status remote-submit show-submits)
@@ -44,4 +44,4 @@ $(SDIR)/remote-status: $(s)/submit/remote-status.pl
 $(SDIR)/remote-submit: $(s)/submit/remote-submit.pl
 $(SDIR)/show-submits: $(s)/submit/show-submits.pl
 
-DATAFILES=$(addprefix $(SDIR)/,ca-cert.tpl client-cert.tpl server-cert.tpl)
+DATAFILES+=$(addprefix $(SDIR)/,ca-cert.tpl client-cert.tpl server-cert.tpl)
