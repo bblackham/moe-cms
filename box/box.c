@@ -944,6 +944,11 @@ boxkeeper(void)
 		msg("= %ld\n", u.regs.eax);
 	      ptrace(PTRACE_SYSCALL, box_pid, 0, 0);
 	    }
+	  else if (sig == SIGSTOP)
+	    {
+	      msg(">> SIGSTOP\n");
+	      ptrace(PTRACE_SYSCALL, box_pid, 0, 0);
+	    }
 	  else if (sig != SIGSTOP && sig != SIGXCPU && sig != SIGXFSZ)
 	    {
 	      msg(">> Signal %d\n", sig);
@@ -1007,8 +1012,7 @@ box_inside(int argc, char **argv)
       if (ptrace(PTRACE_TRACEME) < 0)
 	die("ptrace(PTRACE_TRACEME): %m");
       /* Trick: Make sure that we are stopped until the boxkeeper wakes up. */
-      signal(SIGCHLD, SIG_IGN);
-      raise(SIGCHLD);
+      raise(SIGSTOP);
     }
   execve(args[0], args, env);
   die("execve(\"%s\"): %m", args[0]);
