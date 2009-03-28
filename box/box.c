@@ -1001,6 +1001,7 @@ box_inside(int argc, char **argv)
   rl.rlim_cur = rl.rlim_max = 64;
   if (setrlimit(RLIMIT_NOFILE, &rl) < 0)
     die("setrlimit: %m");
+  char **env = setup_environment();
   if (filter_syscalls)
     {
       if (ptrace(PTRACE_TRACEME) < 0)
@@ -1009,7 +1010,7 @@ box_inside(int argc, char **argv)
       signal(SIGCHLD, SIG_IGN);
       raise(SIGCHLD);
     }
-  execve(args[0], args, setup_environment());
+  execve(args[0], args, env);
   die("execve(\"%s\"): %m", args[0]);
 }
 
