@@ -2,14 +2,14 @@
 Comment=
 Comment[en_US]=
 Encoding=UTF-8
-Exec='/mo/kdevelop/templates/templater.pl'
+Exec[$e]='/mo/kdevelop/templates/templater.pl'
 GenericName=
 GenericName[en_US]=
 Icon=kdevelop
 MimeType=
 Name=MO-P project IDE
 Name[en_US]=MO-P project IDE
-Path=
+Path[$e]=
 StartupNotify=true
 Terminal=false
 TerminalOptions=

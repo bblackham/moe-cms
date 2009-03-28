@@ -2,7 +2,7 @@
 DisplayNames=
 EnableXkbOptions=false
 IncludeGroups=
-LayoutList=us,hr,cz,de,hu,pl,ro,sk
+LayoutList=us,cz
 Model=pc104
 Options=
 ResetOldOptions=false

@@ -237,6 +237,32 @@ UseKDESetting=false
 RunOnStart=false
 TipLastShown=2007,6,30,18,43,55
 
+[ToolDockPosition]
+CTags2WidgetBase=DockBottom
+ClassViewWidget=DockLeft
+KDevFileCreate=DockLeft
+Security Widget=DockBottom
+app output widget=DockBottom
+bookmarks widget=DockBottom
+disassembleWidget=DockRight
+documentation widget=DockRight
+file view widget=DockLeft
+filelist widget=DockLeft
+fileselectorwidget=DockLeft
+fileviewpartwidget=DockLeft
+framestackWidget=DockRight
+gdbBreakpointWidget=DockRight
+gdbOutputWidget=DockBottom
+grepview widget=DockBottom
+konsole widget=DockBottom
+make widget=DockBottom
+problemreporter=DockBottom
+replace widget=DockBottom
+snippet widget=DockRight
+unnamed=DockBottom
+valgrind widget=DockBottom
+variablewidget=DockLeft
+
 [UI]
 TabWidgetVisibility=0
 UseSimpleMainWindow=false
