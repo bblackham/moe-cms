@@ -2,14 +2,14 @@
 Comment=
 Comment[en_US]=
 Encoding=UTF-8
-Exec='/mo/public/bin/contest'
+Exec[$e]='/mo/public/bin/contest'
 GenericName=
 GenericName[en_US]=
 Icon=server
 MimeType=
 Name=MO-P submit
 Name[en_US]=MO-P submit
-Path=
+Path[$e]=
 StartupNotify=true
 Terminal=false
 TerminalOptions=

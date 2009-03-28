@@ -26,7 +26,7 @@ close CT;
 print STDERR 0+keys %users, "\n";
 
 print STDERR "Scanning teoretical results... ";
-if (open (EX, "../mop/score/teorie.txt")) {
+if (open (EX, "mop/score/teorie.txt")) {
 	while (<EX>) {
 		chomp;
 		(/^$/ || /^#/) && next;
@@ -59,10 +59,17 @@ foreach $u (keys %users) {
 		-f $tt || next;
 		print STDERR "$u/$t ";
 		open (X, $tt) || die "Unable to open $tt";
+
+                my %tests = ();
 		while (<X>) {
 			chomp;
-			/^\S+ (-?\d+)/ || die "Parse error: $_";
-			$tasks{$u}{$t_num} += $1;
+			/^(\S+) (-?\d+)/ || die "Parse error: $_";
+                        my ($t, $p) = ($1, $2);
+                        $t =~ s/[^0-9]//g;
+			$tests{$t} = $p if not exists $tests{$t} or $tests{$t} > $p;
+		}
+		foreach my $p (values %tests) {
+			$tasks{$u}{$t_num} += $p;
 		}
 		close X;
 	}
@@ -124,13 +131,13 @@ while ($i < @table) {
 print STDERR "OK\n";
 
 if ($tex) {
-        open HDR,"../mop/score/listina.hdr" or die "Cannot open file ../mop/score/listina.hdr with TeX template!";
+        open HDR,"mop/score/listina.hdr" or die "Cannot open file mop/score/listina.hdr with TeX template!";
 	while (<HDR>) {print; }
 	close HDR;
 	
 	foreach $r (@table) { print join('&',@$r), "\\cr\n";}
 
-        open FTR,"../mop/score/listina.ftr" or die "Cannot open file ../mop/score/listina.ftr with TeX template!";
+        open FTR,"mop/score/listina.ftr" or die "Cannot open file mop/score/listina.ftr with TeX template!";
 	while (<FTR>) {print; }
 	close FTR;
 } else {

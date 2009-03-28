@@ -50,7 +50,7 @@ case $mode in
     cat > logins.tex <<- EOF
 	\\nopagenumbers
 	\\voffset=-1.5cm\\vsize=280mm\\hoffset=-0.75cm\\advance\\hsize by 3cm
-	\\raggedright\\parindent=0pt
+	\\rightskip=0pt plus 3in\\parindent=0pt
 	\\font\\ftt=cstt17
 	\\font\\frm=csr17
 	\\font\\fit=csti17

@@ -14,10 +14,11 @@ mkdir -p certs
 cp $H/certs/server* certs/
 cp $H/certs/ca-cert.pem certs/
 
-rm -rf bin cf
+rm -rf bin cf lib
 mkdir bin cf
 cp $H/bin/{submitd,show-submits} bin/
 cp $H/cf/{submitd,libucw} cf/
+cp -a $H/lib .
 
 mkdir -p solutions 
 for a in `cd $H && bin/mo-get-users` ; do

@@ -1,3 +1,15 @@
+[IconPosition::MO-P project IDE.desktop]
+Xabs=375
+Xabs_1280x1024=375
+Yabs=15
+Yabs_1280x1024=15
+
+[IconPosition::MO-P submit.desktop]
+Xabs=387
+Xabs_1280x1024=387
+Yabs=123
+Yabs_1280x1024=123
+
 [IconPosition::FPC doc]
 Xabs=1203
 Xabs_1280x1024=1203
@@ -40,18 +52,6 @@ Xabs_1280x1024=1100
 Yabs=123
 Yabs_1280x1024=123
 
-[IconPosition::MO-P project IDE.desktop]
-Xabs=375
-Xabs_1280x1024=375
-Yabs=15
-Yabs_1280x1024=15
-
-[IconPosition::MO-P submit.desktop]
-Xabs=387
-Xabs_1280x1024=387
-Yabs=123
-Yabs_1280x1024=123
-
 [IconPosition::Mc.desktop]
 Xabs=23
 Xabs_1280x1024=23
@@ -61,6 +61,18 @@ Yabs_1280x1024=231
 [IconPosition::STL doc]
 Xabs=1203
 Xabs_1280x1024=1203
+Yabs=123
+Yabs_1280x1024=123
+
+[IconPosition::Submit CPSPC solution.desktop]
+Xabs=463
+Xabs_1280x1024=463
+Yabs=123
+Yabs_1280x1024=123
+
+[IconPosition::Submit.desktop]
+Xabs=477
+Xabs_1280x1024=477
 Yabs=123
 Yabs_1280x1024=123
 
