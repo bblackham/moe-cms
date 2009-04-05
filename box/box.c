@@ -32,6 +32,7 @@
 static int filter_syscalls;		/* 0=off, 1=liberal, 2=totalitarian */
 static int timeout;			/* milliseconds */
 static int wall_timeout;
+static int extra_timeout;
 static int pass_environ;
 static int file_access;
 static int verbose;
@@ -771,7 +772,7 @@ check_timeout(void)
       ms = (utime + stime) * 1000 / ticks_per_sec;
       if (verbose > 1)
 	fprintf(stderr, "[time check: %d msec]\n", ms);
-      if (ms > timeout)
+      if (ms > timeout && ms > extra_timeout)
 	err("TO: Time limit exceeded");
     }
 }
@@ -1074,6 +1075,8 @@ Options:\n\
 -T\t\tAllow syscalls for measuring run time\n\
 -v\t\tBe verbose (use multiple times for even more verbosity)\n\
 -w <time>\tSet wall clock time limit (seconds, fractions allowed)\n\
+-x <time>\tSet extra timeout, before which a timing-out program is not yet killed,\n\
+\t\tso that its real execution time is reported (seconds, fractions allowed)\n\
 ");
   exit(2);
 }
@@ -1084,7 +1087,7 @@ main(int argc, char **argv)
   int c;
   uid_t uid;
 
-  while ((c = getopt(argc, argv, "a:c:eE:fi:m:M:o:p:r:s:t:Tvw:")) >= 0)
+  while ((c = getopt(argc, argv, "a:c:eE:fi:m:M:o:p:r:s:t:Tvw:x:")) >= 0)
     switch (c)
       {
       case 'a':
@@ -1137,6 +1140,9 @@ main(int argc, char **argv)
 	break;
       case 'w':
         wall_timeout = 1000*atof(optarg);
+	break;
+      case 'x':
+	extra_timeout = 1000*atof(optarg);
 	break;
       default:
 	usage();
