@@ -212,6 +212,7 @@ enum action {
   A_YES,		// Always permit
   A_FILENAME,		// Permit if arg1 is a known filename
   A_ACTION_MASK = 15,
+  A_NO_RETVAL = 32,	// Does not return a value
   A_SAMPLE_MEM = 64,	// Sample memory usage before the syscall
   A_LIBERAL = 128,	// Valid only in liberal mode
   // Must fit in a unsigned char
@@ -298,7 +299,7 @@ static unsigned char syscall_action[NUM_ACTIONS] = {
     S(readdir) = A_YES | A_LIBERAL,
     S(setitimer) = A_YES | A_LIBERAL,
     S(getitimer) = A_YES | A_LIBERAL,
-    S(sigreturn) = A_YES | A_LIBERAL,
+    S(sigreturn) = A_YES | A_LIBERAL | A_NO_RETVAL,
     S(mprotect) = A_YES | A_LIBERAL,
     S(sigprocmask) = A_YES | A_LIBERAL,
     S(getdents) = A_YES | A_LIBERAL,
@@ -309,7 +310,7 @@ static unsigned char syscall_action[NUM_ACTIONS] = {
     S(poll) = A_YES | A_LIBERAL,
     S(getcwd) = A_YES | A_LIBERAL,
     S(nanosleep) = A_YES | A_LIBERAL,
-    S(rt_sigreturn) = A_YES | A_LIBERAL,
+    S(rt_sigreturn) = A_YES | A_LIBERAL | A_NO_RETVAL,
     S(rt_sigaction) = A_YES | A_LIBERAL,
     S(rt_sigprocmask) = A_YES | A_LIBERAL,
     S(rt_sigpending) = A_YES | A_LIBERAL,
@@ -900,28 +901,38 @@ boxkeeper(void)
 	  int sig = WSTOPSIG(stat);
 	  if (sig == SIGTRAP)
 	    {
+	      if (verbose > 2)
+		msg("[ptrace status %08x] ", stat);
+	      static int stop_count;
+	      if (!stop_count++)		/* Traceme request */
+		msg(">> Traceme request caught\n");
+	      else
+		err("SG: Breakpoint");
+	      ptrace(PTRACE_SYSCALL, box_pid, 0, 0);
+	    }
+	  else if (sig == (SIGTRAP | 0x80))
+	    {
+	      if (verbose > 2)
+		msg("[ptrace status %08x] ", stat);
 	      struct user u;
-	      static int stop_count = -1;
+	      static unsigned int sys_tick, last_sys, last_act;
 	      if (ptrace(PTRACE_GETREGS, box_pid, NULL, &u) < 0)
 		die("ptrace(PTRACE_GETREGS): %m");
-	      if (u.regs.orig_eax < 0)		/* Process issued a breakpoint instruction */
-		err("SG: Breakpoint");
-	      stop_count++;
-	      if (!stop_count)			/* Traceme request */
-		msg(">> Traceme request caught\n");
-	      else if (stop_count & 1)		/* Syscall entry */
+	      unsigned int sys = u.regs.orig_eax;
+	      if (++sys_tick & 1)		/* Syscall entry */
 		{
 		  char namebuf[32];
 		  int act;
-		  msg(">> Syscall %-12s (%08lx,%08lx,%08lx) ", syscall_name(u.regs.orig_eax, namebuf), u.regs.ebx, u.regs.ecx, u.regs.edx);
+		  msg(">> Syscall %-12s (%08lx,%08lx,%08lx) ", syscall_name(sys, namebuf), u.regs.ebx, u.regs.ecx, u.regs.edx);
 		  if (!exec_seen)
 		    {
 		      msg("[master] ");
-		      if (u.regs.orig_eax == __NR_execve)
+		      if (sys == __NR_execve)
 			exec_seen = 1;
 		    }
 		  else if ((act = valid_syscall(&u)) >= 0)
 		    {
+		      last_act = act;
 		      syscall_count++;
 		      if (act & A_SAMPLE_MEM)
 			sample_mem_peak();
@@ -933,23 +944,41 @@ boxkeeper(void)
 		       * so we have to change it to something harmless (e.g., an undefined
 		       * syscall) and make the program continue.
 		       */
-		      unsigned int sys = u.regs.orig_eax;
 		      u.regs.orig_eax = 0xffffffff;
 		      if (ptrace(PTRACE_SETREGS, box_pid, NULL, &u) < 0)
 			die("ptrace(PTRACE_SETREGS): %m");
 		      err("FO: Forbidden syscall %s", syscall_name(sys, namebuf));
 		    }
+		  last_sys = sys;
 		}
 	      else					/* Syscall return */
-		msg("= %ld\n", u.regs.eax);
+		{
+		  if (sys == 0xffffffff)
+		    {
+		      /* Some syscalls (sigreturn et al.) do not return a value */
+		      if (!(last_act & A_NO_RETVAL))
+			err("XX: Syscall does not return, but it should");
+		    }
+		  else
+		    {
+		      if (sys != last_sys)
+			err("XX: Mismatched syscall entry/exit");
+		    }
+		  if (last_act & A_NO_RETVAL)
+		    msg("= ?\n");
+		  else
+		    msg("= %ld\n", u.regs.eax);
+		}
 	      ptrace(PTRACE_SYSCALL, box_pid, 0, 0);
 	    }
 	  else if (sig == SIGSTOP)
 	    {
 	      msg(">> SIGSTOP\n");
+	      if (ptrace(PTRACE_SETOPTIONS, box_pid, NULL, (void *) PTRACE_O_TRACESYSGOOD) < 0)
+		die("ptrace(PTRACE_SETOPTIONS): %m");
 	      ptrace(PTRACE_SYSCALL, box_pid, 0, 0);
 	    }
-	  else if (sig != SIGSTOP && sig != SIGXCPU && sig != SIGXFSZ)
+	  else if (sig != SIGXCPU && sig != SIGXFSZ)
 	    {
 	      msg(">> Signal %d\n", sig);
 	      sample_mem_peak();			/* Signal might be fatal, so update mem-peak */
