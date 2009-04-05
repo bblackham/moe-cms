@@ -117,6 +117,7 @@ box_exit(int rc)
 	ptrace(PTRACE_KILL, box_pid);
       kill(-box_pid, SIGKILL);
       kill(box_pid, SIGKILL);
+      meta_printf("killed:1\n");
 
       struct rusage rus;
       int stat;
