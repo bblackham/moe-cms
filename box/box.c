@@ -121,10 +121,12 @@ box_exit(int rc)
       meta_printf("killed:1\n");
 
       struct rusage rus;
-      int stat;
-      int p = wait4(box_pid, &stat, 0, &rus);
+      int p, stat;
+      do
+	p = wait4(box_pid, &stat, 0, &rus);
+      while (p < 0 && errno == EINTR);
       if (p < 0)
-	fprintf(stderr, "UGH: Lost track of the process\n");
+	fprintf(stderr, "UGH: Lost track of the process (%m)\n");
       else
 	final_stats(&rus);
     }
