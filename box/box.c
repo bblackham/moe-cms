@@ -24,6 +24,7 @@
 #include <sys/sysinfo.h>
 #include <sys/syscall.h>
 #include <sys/resource.h>
+#include <linux/ptrace.h>
 
 #define NONRET __attribute__((noreturn))
 #define UNUSED __attribute__((unused))
