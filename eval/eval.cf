@@ -112,6 +112,9 @@ TIME_LIMIT=10
 # Memory limit in kilobytes
 MEM_LIMIT=16384
 
+# Stack size limit in kilobytes (0=limited only by MEM_LIMIT)
+STACK_LIMIT=0
+
 # Command used for filtering of program output (optional)
 # If turned on, program output (*.raw) is ran through this filter and the
 # checkers are applied to the output of the filter (*.out).
@@ -139,7 +142,7 @@ OUTPUT_CHECK='diff -bBu $TDIR/$TEST.ok $TDIR/$TEST.out'
 #IC_CHECK='$PDIR/checker $PDIR/$TEST.in $PDIR/$TEST.chk'
 
 # Sandbox options used when testing
-TEST_SANDBOX_OPTS='-a2 -f -m$MEM_LIMIT -t$TIME_LIMIT $LANG_SANDBOX_OPTS $BOX_EXTRAS'
+TEST_SANDBOX_OPTS='-a2 -f -m$MEM_LIMIT -k$STACK_LIMIT -t$TIME_LIMIT $LANG_SANDBOX_OPTS $BOX_EXTRAS'
 
 # Extra options to be overridden in task configuration
 BOX_EXTRAS=
