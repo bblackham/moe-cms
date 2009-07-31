@@ -38,6 +38,7 @@ static int pass_environ;
 static int file_access;
 static int verbose;
 static int memory_limit;
+static int stack_limit;
 static char *redir_stdin, *redir_stdout, *redir_stderr;
 static char *set_cwd;
 
@@ -1031,15 +1032,22 @@ box_inside(int argc, char **argv)
   else
     dup2(1, 2);
   setpgrp();
+
   if (memory_limit)
     {
       rl.rlim_cur = rl.rlim_max = memory_limit * 1024;
       if (setrlimit(RLIMIT_AS, &rl) < 0)
-	die("setrlimit: %m");
+	die("setrlimit(RLIMIT_AS): %m");
     }
+
+  rl.rlim_cur = rl.rlim_max = (stack_limit ? (rlim_t)stack_limit * 1024 : RLIM_INFINITY);
+  if (setrlimit(RLIMIT_STACK, &rl) < 0)
+    die("setrlimit(RLIMIT_STACK): %m");
+
   rl.rlim_cur = rl.rlim_max = 64;
   if (setrlimit(RLIMIT_NOFILE, &rl) < 0)
-    die("setrlimit: %m");
+    die("setrlimit(RLIMIT_NOFILE): %m");
+
   char **env = setup_environment();
   if (filter_syscalls)
     {
@@ -1067,6 +1075,7 @@ Options:\n\
 -E <var>=<val>\tSet the environment variable <var> to <val>; unset it if <var> is empty\n\
 -f\t\tFilter system calls (-ff=very restricted)\n\
 -i <file>\tRedirect stdin from <file>\n\
+-k <size>\tLimit stack size to <size> KB (default: 0=unlimited)\n\
 -m <size>\tLimit address space to <size> KB\n\
 -M <file>\tOutput process information to <file> (name:value)\n\
 -o <file>\tRedirect stdout to <file>\n\
@@ -1091,7 +1100,7 @@ main(int argc, char **argv)
   int c;
   uid_t uid;
 
-  while ((c = getopt(argc, argv, "a:c:eE:fi:m:M:o:p:r:s:t:Tvw:x:")) >= 0)
+  while ((c = getopt(argc, argv, "a:c:eE:fi:k:m:M:o:p:r:s:t:Tvw:x:")) >= 0)
     switch (c)
       {
       case 'a':
@@ -1109,6 +1118,9 @@ main(int argc, char **argv)
 	break;
       case 'f':
 	filter_syscalls++;
+	break;
+      case 'k':
+	stack_limit = atol(optarg);
 	break;
       case 'i':
 	redir_stdin = optarg;
