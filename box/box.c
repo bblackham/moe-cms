@@ -830,23 +830,27 @@ sample_mem_peak(void)
 static void
 boxkeeper(void)
 {
-  int syscall_count = 0;
+  int syscall_count = (filter_syscalls ? 0 : 1);
   struct sigaction sa;
 
   is_ptraced = 1;
+
   bzero(&sa, sizeof(sa));
   sa.sa_handler = signal_int;
   sigaction(SIGINT, &sa, NULL);
+
   gettimeofday(&start_time, NULL);
   ticks_per_sec = sysconf(_SC_CLK_TCK);
   if (ticks_per_sec <= 0)
     die("Invalid ticks_per_sec!");
+
   if (timeout || wall_timeout)
     {
       sa.sa_handler = signal_alarm;
       sigaction(SIGALRM, &sa, NULL);
       alarm(1);
     }
+
   for(;;)
     {
       struct rusage rus;
