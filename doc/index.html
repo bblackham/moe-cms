@@ -1,44 +1,57 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html40/strict.dtd">
 
 <html><head>
-<title>The MO Contest Environment</title>
+<title>The Moe Contest Environment</title>
 <link rev=made href="mailto:mj@ucw.cz">
 <link rel=stylesheet title=Default href="mo-eval.css" type="text/css" media=all>
 </head><body>
 
-<h1>The MO Contest Environment</h1>
+<h1>The Moe Contest Environment</h1>
 
-<p>The MO Contest Environment a.k.a. MO-Eval is a simple system for conducting programming competitions similar to the
-<a href="http://olympiads.win.tue.nl/ioi/">International Olympiad in Informatics</a> &ndash; a contest
-where the participants solve programming tasks, which are then evaluated off-line after the end of the
-competition. It's built in a modular way, so extending to other types of programming contests
-(e.g., to on-line contests like the <a href="http://icpc.baylor.edu/icpc/">ACM ICPC</a>) should be
-pretty easy, but it hasn't been done yet.
+<p>The Moe Contest Environment (formerly MO-Eval) is a system for conducting
+programming competitions similar in spirit to the
+<a href="http://www.ioinformatics.org/">International Olympiad in Informatics</a> &ndash;
+contestants solve programming tasks, submit the source code of their solutions,
+which is then automatically tested on a set of test inputs.
 
-<p>We use this environment at the <a href="http://mo.mff.cuni.cz/p/index.html.en">Czech Olympiad in programming</a>
-(officially a part of the Mathematical Olympiad) since 2002 and also at the <a href="http://mo.mff.cuni.cz/cpspc/">CPSPC</a>
-(Czech-Polish-Slovak Preparation Camp) when it's held in the Czech Republic.
+<p>Moe is built in a modular way, making it easy to adapt it to the specifics
+of a particular contest, to other types of tasks, or other programming languages.
+
+<p>A brief description of the system and of the ideas behind it can be found in the following two papers
+published in <a href="http://www.i-journals.org/olympiads_in_informatics/">Olympiads in Informatics</a>:
+
+<ul>
+<li><a href="http://mj.ucw.cz/papers/eval.pdf">Perspectives on automatic grading systems</a>
+<li><a href="http://mj.ucw.cz/papers/eval2.pdf">Moe &ndash; Design of a Modular Grading System</a>
+</ul>
+
+<h2>Contests</h2>
+
+<p>Moe (or some of its modules) are used at the following contests:
+
+<ul>
+<li><a href="http://mo.mff.cuni.cz/p/index.html.en">Czech Olympiad in programming</a> since 2002
+<li><a href="http://mo.mff.cuni.cz/cpspc/">CPSPC</a> (Czech-Polish-Slovak Preparation Camp) on some years
+<li><a href="http://www.fi.muni.cz/ceoi/">CEOI 2007</a> (Central-European Olympiad in Informatics)
+<li><a href="http://www.ioi2009.org/">IOI 2009<a> (used the sandbox module)
+<li><a href="http://codex2.ms.mff.cuni.cz/project/">CodEx</a> (a web-based system, originally
+	designed for evaluation of students' homeworks, but also used for several programming
+	contests)
+</ul>
 
 <h2>Download</h2>
 
-<p>You can download the current release <a href="http://mj.ucw.cz/download/eval/mo-eval-1.0.1.tar.gz">eval-1.0.1</a>
-or browse <a href="http://atrey.karlin.mff.cuni.cz/~mj/download/eval/">the archive of past releases</a>.
+<p>Moe is still under heavy development, so the best way to obtain the latest
+version is directly from our <a href="http://git.or.cz/">Git</a> repository at git://git.ucw.cz/eval.git.
+The master branch of the repository is kept in a stable state, new development
+is done on other branches and then merged to the master.
 
-<p>Everything is also available in <a href="ftp://ftp.ucw.cz/mj/eval/">my FTP archive</a>.
-
-<h2>Development versions</h2>
-
-<p>Since the last release, there were lots of changes, but they still wait
-for polishing and documentation. If you are interested, you can take a peek
-inside our pot:
-
-<ul>
-<li>There are snapshot tarballs in the <a href="ftp://ftp.ucw.cz/mj/eval/">FTP archive</a>.
-<li>You can access our <a href="http://git.or.cz/">GIT</a> repository at git://git.ucw.cz/eval.git &ndash; there you can
-find the current source tree together with a complete log of changes.
-</ul>
+<p>We also occasionally publish snapshot tarballs in our <a href="ftp://ftp.ucw.cz/pub/mj/eval/">FTP archive</a>.
 
 <h2>Documentation</h2>
+
+<p>Warning: Most parts of this documentation are outdated. Please consult the papers above
+to get a more up-to-date picture.
 
 <ul>
 <li><a href="anatomy.html">Anatomy of MO-Eval</a>
@@ -48,27 +61,34 @@ find the current source tree together with a complete log of changes.
 <li><a href="public.html">Utilities for contestants</a>
 </ul>
 
-<p>Recently, I have published a short <a href="http://mj.ucw.cz/papers/eval.pdf">article
-on perspectives on automatic grading systems</a> in <a href="http://www.i-journals.org/olympiads_in_informatics/">Olympiads
-in Informatics</a>. It mentions many of the ideas behind MO-Eval.
-
 <h2>Portability</h2>
 
-<p>The environment runs under Linux on the i386 architecture. We currently use a slightly modified installation of <a href="http://www.debian.org/">Debian
-GNU/Linux</a>, but it will happily work with any other Linux distribution with a 2.4 or newer kernel. The only dependecies
-on Linux and on i386 are in the sandbox module; porting to other architectures requires just minor changes, porting to other
-UNIX systems is probably hard. Outside of that, everything should run happily on almost any system providing a reasonable
-set of GNU utilities (especially bash) and Perl, possibly including MinGW or Cygwin on Windows.
+<p>The environment runs under Linux on the i386 architecture. We currently use
+a slightly modified installation of <a href="http://www.debian.org/">Debian
+GNU/Linux</a>, but it will happily work with any other Linux distribution with
+a 2.6 or newer kernel. The only dependecies on Linux and on i386 are in the
+sandbox module; porting to other architectures requires just minor changes,
+porting to other UNIX systems is probably hard. Outside of that, everything
+should run happily on almost any system providing a reasonable set of GNU
+utilities (especially bash) and Perl, possibly including MinGW or Cygwin on
+Windows.
 
-<h2>Author</h2>
+<h2>Authors</h2>
 
-<p>MO-Eval has been written by <a href="http://atrey.karlin.mff.cuni.cz/~mj/">Martin Mares</a>.
-Great thanks go to Jan Kara, Milan Straka and Tomas Gavenciak for their help and for many fine ideas.
+<p>Moe has been written by the following people:
+
+<ul>
+<li><a href="http://mj.ucw.cz/">Martin Mares</a>
+<li>Tomas Gavenciak (the queue manager module)
+</ul>
+
+<p>We are also thankful to Jan Kara and Milan Straka for their help and for
+many fine ideas.
 
 <h2>License</h2>
 
-<p>The MO-Eval package can be used and distributed under the terms of the <a href="http://www.gnu.org/copyleft/gpl.html">GNU General
-Public License version 2.</a>
+<p>Moe can be used and distributed under the terms of the <a
+href="http://www.gnu.org/copyleft/gpl.html">GNU General Public License version 2.</a>
 
 <h2>Feedback</h2>
 
