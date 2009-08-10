@@ -1,2 +1,2 @@
 install:
-	rsync -av --delete . jw:www/mo-eval/
+	rsync -av --delete . jw:www/moe/
