@@ -166,3 +166,7 @@ BOX_EXTRAS=
 #EXT_pas_TIME_LIMIT=100
 #TEST_1_TIME_LIMIT=100
 #EXT_pas_TEST_1_TIME_LIMIT=100
+
+### Reserved for use by external applications
+
+#TEST_x_COMMENT="Description of the test case"
