@@ -25,7 +25,7 @@ MaxAttachSize		256K
 
 # Maximum number of versions of a single task part a contestant is allowed
 # to submit (0=unlimited)
-MaxVersions		50
+MaxVersions		100
 
 # Number of bits for the Diffie-Hellman key exchange
 DHBits			1024
