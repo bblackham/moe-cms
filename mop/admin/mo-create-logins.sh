@@ -60,7 +60,7 @@ case $mode in
 	EOF
 
     bin/mo-get-users --full | while read user name; do
-      passwd=`apg -n1 -m6 -Mncl | cut -d" " -f1 | tr l1O0 '@*?-' `
+      passwd=`apg -n1 -m6 -Mncl -E"01lO" | cut -d" " -f1`
       passwd_md5=`echo $passwd | bin/md5crypt`
       echo $user:x:$uid:$uid:$name:$MO_ROOT/users/$user/$user:/bin/bash			>> etcpasswd
       echo $user:x:$uid:								>> etcgroup
