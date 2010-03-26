@@ -430,7 +430,7 @@ function test-run-interactive
 function test-run-open-data
 {
 	[ -f $SDIR/$TEST.out ] || test-result 0 "No solution"
-	ln $SDIR/$TEST.out $TDIR/$TEST.out
+	try-ln $SDIR/$TEST.out $TDIR/$TEST.out
 }
 
 # Syntax checks
@@ -458,7 +458,7 @@ function output-check
 	MSG=
 	if [ -n "$OUTPUT_CHECK" -a "$OUT_TYPE" != none -a -z "$EV_NOCHECK" ] ; then
 		pcont "<check> "
-		[ -f $PDIR/$TEST.out ] && ln $PDIR/$TEST.out $TDIR/$TEST.ok
+		[ -f $PDIR/$TEST.out ] && try-ln $PDIR/$TEST.out $TDIR/$TEST.ok
 		OCHECK=$(expand-var OUTPUT_CHECK)
 		echo "Output check command: $OCHECK"
 		if ! eval $OCHECK 2>$TMPDIR/exec.out ; then
