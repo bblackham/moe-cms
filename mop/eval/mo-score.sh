@@ -8,7 +8,8 @@ $tex = 0;
 $extras = 0;
 $alt = 0;
 $merged = 0;
-$usage = "Usage: mo-score [--detail] [--alt] [--extras] [--html] [--tex] [--merged] [<directory>/]<task> ...";
+$table = 0;
+$usage = "Usage: mo-score [--detail] [--alt] [--extras] [--html] [--tex] [--table] [--merged] [<directory>/]<task> ...";
 while (($arg = $ARGV[0]) =~ /^--([a-z]+)$/) {
 	shift @ARGV;
 	$var = "\$$1";
@@ -16,6 +17,12 @@ while (($arg = $ARGV[0]) =~ /^--([a-z]+)$/) {
 	eval "$var = 1;";
 }
 @ARGV || die $usage;
+
+$print_key = 1;
+if ($table) {
+	open STDOUT, "|column -t -s'\t'" or die;
+	$print_key = 0;
+}
 
 print STDERR "Scanning contestants... ";
 open (CT, "bin/mo-get-users --full |") || die "Cannot get list of contestants";
@@ -219,10 +226,11 @@ if ($debug) {
 	print "\\error{TeX output not supported yet!}\n";
 } else {
 	foreach $r (@table) { print join("\t",@$r), "\n"; }
-	print "\n";
-	foreach $r (sort keys %error_codes) { print "$r: $error_codes{$r}\n"; }
+	if ($print_key) {
+		print "\n";
+		foreach $r (sort keys %error_codes) { print "$r: $error_codes{$r}\n"; }
+	}
 }
-
 
 sub printHtmlRow {
 	print "<TR>", join('',map {
@@ -230,7 +238,6 @@ sub printHtmlRow {
 		else { $_ = "<TD align=" . (/^[0-9A-Z-]+$/ ? "right" : "left") . (length($_) > 14 ? " width=150" : "") . ">$_"; }
 	} @_), "\n";
 }
-
 
 sub printHtmlHeader {
 
