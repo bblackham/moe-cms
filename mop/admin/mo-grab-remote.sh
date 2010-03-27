@@ -6,12 +6,13 @@
 set -e
 . cf/mop
 
+rsync -a mo-submit@mo100:solutions/ submits
 for user in `bin/mo-get-users` ; do
 	echo -n "$user:"
 	mkdir -p solutions/$user
 	for t in $@ ; do
 		rm -rf solutions/$user/$t
-		D=$MO_ROOT/eval/submit/solutions/$user/$t
+		D=submits/$user/$t
 		if [ -d $D ] ; then
 			echo -n " $t"
 			cp -a $D solutions/$user/$t
