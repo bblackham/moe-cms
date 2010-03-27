@@ -1,5 +1,7 @@
 #!/usr/bin/perl
 
+use List::Util qw(min);
+
 $tex = 0;
 $usage = "Usage: mo-score-mop [--tex] theoretical_tasks_nr praxis_tasks_nr task1 task2 ...";
 while (($arg = $ARGV[0]) =~ /^--([a-z]+)$/) {
@@ -59,19 +61,23 @@ foreach $u (keys %users) {
 		-f $tt || next;
 		print STDERR "$u/$t ";
 		open (X, $tt) || die "Unable to open $tt";
-
-                my %tests = ();
+		my %groups = ();
 		while (<X>) {
 			chomp;
-			/^(\S+) (-?\d+)/ || die "Parse error: $_";
-                        my ($t, $p) = ($1, $2);
-                        $t =~ s/[^0-9]//g;
-			$tests{$t} = $p if not exists $tests{$t} or $tests{$t} > $p;
-		}
-		foreach my $p (values %tests) {
-			$tasks{$u}{$t_num} += $p;
+			my ($test, $pts) = /^(\S+) (-?\d+)/ or die "Parse error: $_";
+			my $group = $test;
+			$group =~ s{\D}{}g;
+			if (defined $groups{$group}) {
+				$groups{$group} = min($groups{$group}, $pts);
+			} else {
+				$groups{$group} = $pts;
+			}
 		}
 		close X;
+
+		for my $g (keys %groups) {
+			$tasks{$u}{$t_num} += $groups{$g};
+		}
 	}
 	closedir D;
 }
