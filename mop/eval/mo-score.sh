@@ -187,7 +187,7 @@ while ($i < @table) {
 	} else {
 		${table[$j]}[0] = $j+1 . ".-" . $i . ".";
 		$j++;
-		while ($j < $i) { ${table[$j++]}[0] = ""; };
+		while ($j < $i) { ${table[$j++]}[0] = " "; };
 	}
 }
 print STDERR "OK\n";
