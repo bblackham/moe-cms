@@ -82,6 +82,8 @@ foreach $u (keys %users) {
 				elsif ($trem =~ /^Caught fatal signal /) { $cmt = "SG"; }
 				elsif ($trem =~ /^([A-Za-z])\S*\s+([A-Za-z])/) {
 					($cmt = "$1$2") =~ tr/a-z/A-Z/;
+				} elsif ($trem =~ /^([A-Za-z]{2})/) {
+					($cmt = $1) =~ tr/a-z/A-Z/;
 				}
 				if (!defined $messages{$trem}) {
 					$messages{$trem} = $cmt;
