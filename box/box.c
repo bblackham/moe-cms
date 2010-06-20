@@ -1,7 +1,7 @@
 /*
- *	A Simple Sandbox for MO-Eval
+ *	A Simple Sandbox for Moe
  *
- *	(c) 2001--2008 Martin Mares <mj@ucw.cz>
+ *	(c) 2001--2010 Martin Mares <mj@ucw.cz>
  */
 
 #define _LARGEFILE64_SOURCE
@@ -231,16 +231,18 @@ static unsigned char syscall_action[NUM_ACTIONS] = {
     S(open) = A_FILENAME,
     S(creat) = A_FILENAME,
     S(unlink) = A_FILENAME,
-    S(oldstat) = A_FILENAME,
     S(access) = A_FILENAME,			
-    S(oldlstat) = A_FILENAME,			
     S(truncate) = A_FILENAME,
     S(stat) = A_FILENAME,
     S(lstat) = A_FILENAME,
+    S(readlink) = A_FILENAME,
+#ifndef CONFIG_BOX_AMD64
+    S(oldstat) = A_FILENAME,
+    S(oldlstat) = A_FILENAME,
     S(truncate64) = A_FILENAME,
     S(stat64) = A_FILENAME,
     S(lstat64) = A_FILENAME,
-    S(readlink) = A_FILENAME,
+#endif
 
     // Syscalls permitted always
     S(exit) = A_YES | A_SAMPLE_MEM,
@@ -250,7 +252,6 @@ static unsigned char syscall_action[NUM_ACTIONS] = {
     S(lseek) = A_YES,
     S(getpid) = A_YES,
     S(getuid) = A_YES,
-    S(oldfstat) = A_YES,
     S(dup) = A_YES,
     S(brk) = A_YES,
     S(getgid) = A_YES,
@@ -260,7 +261,6 @@ static unsigned char syscall_action[NUM_ACTIONS] = {
     S(ftruncate) = A_YES,
     S(fstat) = A_YES,
     S(personality) = A_YES,
-    S(_llseek) = A_YES,
     S(readv) = A_YES,
     S(writev) = A_YES,
     S(getresuid) = A_YES,
@@ -271,12 +271,8 @@ static unsigned char syscall_action[NUM_ACTIONS] = {
     S(pread) = A_YES,
     S(pwrite) = A_YES,
 #endif
-    S(ftruncate64) = A_YES,
-    S(fstat64) = A_YES,
     S(fcntl) = A_YES,
-    S(fcntl64) = A_YES,
     S(mmap) = A_YES,
-    S(mmap2) = A_YES,
     S(munmap) = A_YES,
     S(ioctl) = A_YES,
     S(uname) = A_YES,
@@ -285,32 +281,29 @@ static unsigned char syscall_action[NUM_ACTIONS] = {
     S(get_thread_area) = A_YES,
     S(set_tid_address) = A_YES,
     S(exit_group) = A_YES | A_SAMPLE_MEM,
+#ifndef CONFIG_BOX_AMD64
+    S(oldfstat) = A_YES,
+    S(ftruncate64) = A_YES,
+    S(_llseek) = A_YES,
+    S(fstat64) = A_YES,
+    S(fcntl64) = A_YES,
+    S(mmap2) = A_YES,
+#endif
 
     // Syscalls permitted only in liberal mode
     S(time) = A_YES | A_LIBERAL,
     S(alarm) = A_YES | A_LIBERAL,
     S(pause) = A_YES | A_LIBERAL,
-    S(signal) = A_YES | A_LIBERAL,
     S(fchmod) = A_YES | A_LIBERAL,
-    S(sigaction) = A_YES | A_LIBERAL,
-    S(sgetmask) = A_YES | A_LIBERAL,
-    S(ssetmask) = A_YES | A_LIBERAL,
-    S(sigsuspend) = A_YES | A_LIBERAL,
-    S(sigpending) = A_YES | A_LIBERAL,
     S(getrlimit) = A_YES | A_LIBERAL,
     S(getrusage) = A_YES | A_LIBERAL,
-    S(ugetrlimit) = A_YES | A_LIBERAL,
     S(gettimeofday) = A_YES | A_LIBERAL,
     S(select) = A_YES | A_LIBERAL,
-    S(readdir) = A_YES | A_LIBERAL,
     S(setitimer) = A_YES | A_LIBERAL,
     S(getitimer) = A_YES | A_LIBERAL,
-    S(sigreturn) = A_YES | A_LIBERAL | A_NO_RETVAL,
     S(mprotect) = A_YES | A_LIBERAL,
-    S(sigprocmask) = A_YES | A_LIBERAL,
     S(getdents) = A_YES | A_LIBERAL,
     S(getdents64) = A_YES | A_LIBERAL,
-    S(_newselect) = A_YES | A_LIBERAL,
     S(fdatasync) = A_YES | A_LIBERAL,
     S(mremap) = A_YES | A_LIBERAL,
     S(poll) = A_YES | A_LIBERAL,
@@ -324,6 +317,20 @@ static unsigned char syscall_action[NUM_ACTIONS] = {
     S(rt_sigqueueinfo) = A_YES | A_LIBERAL,
     S(rt_sigsuspend) = A_YES | A_LIBERAL,
     S(_sysctl) = A_YES | A_LIBERAL,
+#ifndef CONFIG_BOX_AMD64
+    S(sigaction) = A_YES | A_LIBERAL,
+    S(sgetmask) = A_YES | A_LIBERAL,
+    S(ssetmask) = A_YES | A_LIBERAL,
+    S(sigsuspend) = A_YES | A_LIBERAL,
+    S(sigpending) = A_YES | A_LIBERAL,
+    S(sigreturn) = A_YES | A_LIBERAL | A_NO_RETVAL,
+    S(sigprocmask) = A_YES | A_LIBERAL,
+    S(ugetrlimit) = A_YES | A_LIBERAL,
+    S(readdir) = A_YES | A_LIBERAL,
+    S(signal) = A_YES | A_LIBERAL,
+    S(_newselect) = A_YES | A_LIBERAL,
+#endif
+
 #undef S
 };
 
