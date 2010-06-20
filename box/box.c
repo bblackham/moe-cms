@@ -719,20 +719,12 @@ static void
 valid_filename(arg_t addr)
 {
   char namebuf[4096], *p, *end;
-  static int mem_fd;
 
   if (!file_access)
     err("FA: File access forbidden");
   if (file_access >= 9)
     return;
 
-  if (!mem_fd)
-    {
-      sprintf(namebuf, "/proc/%d/mem", (int) box_pid);
-      mem_fd = open(namebuf, O_RDONLY);
-      if (mem_fd < 0)
-	die("open(%s): %m", namebuf);
-    }
   p = end = namebuf;
   do
     {
@@ -744,15 +736,13 @@ valid_filename(arg_t addr)
 	    l = remains;
 	  if (!l)
 	    err("FA: Access to file with name too long");
-	  if (lseek64(mem_fd, addr, SEEK_SET) < 0)
-	    die("lseek64(mem): %m");
-	  remains = read(mem_fd, end, l);
+	  remains = read_user_mem(addr, end, l);
 	  if (remains < 0)
 	    die("read(mem): %m");
 	  if (!remains)
 	    err("FA: Access to file with name out of memory");
-	  end += l;
-	  addr += l;
+	  end += remains;
+	  addr += remains;
 	}
     }
   while (*p++);
