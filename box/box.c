@@ -610,10 +610,27 @@ struct syscall_args {
   struct user user;
 };
 
+static int read_user_mem(arg_t addr, char *buf, int len)
+{
+  static int mem_fd;
+
+  if (!mem_fd)
+    {
+      char memname[64];
+      sprintf(memname, "/proc/%d/mem", (int) box_pid);
+      mem_fd = open(memname, O_RDONLY);
+      if (mem_fd < 0)
+	die("open(%s): %m", memname);
+    }
+  if (lseek64(mem_fd, addr, SEEK_SET) < 0)
+    die("lseek64(mem): %m");
+  return read(mem_fd, buf, len);
+}
+
 #ifdef CONFIG_BOX_AMD64
 
 static void
-get_syscall_args(struct syscall_args *a)
+get_syscall_args(struct syscall_args *a, int is_exit)
 {
   if (ptrace(PTRACE_GETREGS, box_pid, NULL, &a->user) < 0)
     die("ptrace(PTRACE_GETREGS): %m");
@@ -623,7 +640,43 @@ get_syscall_args(struct syscall_args *a)
   a->arg3 = a->user.regs.rdx;
   a->result = a->user.regs.rax;
 
-  // FIXME: Check that it's really a 64-bit syscall
+  /*
+   *  CAVEAT: We have to check carefully that this is a real 64-bit syscall.
+   *  We test whether the process runs in 64-bit mode, but surprisingly this
+   *  is not enough: a 64-bit process can still issue the INT 0x80 instruction
+   *  which performs a 32-bit syscall. Currently, the only known way how to
+   *  detect this situation is to inspect the instruction code (the kernel
+   *  keeps a syscall type flag internally, but it is not accessible from
+   *  user space). Hopefully, there is no instruction whose suffix is the
+   *  code of the SYSCALL instruction. Sometimes, one would wish the
+   *  instruction codes to be unique even when read backwards :)
+   */
+
+  if (is_exit)
+    return;
+
+  switch (a->user.regs.cs)
+    {
+    case 0x23:
+      err("FO: Forbidden 32-bit mode syscall");
+    case 0x33:
+      break;
+    default:
+      err("XX: Unknown code segment %04jx", (intmax_t) a->user.regs.cs);
+    }
+
+  uint16_t instr;
+  if (read_user_mem(a->user.regs.rip-2, (char *) &instr, 2) != 2)
+    err("FO: Cannot read syscall instruction");
+  switch (instr)
+    {
+    case 0x050f:
+      break;
+    case 0x80cd:
+      err("FO: Forbidden 32-bit syscall in 64-bit mode");
+    default:
+      err("FO: Unknown syscall instruction %04x", instr);
+    }
 }
 
 static void
@@ -638,7 +691,7 @@ set_syscall_nr(struct syscall_args *a, arg_t sys)
 #else
 
 static void
-get_syscall_args(struct syscall_args *a)
+get_syscall_args(struct syscall_args *a, int is_exit UNUSED)
 {
   if (ptrace(PTRACE_GETREGS, box_pid, NULL, &a->user) < 0)
     die("ptrace(PTRACE_GETREGS): %m");
@@ -1000,12 +1053,13 @@ boxkeeper(void)
 	      struct syscall_args a;
 	      static unsigned int sys_tick, last_act;
 	      static arg_t last_sys;
-	      get_syscall_args(&a);
-	      arg_t sys = a.sys;
 	      if (++sys_tick & 1)		/* Syscall entry */
 		{
 		  char namebuf[32];
 		  int act;
+
+		  get_syscall_args(&a, 0);
+		  arg_t sys = a.sys;
 		  msg(">> Syscall %-12s (%08jx,%08jx,%08jx) ", syscall_name(sys, namebuf), (intmax_t) a.arg1, (intmax_t) a.arg2, (intmax_t) a.arg3);
 		  if (!exec_seen)
 		    {
@@ -1034,7 +1088,8 @@ boxkeeper(void)
 		}
 	      else					/* Syscall return */
 		{
-		  if (sys == ~(arg_t)0)
+		  get_syscall_args(&a, 1);
+		  if (a.sys == ~(arg_t)0)
 		    {
 		      /* Some syscalls (sigreturn et al.) do not return a value */
 		      if (!(last_act & A_NO_RETVAL))
@@ -1042,7 +1097,7 @@ boxkeeper(void)
 		    }
 		  else
 		    {
-		      if (sys != last_sys)
+		      if (a.sys != last_sys)
 			err("XX: Mismatched syscall entry/exit");
 		    }
 		  if (last_act & A_NO_RETVAL)
