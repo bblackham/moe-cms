@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <stdint.h>
 #include <unistd.h>
 #include <getopt.h>
 #include <time.h>
@@ -594,10 +595,75 @@ setup_environment(void)
   return env;
 }
 
+/*** Low-level parsing of syscalls ***/
+
+#ifdef CONFIG_BOX_AMD64
+typedef uint64_t arg_t;
+#else
+typedef uint32_t arg_t;
+#endif
+
+struct syscall_args {
+  arg_t sys;
+  arg_t arg1, arg2, arg3;
+  arg_t result;
+  struct user user;
+};
+
+#ifdef CONFIG_BOX_AMD64
+
+static void
+get_syscall_args(struct syscall_args *a)
+{
+  if (ptrace(PTRACE_GETREGS, box_pid, NULL, &a->user) < 0)
+    die("ptrace(PTRACE_GETREGS): %m");
+  a->sys = a->user.regs.orig_rax;
+  a->arg1 = a->user.regs.rdi;
+  a->arg2 = a->user.regs.rsi;
+  a->arg3 = a->user.regs.rdx;
+  a->result = a->user.regs.rax;
+
+  // FIXME: Check that it's really a 64-bit syscall
+}
+
+static void
+set_syscall_nr(struct syscall_args *a, arg_t sys)
+{
+  a->sys = sys;
+  a->user.regs.orig_rax = sys;
+  if (ptrace(PTRACE_SETREGS, box_pid, NULL, &a->user) < 0)
+    die("ptrace(PTRACE_SETREGS): %m");
+}
+
+#else
+
+static void
+get_syscall_args(struct syscall_args *a)
+{
+  if (ptrace(PTRACE_GETREGS, box_pid, NULL, &a->user) < 0)
+    die("ptrace(PTRACE_GETREGS): %m");
+  a->sys = a->user.regs.orig_eax;
+  a->arg1 = a->user.regs.ebx;
+  a->arg2 = a->user.regs.ecx;
+  a->arg3 = a->user.regs.edx;
+  a->result = a->user.regs.eax;
+}
+
+static void
+set_syscall_nr(struct syscall_args *a, arg_t sys)
+{
+  a->sys = sys;
+  a->user.regs.orig_eax = sys;
+  if (ptrace(PTRACE_SETREGS, box_pid, NULL, &a->user) < 0)
+    die("ptrace(PTRACE_SETREGS): %m");
+}
+
+#endif
+
 /*** Syscall checks ***/
 
 static void
-valid_filename(unsigned long addr)
+valid_filename(arg_t addr)
 {
   char namebuf[4096], *p, *end;
   static int mem_fd;
@@ -666,9 +732,9 @@ valid_filename(unsigned long addr)
 
 // Check syscall. If invalid, return -1, otherwise return the action mask.
 static int
-valid_syscall(struct user *u)
+valid_syscall(struct syscall_args *a)
 {
-  unsigned int sys = u->regs.orig_eax;
+  unsigned int sys = a->sys;
   unsigned int act = (sys < NUM_ACTIONS) ? syscall_action[sys] : A_DEFAULT;
 
   if (act & A_LIBERAL)
@@ -684,7 +750,7 @@ valid_syscall(struct user *u)
     case A_NO:
       return -1;
     case A_FILENAME:
-      valid_filename(u->regs.ebx);
+      valid_filename(a->arg1);
       return act;
     default: ;
     }
@@ -692,17 +758,17 @@ valid_syscall(struct user *u)
   switch (sys)
     {
     case __NR_kill:
-      if (u->regs.ebx == box_pid)
+      if (a->arg1 == (arg_t) box_pid)
 	{
-	  meta_printf("exitsig:%d\n", (int)u->regs.ecx);
-	  err("SG: Committed suicide by signal %d", (int)u->regs.ecx);
+	  meta_printf("exitsig:%d\n", (int) a->arg2);
+	  err("SG: Committed suicide by signal %d", (int) a->arg2);
 	}
       return -1;
     case __NR_tgkill:
-      if (u->regs.ebx == box_pid && u->regs.ecx == box_pid)
+      if (a->arg1 == (arg_t) box_pid && a->arg2 == (arg_t) box_pid)
 	{
-	  meta_printf("exitsig:%d\n", (int)u->regs.edx);
-	  err("SG: Committed suicide by signal %d", (int)u->regs.edx);
+	  meta_printf("exitsig:%d\n", (int) a->arg3);
+	  err("SG: Committed suicide by signal %d", (int) a->arg3);
 	}
       return -1;
     default:
@@ -931,23 +997,23 @@ boxkeeper(void)
 	    {
 	      if (verbose > 2)
 		msg("[ptrace status %08x] ", stat);
-	      struct user u;
-	      static unsigned int sys_tick, last_sys, last_act;
-	      if (ptrace(PTRACE_GETREGS, box_pid, NULL, &u) < 0)
-		die("ptrace(PTRACE_GETREGS): %m");
-	      unsigned int sys = u.regs.orig_eax;
+	      struct syscall_args a;
+	      static unsigned int sys_tick, last_act;
+	      static arg_t last_sys;
+	      get_syscall_args(&a);
+	      arg_t sys = a.sys;
 	      if (++sys_tick & 1)		/* Syscall entry */
 		{
 		  char namebuf[32];
 		  int act;
-		  msg(">> Syscall %-12s (%08lx,%08lx,%08lx) ", syscall_name(sys, namebuf), u.regs.ebx, u.regs.ecx, u.regs.edx);
+		  msg(">> Syscall %-12s (%08jx,%08jx,%08jx) ", syscall_name(sys, namebuf), (intmax_t) a.arg1, (intmax_t) a.arg2, (intmax_t) a.arg3);
 		  if (!exec_seen)
 		    {
 		      msg("[master] ");
 		      if (sys == __NR_execve)
 			exec_seen = 1;
 		    }
-		  else if ((act = valid_syscall(&u)) >= 0)
+		  else if ((act = valid_syscall(&a)) >= 0)
 		    {
 		      last_act = act;
 		      syscall_count++;
@@ -961,16 +1027,14 @@ boxkeeper(void)
 		       * so we have to change it to something harmless (e.g., an undefined
 		       * syscall) and make the program continue.
 		       */
-		      u.regs.orig_eax = 0xffffffff;
-		      if (ptrace(PTRACE_SETREGS, box_pid, NULL, &u) < 0)
-			die("ptrace(PTRACE_SETREGS): %m");
+		      set_syscall_nr(&a, ~(arg_t)0);
 		      err("FO: Forbidden syscall %s", syscall_name(sys, namebuf));
 		    }
 		  last_sys = sys;
 		}
 	      else					/* Syscall return */
 		{
-		  if (sys == 0xffffffff)
+		  if (sys == ~(arg_t)0)
 		    {
 		      /* Some syscalls (sigreturn et al.) do not return a value */
 		      if (!(last_act & A_NO_RETVAL))
@@ -984,7 +1048,7 @@ boxkeeper(void)
 		  if (last_act & A_NO_RETVAL)
 		    msg("= ?\n");
 		  else
-		    msg("= %ld\n", u.regs.eax);
+		    msg("= %jd\n", (intmax_t) a.result);
 		}
 	      ptrace(PTRACE_SYSCALL, box_pid, 0, 0);
 	    }

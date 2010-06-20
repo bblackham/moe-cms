@@ -8,6 +8,8 @@ BOX_CFLAGS=-m64 -DCONFIG_BOX_AMD64
 
 $(o)/box/box: $(o)/box/box.o
 $(o)/box/box.o: $(o)/box/syscall-table.h
+
+$(o)/box/box: LDFLAGS+=$(BOX_CFLAGS)
 $(o)/box/box.o: CFLAGS+=$(BOX_CFLAGS)
 
 $(o)/box/syscall-table.h: $(s)/box/mk-syscall-table
