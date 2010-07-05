@@ -4,7 +4,10 @@
 DIRS+=box
 PROGS+=$(o)/box/box
 
-BOX_CFLAGS=-m64 -DCONFIG_BOX_KERNEL_AMD64 #-DCONFIG_BOX_USER_AMD64
+BOX_CFLAGS=
+ifdef CONFIG_BOX_KERNEL_AMD64
+BOX_CFLAGS += -m64
+endif
 
 $(o)/box/box: $(o)/box/box.o
 $(o)/box/box.o: $(o)/box/syscall-table.h
@@ -13,7 +16,7 @@ $(o)/box/box: LDFLAGS+=$(BOX_CFLAGS)
 $(o)/box/box.o: CFLAGS+=$(BOX_CFLAGS)
 
 $(o)/box/syscall-table.h: $(s)/box/mk-syscall-table
-	sh $^ >$@ $(BOX_CFLAGS)
+	sh $^ >$@ $(CFLAGS) $(BOX_CFLAGS)
 
 box-tests: $(addprefix $(o)/box/test-sys,32-int80 64-int80 32-syscall 64-syscall 32-sysenter 64-sysenter)
 

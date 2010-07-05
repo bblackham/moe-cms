@@ -7,6 +7,8 @@
 #define _LARGEFILE64_SOURCE
 #define _GNU_SOURCE
 
+#include "autoconf.h"
+
 #include <errno.h>
 #include <stdio.h>
 #include <fcntl.h>
