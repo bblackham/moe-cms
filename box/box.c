@@ -24,6 +24,7 @@
 #include <sys/signal.h>
 #include <sys/sysinfo.h>
 #include <sys/resource.h>
+#include <sys/utsname.h>
 #include <linux/ptrace.h>
 
 #if defined(CONFIG_BOX_KERNEL_AMD64) && !defined(CONFIG_BOX_USER_AMD64)
@@ -718,6 +719,11 @@ set_syscall_nr(struct syscall_args *a, arg_t sys)
     die("ptrace(PTRACE_SETREGS): %m");
 }
 
+static void
+sanity_check(void)
+{
+}
+
 #else
 
 static void
@@ -739,6 +745,19 @@ set_syscall_nr(struct syscall_args *a, arg_t sys)
   a->user.regs.orig_eax = sys;
   if (ptrace(PTRACE_SETREGS, box_pid, NULL, &a->user) < 0)
     die("ptrace(PTRACE_SETREGS): %m");
+}
+
+static void
+sanity_check(void)
+{
+#if !defined(CONFIG_BOX_ALLOW_INSECURE)
+  struct utsname uts;
+  if (uname(&uts) < 0)
+    die("uname() failed: %m");
+
+  if (!strcmp(uts.machine, "x86_64"))
+    die("Running 32-bit sandbox on 64-bit kernels is inherently unsafe. Please get a 64-bit version.");
+#endif
 }
 
 #endif
@@ -1316,6 +1335,7 @@ main(int argc, char **argv)
   if (optind >= argc)
     usage();
 
+  sanity_check();
   uid = geteuid();
   if (setreuid(uid, uid) < 0)
     die("setreuid: %m");
