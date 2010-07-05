@@ -4,7 +4,7 @@
 DIRS+=box
 PROGS+=$(o)/box/box
 
-BOX_CFLAGS=-m64 -DCONFIG_BOX_AMD64
+BOX_CFLAGS=-m64 -DCONFIG_BOX_KERNEL_AMD64 #-DCONFIG_BOX_USER_AMD64
 
 $(o)/box/box: $(o)/box/box.o
 $(o)/box/box.o: $(o)/box/syscall-table.h

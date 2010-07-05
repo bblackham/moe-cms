@@ -23,9 +23,16 @@
 #include <sys/ptrace.h>
 #include <sys/signal.h>
 #include <sys/sysinfo.h>
-#include <sys/syscall.h>
 #include <sys/resource.h>
 #include <linux/ptrace.h>
+
+#if defined(CONFIG_BOX_KERNEL_AMD64) && !defined(CONFIG_BOX_USER_AMD64)
+#include <asm/unistd_32.h>
+#define NATIVE_NR_execve 59		/* 64-bit execve */
+#else
+#include <asm/unistd.h>
+#define NATIVE_NR_execve __NR_execve
+#endif
 
 #define NONRET __attribute__((noreturn))
 #define UNUSED __attribute__((unused))
@@ -237,7 +244,7 @@ static unsigned char syscall_action[NUM_ACTIONS] = {
     S(stat) = A_FILENAME,
     S(lstat) = A_FILENAME,
     S(readlink) = A_FILENAME,
-#ifndef CONFIG_BOX_AMD64
+#ifndef CONFIG_BOX_USER_AMD64
     S(oldstat) = A_FILENAME,
     S(oldlstat) = A_FILENAME,
     S(truncate64) = A_FILENAME,
@@ -282,7 +289,7 @@ static unsigned char syscall_action[NUM_ACTIONS] = {
     S(get_thread_area) = A_YES,
     S(set_tid_address) = A_YES,
     S(exit_group) = A_YES | A_SAMPLE_MEM,
-#ifndef CONFIG_BOX_AMD64
+#ifndef CONFIG_BOX_USER_AMD64
     S(oldfstat) = A_YES,
     S(ftruncate64) = A_YES,
     S(_llseek) = A_YES,
@@ -318,7 +325,7 @@ static unsigned char syscall_action[NUM_ACTIONS] = {
     S(rt_sigqueueinfo) = A_YES | A_LIBERAL,
     S(rt_sigsuspend) = A_YES | A_LIBERAL,
     S(_sysctl) = A_YES | A_LIBERAL,
-#ifndef CONFIG_BOX_AMD64
+#ifndef CONFIG_BOX_USER_AMD64
     S(sigaction) = A_YES | A_LIBERAL,
     S(sgetmask) = A_YES | A_LIBERAL,
     S(ssetmask) = A_YES | A_LIBERAL,
@@ -597,7 +604,7 @@ setup_environment(void)
 
 /*** Low-level parsing of syscalls ***/
 
-#ifdef CONFIG_BOX_AMD64
+#ifdef CONFIG_BOX_KERNEL_AMD64
 typedef uint64_t arg_t;
 #else
 typedef uint32_t arg_t;
@@ -627,7 +634,7 @@ static int read_user_mem(arg_t addr, char *buf, int len)
   return read(mem_fd, buf, len);
 }
 
-#ifdef CONFIG_BOX_AMD64
+#ifdef CONFIG_BOX_KERNEL_AMD64
 
 static void
 get_syscall_args(struct syscall_args *a, int is_exit)
@@ -635,9 +642,6 @@ get_syscall_args(struct syscall_args *a, int is_exit)
   if (ptrace(PTRACE_GETREGS, box_pid, NULL, &a->user) < 0)
     die("ptrace(PTRACE_GETREGS): %m");
   a->sys = a->user.regs.orig_rax;
-  a->arg1 = a->user.regs.rdi;
-  a->arg2 = a->user.regs.rsi;
-  a->arg3 = a->user.regs.rdx;
   a->result = a->user.regs.rax;
 
   /*
@@ -655,27 +659,53 @@ get_syscall_args(struct syscall_args *a, int is_exit)
   if (is_exit)
     return;
 
+  int sys_type;
+  uint16_t instr;
+
   switch (a->user.regs.cs)
     {
     case 0x23:
-      err("FO: Forbidden 32-bit mode syscall");
+      // 32-bit CPU mode => only 32-bit syscalls can be issued
+      sys_type = 32;
+      break;
     case 0x33:
+      // 64-bit CPU mode
+      if (read_user_mem(a->user.regs.rip-2, (char *) &instr, 2) != 2)
+	err("FO: Cannot read syscall instruction");
+      switch (instr)
+	{
+	case 0x050f:
+	  break;
+	case 0x80cd:
+	  err("FO: Forbidden 32-bit syscall in 64-bit mode");
+	default:
+	  err("XX: Unknown syscall instruction %04x", instr);
+	}
+      sys_type = 64;
       break;
     default:
       err("XX: Unknown code segment %04jx", (intmax_t) a->user.regs.cs);
     }
 
-  uint16_t instr;
-  if (read_user_mem(a->user.regs.rip-2, (char *) &instr, 2) != 2)
-    err("FO: Cannot read syscall instruction");
-  switch (instr)
+#ifdef CONFIG_BOX_USER_AMD64
+  if (sys_type != 64)
+    err("FO: Forbidden %d-bit mode syscall", sys_type);
+#else
+  if (sys_type != (exec_seen ? 32 : 64))
+    err("FO: Forbidden %d-bit mode syscall", sys_type);
+#endif
+
+  if (sys_type == 32)
     {
-    case 0x050f:
-      break;
-    case 0x80cd:
-      err("FO: Forbidden 32-bit syscall in 64-bit mode");
-    default:
-      err("FO: Unknown syscall instruction %04x", instr);
+      a->arg1 = a->user.regs.rbx;
+      a->arg2 = a->user.regs.rcx;
+      a->arg3 = a->user.regs.rdx;
+    }
+  else
+    {
+      a->arg1 = a->user.regs.rdi;
+      a->arg2 = a->user.regs.rsi;
+      a->arg3 = a->user.regs.rdx;
     }
 }
 
@@ -1054,7 +1084,7 @@ boxkeeper(void)
 		  if (!exec_seen)
 		    {
 		      msg("[master] ");
-		      if (sys == __NR_execve)
+		      if (sys == NATIVE_NR_execve)
 			exec_seen = 1;
 		    }
 		  else if ((act = valid_syscall(&a)) >= 0)
