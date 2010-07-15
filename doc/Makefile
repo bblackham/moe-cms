@@ -1,2 +1,2 @@
 install:
-	rsync -av --delete . jw:www/moe/
+	rsync -av --delete . jw:/var/www/moe/
