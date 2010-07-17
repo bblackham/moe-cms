@@ -292,7 +292,9 @@ static unsigned char syscall_action[NUM_ACTIONS] = {
     S(get_thread_area) = A_YES,
     S(set_tid_address) = A_YES,
     S(exit_group) = A_YES | A_SAMPLE_MEM,
-#ifndef CONFIG_BOX_USER_AMD64
+#ifdef CONFIG_BOX_USER_AMD64
+    S(arch_prctl) = A_YES,
+#else
     S(oldfstat) = A_YES,
     S(ftruncate64) = A_YES,
     S(_llseek) = A_YES,
