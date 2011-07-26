@@ -425,6 +425,7 @@ static struct path_rule default_path_rules[] = {
   { "/proc/meminfo", A_YES },
   { "/proc/self/stat", A_YES },
   { "/proc/self/exe", A_YES },			// Needed by FPC 2.0.x runtime
+  { "/proc/self/maps", A_YES },			// Needed by glibc when it reports arena corruption
 };
 
 static struct path_rule *user_path_rules;
