@@ -25,6 +25,7 @@ TESTS=
 endif
 
 include $(s)/box/Makefile
+include $(s)/isolate/Makefile
 include $(s)/utils/Makefile
 include $(s)/eval/Makefile
 include $(s)/judge/Makefile
