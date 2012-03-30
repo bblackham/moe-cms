@@ -6,7 +6,7 @@
 set -e
 . cf/mop
 
-rsync -a mo-submit@mo100:solutions/ submits
+rsync -a --delete mo-submit@mo100:solutions/ submits
 for user in `bin/mo-get-users` ; do
 	echo -n "$user:"
 	mkdir -p solutions/$user
