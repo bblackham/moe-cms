@@ -293,3 +293,5 @@ sub printHtmlHeader {
    print "<tr>$hdr2</tr>\n" if $detail;
 
 }
+
+close STDOUT;
