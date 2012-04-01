@@ -45,3 +45,4 @@ Test: ping-pong timing attacks
 Test: big static memory
 Doc: avoid AS randomization
 Doc: avoid cpufreq
+Examine the use of taskstats for measuring memory
