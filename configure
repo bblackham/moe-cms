@@ -38,7 +38,7 @@ if (Get("CONFIG_SUBMIT") || Get("CONFIG_MOP")) {
 
 if (Get("CONFIG_SUBMIT")) {
 	# Submit server needs crypto libraries
-	if (!TrivConfig("libgnutls", script => "libgnutls-config") ||
+	if (!PkgConfig("gnutls") && !TrivConfig("libgnutls", script => "libgnutls-config") ||
 	    !TrivConfig("libgcrypt", script => "libgcrypt-config")) {
 		Fail "The libgnutls and libgcrypt libraries are required to build the submit server.";
 	}
