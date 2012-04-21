@@ -30,6 +30,7 @@ Include Get("CONFIG");
 require UCW::Configure::Paths;
 require UCW::Configure::C;
 require UCW::Configure::LibUCW;
+require UCW::Configure::Doc;
 
 if (Get("CONFIG_SUBMIT") || Get("CONFIG_MOP")) {
 	# Build libucw only if it is needed
