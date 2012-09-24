@@ -1,7 +1,3 @@
-New directory layout
-~~~~~~~~~~~~~~~~~~~~
-The scripts in mop/admin/ need debugging
-
 Evaluator
 ~~~~~~~~~
 interactive tasks: solve deadlocks?
@@ -24,8 +20,7 @@ New submitter:
 - contest: task status cache
 
 Various ideas:
-scores dependent on time (like PL olympiad)
-box: limit the total amount of data written to files, so that quotas don't have to be set up
+- scores dependent on time (like PL olympiad)
 
 TomGav
 ~~~~~~
@@ -36,11 +31,9 @@ paranoidly check file mode/owner before running the sandbox
 
 Isolate
 ~~~~~~~
-Installation
 Test: ptrace self
 Test: SIGSTOP
 Test: ping-pong timing attacks
 Test: big static memory
 Examine the use of taskstats for measuring memory
-Doc: mount -t cgroup none -o cpuset,cpuacct,memory /sys/fs/cgroup
 Switch license to GPL2/GPL3
