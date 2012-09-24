@@ -23,6 +23,6 @@ $r->GenFile("README");
 $r->Dispatch;
 
 if ($r->{"do_upload"}) {
-	print "Updating documentation at Jabberwock\n";
-	`rsync -av --delete doc/. jabberwock.ucw.cz:/var/www/moe/`; die if $?;
+	system "doc/upload";
+	die if $?;
 }
