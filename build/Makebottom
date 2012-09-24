@@ -204,22 +204,22 @@ $(DATAFILES): $(o)/%: $(s)/%
 
 # Rules for documentation
 
-$(o)/%.html: $(o)/%.txt $(BUILDSYS)/asciidoc.conf $(BUILDSYS)/asciidoc-xhtml.conf run/$(DOCDIR)/$(DOC_MODULE)/.dir-stamp
-	$(M)"DOC-HTML $<"
-	$(Q)asciidoc -e -f $(BUILDSYS)/asciidoc.conf -f $(BUILDSYS)/asciidoc-xhtml.conf -f $(HOST_PREFIX)/etc/asciidoc/asciidoc.conf -f $(HOST_PREFIX)/etc/asciidoc/xhtml11.conf $<
-	$(Q)$(call symlink,$@,run/$(DOCDIR)/$(DOC_MODULE))
-
-# In reality, we do not depend on the .txt files, but on the corresponding .deflist's.
-# However, the Makefile language cannot express that doc-extract generates both .txt
-# and .deflist, so we always use the .txt's in dependencies.
-$(patsubst %.html,%.txt,$(DOC_INDICES)): $(o)/%.txt: $(patsubst %.html,%.txt,$(DOCS)) $(BUILDSYS)/doc-defs
-	$(M)"DOC-DEFS $@"
-	$(Q)echo $@: $(DOC_HEAD) $(DOC_LIST) >> $(o)/depend.new
-	$(Q)$(BUILDSYS)/doc-defs $(DOC_HEAD) $@ $(DOC_LIST)
-
-$(patsubst %.html,%.txt,$(DOCS)): $(o)/%.txt: $(s)/%.txt $(BUILDSYS)/doc-extract
-	$(M)"DOC-EXT $<"
-	$(Q)$(BUILDSYS)/doc-extract $< $@ $(o)/depend.new $(s) $(patsubst %.txt,%.deflist,$@)
+## $(o)/%.html: $(o)/%.txt $(BUILDSYS)/asciidoc.conf $(BUILDSYS)/asciidoc-xhtml.conf run/$(DOCDIR)/$(DOC_MODULE)/.dir-stamp
+## 	$(M)"DOC-HTML $<"
+## 	$(Q)asciidoc -e -f $(BUILDSYS)/asciidoc.conf -f $(BUILDSYS)/asciidoc-xhtml.conf -f $(HOST_PREFIX)/etc/asciidoc/asciidoc.conf -f $(HOST_PREFIX)/etc/asciidoc/xhtml11.conf $<
+## 	$(Q)$(call symlink,$@,run/$(DOCDIR)/$(DOC_MODULE))
+## 
+## # In reality, we do not depend on the .txt files, but on the corresponding .deflist's.
+## # However, the Makefile language cannot express that doc-extract generates both .txt
+## # and .deflist, so we always use the .txt's in dependencies.
+## $(patsubst %.html,%.txt,$(DOC_INDICES)): $(o)/%.txt: $(patsubst %.html,%.txt,$(DOCS)) $(BUILDSYS)/doc-defs
+## 	$(M)"DOC-DEFS $@"
+## 	$(Q)echo $@: $(DOC_HEAD) $(DOC_LIST) >> $(o)/depend.new
+## 	$(Q)$(BUILDSYS)/doc-defs $(DOC_HEAD) $@ $(DOC_LIST)
+## 
+## $(patsubst %.html,%.txt,$(DOCS)): $(o)/%.txt: $(s)/%.txt $(BUILDSYS)/doc-extract
+## 	$(M)"DOC-EXT $<"
+## 	$(Q)$(BUILDSYS)/doc-extract $< $@ $(o)/depend.new $(s) $(patsubst %.txt,%.deflist,$@)
 
 # Don't delete intermediate targets. There shouldn't be any, but due to bugs
 # in GNU Make rules with targets in not-yet-existing directories are ignored

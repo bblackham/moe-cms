@@ -20,11 +20,14 @@ include $(BUILDSYS)/Maketop
 ifdef CONFIG_UCW_LIBS
 include $(s)/ucw/Makefile
 include $(s)/sherlock/Makefile
-# Disable built-in tests of these libraries
+# Disable built-in tests and documentation of these libraries
 TESTS=
+DOCS=
+DOC_INDICES=
 endif
 
 include $(s)/box/Makefile
+include $(s)/isolate/Makefile
 include $(s)/utils/Makefile
 include $(s)/eval/Makefile
 include $(s)/judge/Makefile

@@ -33,3 +33,14 @@ recursive try-ln for dir input
 clean and well-defined expansion (beware of per-test re-expansion)
 configurable names of in/out files (independent of $PROBLEM)
 paranoidly check file mode/owner before running the sandbox
+
+Isolate
+~~~~~~~
+Installation
+Test: ptrace self
+Test: SIGSTOP
+Test: ping-pong timing attacks
+Test: big static memory
+Examine the use of taskstats for measuring memory
+Doc: mount -t cgroup none -o cpuset,cpuacct,memory /sys/fs/cgroup
+Switch license to GPL2/GPL3
