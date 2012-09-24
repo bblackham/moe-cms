@@ -2,7 +2,8 @@
 
 			  Moe Contest Environment @VERSION@
 
-		    (c) 2001--2008 Martin Mares <mj@ucw.cz>
+		    (c) 2001--2012 Martin Mares <mj@ucw.cz>
+			     and other contributors
 
 ================================================================================
 
@@ -19,11 +20,8 @@ Public License version 2.
 If you have any suggestions, bug reports or improvements you would like to share
 with others, please send them to mj@ucw.cz.
 
+** How to build Moe **
 
-** How to compile the submission system **
+First of all, edit default.cfg to choose which components should be built.
 
-First, unpack holmes-libs-3.12, configure it and run make. You can build a thinner
-version with `./configure default.cfg -CONFIG_IMAGES -CONFIG_UCW_THREADS -CONFIG_SHARED'.
-
-Then uncomment the "SUBMIT" line in the top-level Makefile and let LIBUCW
-point to the compiled Holmes libraries.
+Then run "./configure" and "make". This will place all compiled binaries in "run/".

@@ -1,7 +1,7 @@
 # Makefile for Moe
 # (c) 2008--2012 Martin Mares <mj@ucw.cz>
 
-VERSION=1.0.99-20080220
+VERSION=2.0
 
 # The default target
 all: runtree programs datafiles configs

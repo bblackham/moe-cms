@@ -1,20 +1,19 @@
 #!/usr/bin/perl
-# A simple script for making releases of mo-eval
-# (c) 2005--2008 Martin Mares <mj@ucw.cz>
+# A simple script for making releases of Moe
+# (c) 2005--2012 Martin Mares <mj@ucw.cz>
 
 use strict;
 use warnings;
 require "maint/release.pm";
 
-my $r = new UCW::Release("mo-eval");
+my $r = new UCW::Release("moe");
 my $ver = $r->GetVersionFromFile("Makefile", "VERSION=(.*)");
-#$r->GetVersionsFromChangelog("ChangeLog", "Released as (.*)\.");
 unshift @{$r->{"rules"}}, '^(problems|testing|solutions|maint|certs)/.*' => '-';
 push @{$r->{"directories"}}, "problems", "testing", "solutions";
 push @{$r->{"uploads"}}, {
-		"url" => "scp://atrey.karlin.mff.cuni.cz/~ftp/pub/local/mj/eval/"
+		"url" => "scp://atrey.karlin.mff.cuni.cz/~ftp/pub/moe/"
 	}, {
-		"url" => "scp://jabberwock.ucw.cz/~ftp/pub/mj/eval/"
+		"url" => "scp://jabberwock.ucw.cz/~ftp/pub/moe/"
 	};
 $r->ParseOptions;
 $r->InitDist("maint/dist");
@@ -24,5 +23,5 @@ $r->Dispatch;
 
 if ($r->{"do_upload"}) {
 	print "Updating documentation at Jabberwock\n";
-	`rsync -a doc/. jabberwock.ucw.cz:www/mo-eval/`; die if $?;
+	`rsync -av --delete doc/. jabberwock.ucw.cz:/var/www/moe/`; die if $?;
 }
