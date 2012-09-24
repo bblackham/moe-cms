@@ -16,7 +16,8 @@ $(o)/box/box: LDFLAGS+=$(BOX_CFLAGS)
 $(o)/box/box.o: CFLAGS+=$(BOX_CFLAGS)
 
 $(o)/box/syscall-table.h: $(s)/box/mk-syscall-table
-	sh $^ >$@ $(CFLAGS) $(BOX_CFLAGS)
+	$(M) GEN $@
+	$(Q)sh $^ >$@ $(CFLAGS) $(BOX_CFLAGS)
 
 box-tests: $(addprefix $(o)/box/test-sys,32-int80 64-int80 32-syscall 64-syscall 32-sysenter 64-sysenter)
 
