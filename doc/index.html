@@ -17,13 +17,20 @@ which is then automatically tested on a set of test inputs.
 <p>Moe is built in a modular way, making it easy to adapt it to the specifics
 of a particular contest, to other types of tasks, or other programming languages.
 
-<p>A brief description of the system and of the ideas behind it can be found in the following two papers
-published in <a href="http://www.mii.lt/olympiads_in_informatics/">Olympiads in Informatics</a>:
+<p>A brief description of the system and of the ideas behind it can be found in the following series
+of papers published in <a href="http://www.mii.lt/olympiads_in_informatics/">Olympiads in Informatics</a>:
 
 <ul>
-<li><a href="http://mj.ucw.cz/papers/eval.pdf">Perspectives on grading systems</a>
-<li><a href="http://mj.ucw.cz/papers/eval2.pdf">Moe &ndash; Design of a Modular Grading System</a>
+<li><a href="http://mj.ucw.cz/papers/eval.pdf">M. Mare&scaron;: Perspectives on grading systems</a>
+<li><a href="http://mj.ucw.cz/papers/eval2.pdf">M. Mare&scaron;: Moe &ndash; Design of a Modular Grading System</a>
+<li><a href="http://mj.ucw.cz/papers/fairness.pdf">M. Mare&scaron;: Fairness of Time Constraints</a>
+<li><a href="http://mj.ucw.cz/papers/isolate.pdf">B. Blackham, M. Mare&scaron;: A New Contest Sandbox</a>
 </ul>
+
+<b>News (2012-09-24):</b> A new sandbox module (<code>isolate</code>) is available.
+It has very low overhead (it uses Linux kernel containers) and it is able to cope with
+multi-threaded programs. For more details, see the "New Contest Sandbox" paper above
+or the <a href="isolate.1.html">isolate's man page</a>.
 
 <h2>Modules</h2>
 
@@ -34,6 +41,8 @@ published in <a href="http://www.mii.lt/olympiads_in_informatics/">Olympiads in 
 <tr><td>sandbox
     <td>Runs the contestant's solution in a controlled and secure environment,
 	limiting its execution time, memory consumption and system calls.
+	We have a stable implementation (<code>box</code>) based on ptrace
+	and a new one (<code>isolate</code>) based on Linux kernel containers.
     <td class=statedone>works
 <tr><td>judges
     <td>A set of utilities for comparing the solution's output with the correct
@@ -92,7 +101,7 @@ to get a more up-to-date picture.
 <li><a href="http://mo.mff.cuni.cz/p/index.html.en">Czech Olympiad in programming</a> since 2002
 <li><a href="http://mo.mff.cuni.cz/cpspc/">CPSPC</a> (Czech-Polish-Slovak Preparation Camp) on some years
 <li><a href="http://www.fi.muni.cz/ceoi/">CEOI 2007</a> (Central-European Olympiad in Informatics)
-<li><a href="http://www.ioi2009.org/">IOI 2009<a> (used the sandbox module)
+<li><a href="http://www.ioinformatics.org/">IOI<a> since 2009 (used the sandbox module)
 <li><a href="http://codex2.ms.mff.cuni.cz/project/">CodEx</a> (a web-based system, originally
 	designed for evaluation of students' homeworks, but also used for several programming
 	contests)
@@ -125,6 +134,10 @@ only on Linux with kernel version 2.6 or newer and only on the i386 and amd64
 architectures. Porting to other architectures should require only minor changes,
 porting to other systems is likely to be hard.
 
+<p>The <code>isolate</code> sandbox does not depend on CPU architecture,
+but it requires a recent Linux kernel in a configuration which might be different
+from your distribution's default.
+
 <h2>Authors</h2>
 
 <p>Moe has been written by the following people:
@@ -132,6 +145,7 @@ porting to other systems is likely to be hard.
 <ul>
 <li><a href="http://mj.ucw.cz/">Martin Mare&scaron;</a>, <a href="mailto:mj@ucw.cz">mj@ucw.cz</a>
 <li>Tom&aacute;&scaron; Gaven&#269;iak (the queue manager module and parts of the new evaluator)
+<li>Bernard Blackham (parts of <code>isolate</code>)
 </ul>
 
 <p>We are also thankful to Jan K&aacute;ra and Milan Straka for their help and for
