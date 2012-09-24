@@ -15,6 +15,7 @@ push @{$r->{"uploads"}}, {
 	}, {
 		"url" => "scp://jabberwock.ucw.cz/~ftp/pub/moe/"
 	};
+$r->{'testmake'} = './configure mop/default.cfg && make -j4';
 $r->ParseOptions;
 $r->InitDist("maint/dist");
 $r->GenPackage;

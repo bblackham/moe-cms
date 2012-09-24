@@ -25,3 +25,6 @@ with others, please send them to mj@ucw.cz.
 First of all, edit default.cfg to choose which components should be built.
 
 Then run "./configure" and "make". This will place all compiled binaries in "run/".
+
+By default, documentation is built, which requires AsciiDoc to be present.
+You can skip documentation by "./configure -CONFIG_DOC".

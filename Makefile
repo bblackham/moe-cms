@@ -4,13 +4,17 @@
 VERSION=2.0
 
 # The default target
-all: runtree programs datafiles configs
+all:: runtree programs datafiles configs
 
 # Include configuration
 s=.
 -include obj/config.mk
 obj/config.mk:
 	@echo "You need to run configure first." && false
+
+ifdef CONFIG_DOC
+all:: docs
+endif
 
 # We will use the libucw build system
 BUILDSYS=$(s)/build

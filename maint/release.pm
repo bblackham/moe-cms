@@ -30,6 +30,8 @@ sub new($$) {
 		"archivedir" => "/home/mj/tmp/archives/$basename",
 		"uploads" => [
 			],
+		"testmake" => "make",
+		"testclean" => "make distclean",
 		# Options
 		"do_test" => 1,
 		"do_patch" => 1,
@@ -242,13 +244,15 @@ sub Test($) {
 	my $dd = $s->{"DISTDIR"};
 	my $pkg = $s->{"PKG"};
 	my $log = "$dd/$pkg.log";
+	my $make = $s->{'testmake'};
+	my $clean = $s->{'testclean'};
 	print "Doing a test compilation\n";
-	`( cd $dd/$pkg && make ) >$log 2>&1`;
+	`( cd $dd/$pkg && $make ) >$log 2>&1`;
 	die "There were errors. Please inspect $log" if $?;
 	`grep -q [Ww]arning $log`;
 	$? or print "There were warnings! Please inspect $log.\n";
 	print "Cleaning up\n";
-	`cd $dd/$pkg && make distclean`; die if $?;
+	`cd $dd/$pkg && $clean`; die if $?;
 }
 
 sub MakePatch($) {
