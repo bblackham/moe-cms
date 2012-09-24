@@ -11,20 +11,18 @@
 <p>Moe lives in the following directory structure:
 
 <ul>
-<li><code>bin/</code> &ndash; all programs (usually shell scripts)
-<li><code>box/</code> &ndash; temporary files used by the sandbox module
-<li><code>doc</code> &ndash; this documentation
-<li><code>examples</code> &ndash; example problems
-<li><code>misc</code> &ndash; various currently undocumented stuff
-<li><code>problems/</code> &ndash; definitions of problems (tasks)
-<li><code>public</code> &ndash; data available publicly to the contestants
-<li><code>solutions</code> &ndash; solutions of problems (both by contestants and authors)
-<li><code>src</code> &ndash; source of parts of the evaluator written in C
-<li><code>template</code> &ndash; templates of contestants' home directories
-<li><code>testing</code> &ndash; results of testing of solutions
-<li><code>tmp</code> &ndash; various temporary files
-<li><code>Makefile</code> &ndash; as usually
-<li><code>config</code> &ndash; the main configuration file
+<li><code>box/</code> &ndash; the sandbox module
+<li><code>build/</code> &ndash; scripts used for compilatuon
+<li><code>doc/</code> &ndash; this documentation
+<li><code>eval/</code> &ndash; the evaluator (grader)
+<li><code>examples/</code> &ndash; example problems
+<li><code>judge/</code> &ndash; judging helpers
+<li><code>maint/</code> &ndash; scripts used by Moe's maintainers
+<li><code>mop/</code> &ndash; various stuff for the MO-P contest
+<li><code>sherlock/</code> &ndash; libsherlock, used by the submit server
+<li><code>submit/</code> &ndash; the submit server
+<li><code>ucw/</code> &ndash; libucw, used by the submit server
+<li><code>utils/</code> &ndash; various utilities
 </ul>
 
 <p>When installed, it will create the following hierarchy:
@@ -34,11 +32,5 @@
 <li><code>public</code> &ndash; public data made available to the contestants
 <li><code>users</code> &ndash; home directories of the contestants
 </ul>
-
-<p>We have tried to make the whole system as flexible as possible, which has lead to writing
-almost everything as simple shell scripts, building on  a library of shell functions contained
-in <code>bin/lib</code>. The config files are also shell scripts, making it possible to do lots
-of fancy (and also confusing, to be honest :) ) things there, the most useful being variable
-substitutions.
 
 </body></html>
