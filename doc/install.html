@@ -3,7 +3,7 @@
 <html><head>
 <title>MO Eval - Installation</title>
 <link rev=made href="mailto:mj@ucw.cz">
-<link rel=stylesheet title=Default href="mo-eval.css" type="text/css" media=all>
+<link rel=stylesheet title=Default href="moe.css" type="text/css" media=all>
 </head><body>
 
 <h1>The Installation of Moe</h1>
@@ -26,7 +26,7 @@ playing with the package, not for any real competition.</em>
 <h2>Normal Installation</h2>
 
 <p>The recommended way is to let the evaluator use two user accounts. One (let's
-call the user <code>mo-eval</code>) runs the evaluator and keeps all secret
+call the user <code>moe</code>) runs the evaluator and keeps all secret
 files like the test data, another one (<code>mo-test</code>) runs the tested
 programs. There can be multiple test users if you want to run several evaluators
 in parallel. However, in practice the evaluation is so fast that this is seldom
@@ -41,17 +41,17 @@ needed.
 <li>Create <code>$MO_ROOT</code> (here we will assume that it's set to <code>/aux/mo</code>
 <li>Create the evaluation users:
 <pre>
-	mo-eval:x:65000:65000:MO Evaluator:/aux/mo/eval/mo-eval:/bin/bash
+	moe:x:65000:65000:MO Evaluator:/aux/mo/eval/moe:/bin/bash
 	mo-test1:x:65001:65000:MO Tester 1:/aux/mo/eval/mo-test1:/bin/bash
 	mo-test2:x:65002:65000:MO Tester 2:/aux/mo/eval/mo-test2:/bin/bash
 </pre>
 <li>And the evaluation group:
 <pre>
-	mo-eval:x:65000:
+	moe:x:65000:
 </pre>
 <li>Run <code>bin/mo-install</code> as root to create the directory hierarchy under <code>$MO_ROOT</code>
 install all parts of the evaluator there and set the correct access rights.
-<li>Log in as <code>mo-eval</code> and do everything else from there.
+<li>Log in as <code>moe</code> and do everything else from there.
 <li>Later, you can reinstall parts of the hierarchy, without affecting the rest, by running:
    <ul>
    <li><code>mo-create-public</code> to update the public data available to contestants
