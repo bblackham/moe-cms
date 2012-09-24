@@ -3,10 +3,10 @@
 # DN options
 
 # The organization of the subject.
-organization = "MO-Eval"
+organization = "Moe"
 
 # The organizational unit of the subject.
-#unit = "MO-Eval"
+#unit = "Moe"
 
 # The locality of the subject.
 # locality =

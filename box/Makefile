@@ -1,4 +1,4 @@
-# Makefile for MO-Eval sandbox
+# Makefile for Moe sandbox
 # (c) 2008--2010 Martin Mares <mj@ucw.cz>
 
 DIRS+=box

@@ -1,4 +1,4 @@
-# Makefile for MO-Eval evaluator
+# Makefile for Moe evaluator
 # (c) 2008 Martin Mares <mj@ucw.cz>
 
 DIRS+=eval

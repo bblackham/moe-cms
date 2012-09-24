@@ -1,4 +1,4 @@
-# Makefile for MO-Eval submitter
+# Makefile for Moe submitter
 # (c) 2008 Martin Mares <mj@ucw.cz>
 
 SUBCF=$(LIBGCRYPT_CFLAGS) $(LIBGNUTLS_CFLAGS) $(GNUTLS_CFLAGS)

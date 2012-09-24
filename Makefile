@@ -1,5 +1,5 @@
-# Makefile for MO-Eval
-# (c) 2008--2009 Martin Mares <mj@ucw.cz>
+# Makefile for Moe
+# (c) 2008--2012 Martin Mares <mj@ucw.cz>
 
 VERSION=1.0.99-20080220
 

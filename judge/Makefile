@@ -1,4 +1,4 @@
-# Makefile for MO-Eval judges
+# Makefile for Moe judges
 # (c) 2008--2009 Martin Mares <mj@ucw.cz>
 
 DIRS+=judge

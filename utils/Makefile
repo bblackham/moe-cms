@@ -1,4 +1,4 @@
-# Makefile for MO-Eval utilities
+# Makefile for Moe utilities
 # (c) 2008 Martin Mares <mj@ucw.cz>
 
 DIRS+=utils

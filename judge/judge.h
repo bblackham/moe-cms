@@ -1,5 +1,5 @@
 /*
- *	A simple library for MO-Eval judges
+ *	A simple library for Moe judges
  *
  *	(c) 2007 Martin Mares <mj@ucw.cz>
  */
